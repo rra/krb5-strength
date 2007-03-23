@@ -11,6 +11,7 @@
  *
  * 2007-03-23  Russ Allbery <rra@stanford.edu>
  *   - Apply Debian patch to improve the search logic.
+ *   - Don't crash if the dictionary is corrupt.
  *   - Additional system includes for other functions.
  */
 
@@ -343,7 +344,16 @@ FindPW(pwp, string)
 
 	middle = lwm + ((hwm - lwm + 1) / 2);
 
+	/*
+	 * If GetPW returns NULL, we have a corrupt dictionary.	 It's hard to
+	 * figure out the best thing to do here.  Returning true for every
+	 * password seems better than just crashing the program.
+	 */
 	this = GetPW(pwp, middle);
+	if (this == NULL)
+	{
+	    return (middle);
+	}
 	cmp = strcmp(string, this);		/* INLINE ? */
 
 	if (cmp < 0)

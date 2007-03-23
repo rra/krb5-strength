@@ -6,6 +6,7 @@ following modifications have been made:
  * Remove checks against the user's GECOS entry.
  * Don't exit on failure to open the database.
  * Improve the search algorithm in FindPW somewhat.
+ * Don't segfault on corrupt dictionaries.
  * Various compilation warning and portability fixes.
 
 Below is the original changelog for CrackLib:
