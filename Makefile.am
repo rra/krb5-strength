@@ -22,12 +22,13 @@ moduledir = $(libdir)/kadmind
 noinst_LTLIBRARIES = cracklib/libcracklib.la
 cracklib_libcracklib_la_SOURCES = cracklib/fascist.c cracklib/packlib.c \
 	cracklib/rules.c cracklib/stringlib.c
-noinst_BIN = cracklib/packer
+cracklib_libcracklib_la_CPPFLAGS = -DIN_CRACKLIB
+noinst_PROGRAMS = cracklib/packer
 cracklib_packer_SOURCES = cracklib/packer.c cracklib/packer.h
-cracklib_packer_LDADD cracklib/libcracklib.la
+cracklib_packer_LDADD = cracklib/libcracklib.la
 
 # Rules for building the password strength plugin.
 module_LTLIBRARIES = plugin/passwd_strength.la
 plugin_passwd_strength_la_SOURCES = plugin/api.c
-plugin_passwd_strength_la_LDADD = cracklib/libcracklib.la
 plugin_passwd_strength_la_LDFLAGS = -module -avoid-version
+plugin_passwd_strength_la_LIBADD = cracklib/libcracklib.la

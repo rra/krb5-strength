@@ -8,7 +8,7 @@ AC_REVISION([$Revision$])
 AC_PREREQ([2.60])
 AC_INIT([krb5-strength], [0.3], [rra@stanford.edu])
 AC_CONFIG_AUX_DIR([tools])
-AC_INIT_AUTOMAKE([1.10 -Wall -Werror])
+AM_INIT_AUTOMAKE([1.10 -Wall -Werror])
 AM_MAINTAINER_MODE
 
 AC_PROG_CC
