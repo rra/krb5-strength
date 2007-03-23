@@ -10,6 +10,7 @@
  * Modified as part of the krb5-strength project as follows:
  *
  * 2007-03-23  Russ Allbery <rra@stanford.edu>
+ *   - Apply Debian patch to improve the search logic.
  *   - Additional system includes for other functions.
  */
 
@@ -342,20 +343,31 @@ FindPW(pwp, string)
 
 	middle = lwm + ((hwm - lwm + 1) / 2);
 
-	if (middle == hwm)
-	{
-	    break;
-	}
-
 	this = GetPW(pwp, middle);
 	cmp = strcmp(string, this);		/* INLINE ? */
 
 	if (cmp < 0)
 	{
-	    hwm = middle;
+	   /* The following may be a little non-obvious... it's
+	    * basically doing:
+	    *
+	    *	hwm = middle - 1;
+	    *	if (hwm < lwm)
+	    *	    break;
+	    *
+	    * which is much clearer, but it unfortunately doesn't work
+	    * because hwm is unsigned and middle may legitimately be
+	    * zero, which would lead to hwm being set to a very high
+	    * number.  So instead we have...
+	    */
+	   if (middle == lwm)
+	       break;
+	   hwm = middle - 1;
 	} else if (cmp > 0)
 	{
-	    lwm = middle;
+	   if (middle == hwm)
+	       break;
+	   lwm = middle + 1;
 	} else
 	{
 	    return (middle);
