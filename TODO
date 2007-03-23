@@ -4,3 +4,6 @@
    the embedded one.  This should come with better documentation of the
    modifications made to the embedded CrackLib and what problems one may
    encounter using an unmodified version.
+
+ * The kadmind patch needs to abort kadmind startup if the plugin could
+   not be loaded, or at least needs to reject every password.
