@@ -1,0 +1,7 @@
+                    User-Visible krb5-strength Changes
+
+krb5-strength 0.3 (2007-03-23)
+
+    Initial public release.  Includes a patch for MIT Kerberos, a slightly
+    modified version of CrackLib, and glue wrapped around CrackLib to make
+    a loadable module.

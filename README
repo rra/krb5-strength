@@ -1,0 +1,165 @@
+                            krb5-strength 0.3
+               (kadmind password strength checking plugin)
+
+              Maintained by Russ Allbery <rra@stanford.edu>
+
+  Copyright 2006, 2007 Board of Trustees, Leland Stanford Jr. University.
+  Portions copyright 1993 Alec Muffett.  Developed by Derrick Brashear and
+  Ken Hornstein of Sine Nomine Associates, on behalf of Stanford
+  University.
+
+  This software is distributed under a BSD-style license and under the
+  Artistic License.  Please see the section LICENSE for more information.
+
+  This should be considered beta-quality code.  It is not currently
+  running anywhere in production.  Feedback and improvements will be
+  gratefully accepted.
+
+BLURB
+
+  krb5-strength is a toolkit for checking the strength of passwords
+  against an external dictionary, applying more transforms and checks than
+  kadmind supports by default.  It is implemented as a patch to kadmind
+  and a plugin module that is called on each password change.  It embeds a
+  slightly modified copy of Alec Muffett's CrackLib to do the password
+  checking.
+
+DESCRIPTION
+
+  The MIT kadmind supports password strength checking against a dictionary
+  out of the box.  Unfortunately, that support loads the entire dictionary
+  into memory, requires uncompressed dictionaries, and doesn't apply any
+  transformations to the password before checking it against the
+  dictionary.  CrackLib provides more sophisticated strength checking and
+  an optimized, compressed on-disk database format.  This toolkit provides
+  a way to check the strength of Kerberos passwords using CrackLib before
+  allowing them.
+
+  This toolkit consists of two pieces:
+
+   * A patch to MIT Kerberos to add a plugin system for password strength
+     checking.  This patch adds initialization and shutdown hooks plus a
+     hook that's run prior to each password change.  The code in kadmind
+     is independent of what the plugin might do.
+
+   * A kadmind plugin that is a simple wrapper around the CrackLib
+     password checking call.  Included in this toolkit is a slightly
+     modified version of CrackLib.
+
+  Currently, the embedded CrackLib is built unconditionally.  In a future
+  release, I hope to add support for building against an already-installed
+  CrackLib if so desired.
+
+  For information about the changes to the CrackLib included in this
+  toolkit, see cracklib/HISTORY.  They are minor changes to tighten the
+  rules in some places, be stricter with longer passwords, fix portability
+  issues, and remove some code that doesn't make sense in the kadmind
+  context.
+
+  Future versions of MIT Kerberos are expected to provide an improved
+  plugin interface for this sort of check that is not compatible with the
+  one added by this patch.  As soon as that interface is available, this
+  package will be updated to work with it.
+
+REQUIREMENTS
+
+  To use this plugin, you will need to apply the patch in the patches
+  directory to MIT Kerberos and rebuild.  Due to how kadmind is
+  constructed, the changes are actually in the libkadm5srv library, not in
+  the kadmind binary, so you'll need to install the modified libraries.
+
+  For this module to be effective, you will also need to construct a
+  dictionary.  The mkdict and packer utilities to build a CrackLib
+  dictionary from a word list are included in this toolkit but not
+  installed by default.  You can run them out of the cracklib directory
+  after building.  You can also use the utilities that come with the stock
+  CrackLib package (often already packaged in a Linux distribution).
+
+  For a word list to use as source for the dictionary, you can use
+  /usr/share/dict/words if it's available on your system, but it would be
+  better to find a more comprehensive word list (or even better, find
+  every word list you can locate on the Internet and combine them).  Since
+  word lists are bulky, often covered by murky copyrights, and easily
+  locatable on the Internet with a modicum of searching, none are included
+  in this toolkit.
+
+COMPILING AND INSTALLING
+
+  First, patch MIT Kerberos with the patch provided in the patches
+  directory and install the new libkadm5srv library.  See patches/README
+  for more information about the patch.  If you're using a different
+  version of MIT Kerberos, you may need to adjust the patch accordingly.
+
+  Then, you can build and install the plugin with the standard commands:
+
+      ./configure
+      make
+      make install
+
+  The last step will probably have to be done as root.  By default, the
+  plugin is installed as /usr/local/lib/kadmind/passwd_strength.so.  You
+  can change this path with the --prefix and --libdir options to
+  configure.
+
+CONFIGURATION
+
+  First, build and install a CrackLib dictionary as described above.  This
+  dictionary will consist of three files, one each ending in *.hwm, *.pwd,
+  and *.pwi.  Install those files somewhere on your system.
+
+  In the [realms] section of your kdc.conf, under the appropriate realm or
+  realms, specify the path to the dictionary:
+
+      dict_file = /path/to/cracklib/dictionary
+
+  The provided path should be the full path to the dictionary files,
+  omitting the trailing *.hwm, *.pwd, or *.pwi extension.  Then, specify
+  the path to the plugin by adding:
+
+      pwcheck_plugin = /usr/local/lib/kadmind/passwd_strength.so
+
+  to the same section of the kdc.conf, giving the correct full path to the
+  plugin.  Restart kadmind and password strength checking should be
+  enabled.
+
+  Be aware that password strength checking is only applied to principals
+  with a policy set.  If you want to check all user passwords, assign all
+  user principals a password policy.  (Similarly, you can avoid checking
+  the strength of passwords for particular principals by clearing their
+  policy.)  Also be aware that enabling this plugin will disable the
+  normal kadmind dictionary check.  There currently is no way to have them
+  both enabled at the same time.
+
+  Finally, note that the default rules of this plugin will reject the
+  temporary password used by addprinc -randkey or ktadd -randkey when
+  initializing a principal.  When generating service principals using that
+  flag, you will need to pass in the -clearpolicy flag as well to avoid
+  rejecting the initial temporary password.  You can then add a policy
+  later with modprinc if desired.
+
+LICENSE
+
+  The packaging, plugin glue, and build system are covered by the
+  following copyright and license:
+
+    Copyright 2006, 2007 Board of Trustees, Leland Stanford Jr.
+    University.  All rights reserved.
+
+    Permission to use, copy, modify, and distribute this software and its
+    documentation for any purpose and without fee is hereby granted,
+    provided that the above copyright notice appear in all copies and that
+    both that copyright notice and this permission notice appear in
+    supporting documentation, and that the name of Stanford University not
+    be used in advertising or publicity pertaining to distribution of the
+    software without specific, written prior permission.  Stanford
+    University makes no representations about the suitability of this
+    software for any purpose.  It is provided "as is" without express or
+    implied warranty.
+
+    THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS OR IMPLIED
+    WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTIES OF
+    MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+
+  The version of CrackLib included here, and all modifications made to it
+  as part of this toolkit, is covered by the Artistic License.  For full
+  license terms, see cracklib/LICENCE.
