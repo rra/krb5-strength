@@ -5,7 +5,7 @@
 # Uncomment this to turn on verbose mode. 
 #export DH_VERBOSE=1
 
-TMP = $(CURDIR)/debian/krb5-passwd-strength
+TMP = $(CURDIR)/debian/krb5-strength
 
 CFLAGS=-g -Wall
 ifneq (,$(findstring noopt,$(DEB_BUILD_OPTIONS)))
@@ -25,10 +25,7 @@ endif
 
 configure-stamp:
 	dh_testdir
-	touch aclocal.m4 configure config.h.in Makefile.in src/Makefile.in
-	CFLAGS="$(CFLAGS)" ./configure --prefix=/usr \
-	    --mandir=\$${prefix}/share/man --infodir=\$${prefix}/share/info \
-	    $(SYSTEM)
+	./configure CFLAGS="$(CFLAGS)" --prefix=/usr $(SYSTEM)
 	touch configure-stamp
 
 build: build-arch build-indep
@@ -50,19 +47,16 @@ install:
 	dh_testdir
 	dh_testroot
 	dh_clean -k
-	install -d $(TMP)/usr/lib/kadmind
-	install src/.libs/kadmin_plugin.so \
-	    $(TMP)/usr/lib/kadmind/passwd_strength.so
-	install -d $(TMP)/usr/bin
-	install src/packer $(TMP)/usr/bin/packer
+	$(MAKE) install DESTDIR=$(TMP)
+	rm -f $(TMP)/usr/lib/kadmind/passwd_strength.la
 
 binary: binary-arch binary-indep
 binary-indep:
 binary-arch: install
 	dh_testdir
 	dh_testroot
-	dh_installchangelogs
-	dh_installdocs
+	dh_installchangelogs NEWS
+	dh_installdocs README TODO
 	dh_link
 	dh_strip
 	dh_compress

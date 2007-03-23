@@ -1,3 +1,15 @@
+krb5-strength (0.3-1) unstable; urgency=low
+
+  * New upstream release with a different name.
+    - Many cleanups to the code and build system.
+    - Unnecessary differences from CrackLib removed.
+    - Some Debian CrackLib patches applied for robustness.
+  * Updated README.Debian with a better example kdc.conf entry.
+  * No longer install the packer binary.  We can use the one from
+    cracklib-runtime.
+
+ -- Russ Allbery <rra@debian.org>  Fri, 23 Mar 2007 15:27:50 -0700
+
 krb5-passwd-strength (0.2-1) unstable; urgency=low
 
   * Initial release.
