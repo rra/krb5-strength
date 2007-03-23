@@ -31,6 +31,7 @@ extern char *FascistCheck(const char *password, const char *dict);
  * allocate memory.
  *
  * The dictionary file should not include the trailing .pwd extension.
+ * Currently, we don't cope with a NULL dictionary path.
  */
 int
 pwcheck_init(void **context, const char *dictionary)
@@ -39,6 +40,8 @@ pwcheck_init(void **context, const char *dictionary)
     size_t length;
     struct context *ctx;
 
+    if (dictionary == NULL)
+        return 1;
     length = strlen(dictionary) + strlen(".pwd") + 1;
     path = malloc(length);
     if (path == NULL)
