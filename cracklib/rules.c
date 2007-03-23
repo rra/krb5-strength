@@ -14,6 +14,7 @@
  *     the length of the password string and no more than five characters.
  *     This goes with a change to fascist.c that adds rules to delete more
  *     leading and trailing characters for longer passwords.
+ *   - Additional system includes for other functions.
  */
 
 static char vers_id[] = "rules.c : v5.0p3 Alec Muffett 20 May 1993";
@@ -35,6 +36,8 @@ Debug(val, a, b, c, d, e, f, g)
 }
 
 #endif
+
+#include <string.h>
 
 #define RULE_NOOP	':'
 #define RULE_PREPEND	'^'
@@ -434,7 +437,7 @@ Mangle(input, control)		/* returns a pointer to a controlled Mangle */
     char *control;
 {
     int limit, min_to_shift;
-    register j;
+    register int j;
     register char *ptr;
     static char area[STRINGSIZE];
     char area2[STRINGSIZE];

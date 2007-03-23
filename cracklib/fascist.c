@@ -14,6 +14,7 @@
  *   - Longer passwords must contain more different characters, up to 8.
  *   - Disable GECOS checking (useless for a server).
  *   - Replace exit(-1) with return when dictionary doesn't exist.
+ *   - Additional system includes for other functions.
  */
 
 static char vers_id[] = "fascist.c : v2.3p3 Alec Muffett 14 dec 1997";
@@ -21,6 +22,9 @@ static char vers_id[] = "fascist.c : v2.3p3 Alec Muffett 14 dec 1997";
 #include "packer.h"
 #include <sys/types.h>
 #include <pwd.h>
+#include <string.h>
+#include <stdlib.h>
+#include <unistd.h>
 
 #define ISSKIP(x) (isspace(x) || ispunct(x))
 

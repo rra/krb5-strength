@@ -6,6 +6,16 @@
  * and upwards.
  */
 
+/*
+ * Modified as part of the krb5-strength project as follows:
+ *
+ * 2007-03-23  Russ Allbery <rra@stanford.edu>
+ *   - Additional system includes for other functions.
+ */
+
+#include <stdio.h>
+#include <string.h>
+
 #include "packer.h"
 
 static char vers_id[] = "packlib.c : v2.3p2 Alec Muffett 18 May 1993";
