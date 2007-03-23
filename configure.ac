@@ -1,47 +1,27 @@
-AC_PREREQ(2.57)
-AC_INIT([passwd-strength], [0.2], [shadow (at) dementia (dot) org])
-AC_CONFIG_SRCDIR([src/kadmin_plugin.c])
-AC_CONFIG_HEADERS([config.h])
-AM_INIT_AUTOMAKE([foreign -Wall])
+dnl Process this file with autoconf to produce a configure script.
+dnl $Id$
+dnl
+dnl Copyright 2006, 2007 Board of Trustees, Leland Stanford Jr. University
+dnl See README for licensing terms.
 
-AM_DISABLE_STATIC
+AC_REVISION([$Revision$])
+AC_PREREQ([2.60])
+AC_INIT([krb5-strength], [0.3], [rra@stanford.edu])
+AC_CONFIG_AUX_DIR([tools])
+AC_INIT_AUTOMAKE([1.10 -Wall -Werror])
+AM_MAINTAINER_MODE
 
-# Checks for programs.
 AC_PROG_CC
+AM_PROG_CC_C_O
+AC_PROG_INSTALL
+AM_DISABLE_STATIC
 AC_PROG_LIBTOOL
-AC_PROG_CXX
 
-# If using GCC specifiy some additional parameters
+# Crank up the warnings if we're using GCC.
 if test "x$GCC" = "xyes" ; then
-   CFLAGS="$CFLAGS -pipe -Wall"
+    CFLAGS="-Wall $CFLAGS"
 fi
 
-AC_SUBST(PACKAGE_URL, [http://www.dementia.org/~shadow/passwd-strength/])
-
-CFLAGS="$CFLAGS -L/lib"
-
-# Checks for libraries.
-
-LIBS="$LIBS -ldl"
-
-# Checks for header files.
-
-AC_CHECK_FUNCS([strdup])
-AC_FUNC_FORK
-AC_FUNC_LSTAT
-AC_FUNC_LSTAT_FOLLOWS_SLASHED_SYMLINK
-AC_FUNC_VPRINTF
-
-AC_CHECK_HEADERS([fcntl.h limits.h syslog.h termios.h])
-AC_HEADER_STDC
-AC_HEADER_SYS_WAIT
-
-AC_C_CONST
-
-AC_TYPE_MODE_T
-AC_TYPE_PID_T
-AC_TYPE_SIGNAL
-AC_TYPE_UID_T
-
-AC_CONFIG_FILES([src/Makefile Makefile])
+AC_CONFIG_FILES([Makefile])
+AC_CONFIG_HEADER([config.h])
 AC_OUTPUT
