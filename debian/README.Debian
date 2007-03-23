@@ -1,0 +1,32 @@
+krb5-passwd-strength for Debian
+-------------------------------
+
+This plugin requires a patched kadmind that loads plugins for password
+strength checking.  This code will hopefully be in a future official
+release of MIT Kerberos.
+
+With that code, a sample kdc.conf file using this plugin looks like:
+
+[realms]
+    EXAMPLE.ORG = {
+        database_name = /usr/local/var/krb5kdc/principal
+        admin_keytab = FILE:/usr/local/var/krb5kdc/kadm5.keytab
+        acl_file = /usr/local/var/krb5kdc/kadm5.acl
+        key_stash_file = /usr/local/var/krb5kdc/stash
+        kdc_ports = 750,88
+        max_life = 10h 0m 0s
+        max_renewable_life = 7d 0h 0m 0s
+        default_principal_flags = +preauth
+        pwcheck_plugin = /usr/local/var/krb5kdc/kadmin_plugin.so
+        dict_file = /usr/local/var/krb5kdc/dict
+    }
+
+dict_file is a prefix for cracklib dicts you have now, e.g.
+/usr/local/var/krb5kdc/dict.pwd, .pwi, etc.
+
+You will need to have any policy apply to the principal in order for this
+module to be enforced, as a result of how kadmin works (if there is no
+policy applying either by default or to the principal, password quality is
+not checked).
+
+ -- Russ Allbery <rra@debian.org>, Sat, 24 Jun 2006 18:31:34 z

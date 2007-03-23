@@ -1,0 +1,17 @@
+Source: krb5-passwd-strength
+Section: net
+Priority: extra
+Maintainer: Russ Allbery <rra@debian.org>
+Build-Depends: debhelper (>= 4)
+Standards-Version: 3.7.2
+
+Package: krb5-passwd-strength
+Architecture: any
+Depends: ${shlibs:Depends}
+Recommends: krb5-admin-server
+Description: MIT Kerberos KDC plugin for password strength checking
+ This plugin checks passwords set via kadmin either through new account
+ creation or password changes.  It rejects passwords that fit common
+ patterns and then uses an embedded version of cracklib to reject
+ passwords based on dictionary words.  No dictionary is shipped with this
+ package; a dictionary package must be installed separately.
