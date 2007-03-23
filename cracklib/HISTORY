@@ -5,6 +5,7 @@ following modifications have been made:
  * Strengthen the prefix and suffix rules for longer passwords.
  * Remove checks against the user's GECOS entry.
  * Don't exit on failure to open the database.
+ * Improve the search algorithm in FindPW somewhat.
  * Various compilation warning and portability fixes.
 
 Below is the original changelog for CrackLib:
