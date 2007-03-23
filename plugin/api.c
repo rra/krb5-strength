@@ -1,63 +1,100 @@
-/* cc -dynamiclib -o plugin.so ~/plugin.c -lcrack */
+/*
+ * api.c
+ *
+ * The public APIs of the password strength checking kadmind plugin.
+ *
+ * Provides the public pwcheck_init, pwcheck_check, and pwcheck_close APIs for
+ * the kadmind plugin.
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <syslog.h>
-#include <sys/stat.h>
+#include <unistd.h>
 
-#ifndef PATH_MAX
-#define PATH_MAX 256
-#endif
+/*
+ * Used to store local state.  Currently, all we have is the dictionary path,
+ * which we get from kadmind rather than from krb5.conf since it's already a
+ * kdc.conf setting.
+ */
+struct context {
+    char *dictionary;
+};
 
-extern char * FascistCheck(char *passwd,char *dictpath) ; 
+/* The public function exported by the cracklib library. */
+extern char *FascistCheck(const char *password, const char *dict);
 
-static struct lctx {
-    char *dict_file;
-} l_context;
-
-int pwcheck_init(void **context, const char *dict_file)
+/*
+ * Initialize the module.  Ensure that the dictionary file exists and is
+ * readable and store the path in the module context.  Returns 0 on success,
+ * non-zero on failure.  This function returns failure only if it could not
+ * allocate memory.
+ *
+ * The dictionary file should not include the trailing .pwd extension.
+ */
+int
+pwcheck_init(void **context, const char *dictionary)
 {
-    static char p[PATH_MAX];
-    static struct stat st;
+    char *path;
+    size_t length;
+    struct context *ctx;
 
-    strncpy(p, dict_file, PATH_MAX-5);
-    strncat(p, ".pwd", PATH_MAX);
-    p[PATH_MAX - 1] = '\0';
-    
-    if (lstat(p, &st) < 0)
-	return 1;
-
-    *context = &l_context;
-
-    l_context.dict_file = strdup(dict_file);
-    
+    length = strlen(dictionary) + strlen(".pwd") + 1;
+    path = malloc(length);
+    if (path == NULL)
+        return 1;
+    snprintf(path, length, "%s.pwd", dictionary);
+    if (access(path, R_OK) != 0)
+        return 1;
+    path[strlen(path) - strlen(".pwd")] = '\0';
+    ctx = malloc(sizeof(struct context));
+    if (ctx == NULL)
+        return 1;
+    ctx->dictionary = path;
+    *context = ctx;
     return 0;
 }
 
-int pwcheck_check(void *context, const char *password, const char
-		  *princ, char *msg, int msglen)
+
+/*
+ * Check a given password.  Takes our local context, the password, the
+ * principal the password is for, and a buffer and buffer length into which to
+ * put any failure message.
+ */
+int
+pwcheck_check(void *context, const char *password, const char *principal,
+              char *errstr, int errstrlen)
 {
-    char *msg2;
+    const char *result;
+    struct context *ctx = context;
 
-    if (msg2 = FascistCheck((char *)password, ((struct lctx *)context)->dict_file))
-    {
-	strncpy(msg, msg2, msglen);
-	msg[msglen - 1] = '\0';
+    if (strcasecmp(password, principal) == 0) {
+	snprintf(errstr, errstrlen, "Password same as username");
+        errstr[errstrlen - 1] = '\0';
 	return 1;
     }
-    
-    if (strcasecmp(password, princ) == 0) {
-	snprintf(msg, msglen, "You can't use \"%s\" as a password!",
-		 princ);
-	msg[msglen - 1] = '\0';
-	return 1;
+    result = FascistCheck(password, ctx->dictionary);
+    if (result != NULL) {
+        strncpy(errstr, result, errstrlen);
+        errstr[errstrlen - 1] = '\0';
+        return 1;
     }
-
     return 0;
 }
 
-void pwcheck_close(void *context)
+
+/*
+ * Cleanly shut down the password strength plugin.  The only thing we have to
+ * do is free our context memory.
+ */
+void
+pwcheck_close(void *context)
 {
-    if (l_context.dict_file) free(l_context.dict_file);
-    l_context.dict_file = NULL;
+    struct context *ctx = context;
+
+    if (ctx != NULL) {
+        if (ctx->dictionary != NULL)
+            free(ctx->dictionary);
+        free(ctx);
+    }
 }
