@@ -12,12 +12,9 @@
 #define STRINGSIZE	1024
 #define TRUNCSTRINGSIZE	(STRINGSIZE/4)
 
-#ifndef _ALL_SOURCE
 typedef unsigned char int8;
 typedef unsigned short int int16;
 typedef unsigned long int int32;
-#endif
-
 #ifndef NUMWORDS
 #define NUMWORDS 	16
 #endif

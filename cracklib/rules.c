@@ -6,6 +6,16 @@
  * and upwards.
  */
 
+/*
+ * Modified as part of the krb5-strength project as follows:
+ *
+ * 2007-03-22  Russ Allbery <rra@stanford.edu>
+ *   - Cap deletion of leading or trailing characters at one more than half
+ *     the length of the password string and no more than five characters.
+ *     This goes with a change to fascist.c that adds rules to delete more
+ *     leading and trailing characters for longer passwords.
+ */
+
 static char vers_id[] = "rules.c : v5.0p3 Alec Muffett 20 May 1993";
 
 #ifndef IN_CRACKLIB
@@ -50,7 +60,6 @@ Debug(val, a, b, c, d, e, f, g)
 
 #define RULE_DFIRST	'['
 #define RULE_DLAST	']'
-
 #define RULE_MFIRST	'('
 #define RULE_MLAST	')'
 
@@ -424,7 +433,7 @@ Mangle(input, control)		/* returns a pointer to a controlled Mangle */
     char *input;
     char *control;
 {
-    int limit,min_to_shift;
+    int limit, min_to_shift;
     register j;
     register char *ptr;
     static char area[STRINGSIZE];
@@ -433,15 +442,18 @@ Mangle(input, control)		/* returns a pointer to a controlled Mangle */
     strcpy(area, input);
 
     j = strlen(input);
-    if ( j%2 == 0 ) { 
-      min_to_shift = (j+1)/2 ; 
-    } else { 
-      min_to_shift = j/2 ; 
+    if (j % 2 == 0)
+    { 
+	min_to_shift = (j + 1) / 2;
+    } else
+    {
+	min_to_shift = j / 2;
     }
-    min_to_shift++ ; 
-
-    if ( min_to_shift > 5 )
-      min_to_shift = 5 ; 
+    min_to_shift++;
+    if (min_to_shift > 5)
+    {
+	min_to_shift = 5;
+    }
     
     for (ptr = control; *ptr; ptr++)
     {
@@ -726,27 +738,23 @@ Mangle(input, control)		/* returns a pointer to a controlled Mangle */
 	    break;
 
 	case RULE_DFIRST:
-	    if (area[0])
+	    if (area[0] && strlen(area) > min_to_shift)
 	    {
-	      if (strlen(area) > min_to_shift ) {
 		register int i;
-		for (i = 1; area[i] ; i++)
+		for (i = 1; area[i]; i++)
 		{
 		    area[i - 1] = area[i];
 		}
 		area[i - 1] = '\0';
-	      }
 	    }
 	    break;
 
 	case RULE_DLAST:
-	    if (area[0])
+	    if (area[0] && strlen(area) > min_to_shift)
 	    {
-	      if ( strlen(area) > min_to_shift ) { 
 		register int i;
-		for (i = 1; area[i] ; i++);
+		for (i = 1; area[i]; i++);
 		area[i - 1] = '\0';
-	      }
 	    }
 	    break;
 

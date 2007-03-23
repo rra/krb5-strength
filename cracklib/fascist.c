@@ -6,6 +6,16 @@
  * and upwards.
  */
 
+/*
+ * Modified as part of the krb5-strength project as follows:
+ *
+ * 2007-03-22  Russ Allbery <rra@stanford.edu>
+ *   - Add four-, five-, and six-character prefix and suffix rules.
+ *   - Longer passwords must contain more different characters, up to 8.
+ *   - Disable GECOS checking (useless for a server).
+ *   - Replace exit(-1) with return when dictionary doesn't exist.
+ */
+
 static char vers_id[] = "fascist.c : v2.3p3 Alec Muffett 14 dec 1997";
 
 #include "packer.h"
@@ -31,7 +41,6 @@ static char *r_destructors[] = {
 #ifdef DEBUG2
     (char *) 0,
 #endif
-
 
     "[",                        /* trimming leading/trailing junk */
     "]",
@@ -626,7 +635,7 @@ FascistLook(pwp, instring)
     PWDICT *pwp;
     char *instring;
 {
-    int i,pw_len,mindiff;
+    int i, pw_len, mindiff;
     char *ptr;
     char *jptr;
     char junk[STRINGSIZE];
@@ -642,13 +651,12 @@ FascistLook(pwp, instring)
     password = rpassword;
 
     pw_len = strlen(password); 
-
-    if ( pw_len < 4)
+    if (pw_len < 4)
     {
 	return ("it's WAY too short");
     }
 
-    if ( pw_len < MINLEN)
+    if (pw_len < MINLEN)
     {
 	return ("it is too short");
     }
@@ -665,23 +673,32 @@ FascistLook(pwp, instring)
 	}
     }
 
-    /* Should MINDIFF be based on length of password ? strlen input + 1*/
-
-    if ( pw_len < ( 2 * MINDIFF)  ) { 
-      mindiff = MINDIFF ; 
-    } else { 
-      if ( (pw_len % 2) == 0 ) { 
-	mindiff = ( pw_len + 1 ) / 2 ; 
-      } else { 
-	mindiff = pw_len / 2 ; 
-      }
-      mindiff++ ;
-      if (mindiff > MAXMINDIFF) {
-	mindiff = MAXMINDIFF ; 
-      }
+    /*
+     * mindiff is the number of different characters the password has to
+     * contain.  The original CrackLib always requires five different
+     * characters.  This increases that number up to 8 for passwords longer
+     * than nine characters.
+     */
+    if (pw_len < 2 * MINDIFF)
+    { 
+	mindiff = MINDIFF;
+    } else
+    {
+	if ((pw_len % 2) == 0)
+	{
+	    mindiff = (pw_len + 1) / 2;
+	} else
+	{
+	    mindiff = pw_len / 2;
+	}
+	mindiff++;
+	if (mindiff > MAXMINDIFF)
+	{
+	    mindiff = MAXMINDIFF;
+	}
     }
 
-    if (strlen(junk) < mindiff )
+    if (strlen(junk) < mindiff)
     {
 	return ("it does not contain enough DIFFERENT characters");
     }
@@ -721,7 +738,7 @@ FascistLook(pwp, instring)
 	return ("it looks like a National Insurance number.");
     }
 
-    /* This is pretty useless for a server, do ldap here ? */ 
+    /* This is pretty useless for a server. */
 #ifdef HAVE_GECOS_AVAILABLE
     if (ptr = FascistGecos(password, getuid()))
     {
@@ -748,8 +765,7 @@ FascistLook(pwp, instring)
 
 	if (FindPW(pwp, a) != notfound)
 	{
-	   printf( "found %s\n",a) ; 
-	   return ("it is based on a dictionary word");
+	    return ("it is based on a dictionary word");
 	}
     }
 
@@ -768,7 +784,6 @@ FascistLook(pwp, instring)
 #endif
 	if (FindPW(pwp, a) != notfound)
 	{
-	    printf( "found %s\n",a) ; 
 	    return ("it is based on a (reversed) dictionary word");
 	}
     }
