@@ -1,3 +1,11 @@
+This directory contains the files from Alec Muffett's v2.7 release of the
+CrackLib library (the cracklib subdirectory of the source) plus mkdict and
+packer from the util directory.  It has been modified for the needs of
+this package in ways enumerated in HISTORY and noted in each source file.
+
+Below is the original README.
+
+
 CrackLib:	A ProActive Password Sanity Library
 By: 		Alec Muffett
 Address:	alecm@crypto.dircon.co.uk

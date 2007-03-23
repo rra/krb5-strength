@@ -1,3 +1,14 @@
+This copy of CrackLib is based on the 2.7 release by Alec Muffett.  The
+following modifications have been made:
+
+ * Require more different characters in the password.
+ * Strengthen the prefix and suffix rules for longer passwords.
+ * Remove checks against the user's GECOS entry.
+ * Don't exit on failure to open the database.
+ * Various compilation warning and portability fixes.
+
+Below is the original changelog for CrackLib:
+
 v2.7    mkdict/tr problem eliminated;
 	misc fixes suggested by Andrey Savochkin <saw@msu.ru> (with thanks)
 v2.6    buffer overflow problems addressed - 1st attempt
