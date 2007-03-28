@@ -6,7 +6,7 @@
 
 AUTOMAKE_OPTIONS = foreign subdir-objects
 EXTRA_DIST = autogen cracklib/HISTORY cracklib/LICENCE cracklib/README \
-	cracklib/mkdict
+	cracklib/mkdict patches/README patches/mit-krb5-1.4.4
 
 # Handle the standard stuff that make maintainer-clean should probably remove
 # but doesn't.  This breaks the GNU coding standard, but in this area the GNU
