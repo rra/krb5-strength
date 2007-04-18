@@ -5,12 +5,14 @@ unsuitable.
 
 Currently, there is only one patch available:
 
-    mit-krb5-1.4.4      Built against Stanford-patched MIT Kerberos 1.4.4
+    mit-krb5-1.4.4      Built against MIT Kerberos 1.4.4
 
-More patches against other, or cleaner, source trees may be provided in
-the future.  Please let me know if there is a specific version you wish to
-see a patch for (and even better, let me know if you have a tested patch
-for a different version).
+This patch should also apply (with some fuzz) to MIT Kerberos 1.6.
+
+More patches against other source trees may be provided in the future.
+Please let me know if there is a specific version you wish to see a patch
+for (and even better, let me know if you have a tested patch for a
+different version).
 
 This patch adds to kadmind a configuration option which should be set in
 the local realm section of kdc.conf.  That configuration option is in the
