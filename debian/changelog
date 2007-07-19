@@ -1,3 +1,10 @@
+krb5-strength (0.5-1) unstable; urgency=low
+
+  * New upstream release.
+    - More checks for passwords based on the principal.
+
+ -- Russ Allbery <rra@debian.org>  Wed, 18 Jul 2007 23:16:37 -0700
+
 krb5-strength (0.3-1) unstable; urgency=low
 
   * New upstream release with a different name.
