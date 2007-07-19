@@ -1,5 +1,12 @@
                     User-Visible krb5-strength Changes
 
+krb5-strength 0.5 (2007-07-18)
+
+    The check of the password against the principal checked against the
+    fully-qualified principal, which is not the usual problem.
+    Additionally check that the password doesn't match the principal with
+    the realm removed or the reverse of that (case-insensitive).
+
 krb5-strength 0.4 (2007-03-28)
 
     The patches directory was omitted from the distribution.  Really

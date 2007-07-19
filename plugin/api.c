@@ -68,14 +68,59 @@ int
 pwcheck_check(void *context, const char *password, const char *principal,
               char *errstr, int errstrlen)
 {
+    char *user, *p;
+    size_t i, j;
+    char c;
     const char *result;
     struct context *ctx = context;
 
+    /*
+     * We get the principal (in krb5_unparse_name format) from kadmind and we
+     * want to be sure that the password doesn't match the username or the
+     * username reversed.  We therefore have to copy the string so that we can
+     * manipulate it a bit.
+     */
     if (strcasecmp(password, principal) == 0) {
-	snprintf(errstr, errstrlen, "Password same as username");
+	snprintf(errstr, errstrlen, "Password based on username");
         errstr[errstrlen - 1] = '\0';
 	return 1;
     }
+    user = strdup(principal);
+    if (user == NULL) {
+        snprintf(errstr, errstrlen, "Cannot allocate memory");
+        errstr[errstrlen - 1] = '\0';
+        return 1;
+    }
+    for (p = user; p[0] != '\0'; p++) {
+        if (p[0] == '\\' && p[1] != '\0') {
+            p++;
+            continue;
+        }
+        if (p[0] == '@') {
+            p[0] = '\0';
+            break;
+        }
+    }
+    if (strlen(password) == strlen(user)) {
+        if (strcasecmp(password, user) == 0) {
+            free(user);
+            snprintf(errstr, errstrlen, "Password based on username");
+            errstr[errstrlen - 1] = '\0';
+            return 1;
+        }
+        for (i = 0, j = strlen(user) - 1; i < j; i++, j--) {
+            c = user[i];
+            user[i] = user[j];
+            user[j] = c;
+        }
+        if (strcasecmp(password, user) == 0) {
+            free(user);
+            snprintf(errstr, errstrlen, "Password based on username");
+            errstr[errstrlen - 1] = '\0';
+            return 1;
+        }
+    }
+    free(user);
     result = FascistCheck(password, ctx->dictionary);
     if (result != NULL) {
         strncpy(errstr, result, errstrlen);
