@@ -1,7 +1,9 @@
-# Makefile.am -- Automake makefile for krb5-strength.
+# Automake makefile for krb5-strength.
 #
-# Copyright 2007 Board of Trustees, Leland Stanford Jr. University
-# See README for licensing terms.
+# Written by Russ Allbery <rra@stanford.edu>
+# Copyright 2007, 2009 Board of Trustees, Leland Stanford Jr. University
+#
+# See LICENSE for licensing terms.
 
 AUTOMAKE_OPTIONS = foreign subdir-objects
 EXTRA_DIST = autogen cracklib/HISTORY cracklib/LICENCE cracklib/README \
