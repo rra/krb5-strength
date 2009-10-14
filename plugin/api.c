@@ -1,10 +1,15 @@
 /*
- * api.c
- *
  * The public APIs of the password strength checking kadmind plugin.
  *
  * Provides the public pwcheck_init, pwcheck_check, and pwcheck_close APIs for
  * the kadmind plugin.
+ *
+ * Developed by Derrick Brashear and Ken Hornstein of Sine Nomine Associates,
+ *     on behalf of Stanford University.
+ * Extensive modifications by Russ Allbery <rra@stanford.edu>
+ * Copyright 2006, 2007, 2009 Board of Trustees, Leland Stanford Jr. Unversity
+ *
+ * See LICENSE for licensing terms.
  */
 
 #include <stdio.h>
@@ -23,6 +28,7 @@ struct context {
 
 /* The public function exported by the cracklib library. */
 extern char *FascistCheck(const char *password, const char *dict);
+
 
 /*
  * Initialize the module.  Ensure that the dictionary file exists and is
