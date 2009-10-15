@@ -7,6 +7,8 @@ following modifications have been made:
  * Don't exit on failure to open the database.
  * Improve the search algorithm in FindPW somewhat.
  * Don't segfault on corrupt dictionaries.
+ * Add ANSI C prototypes for all functions and mark const variables.
+ * Remove unused functions.
  * Various compilation warning and portability fixes.
 
 Below is the original changelog for CrackLib:

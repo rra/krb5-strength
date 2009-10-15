@@ -11,6 +11,9 @@
  *
  * 2007-03-23  Russ Allbery <rra@stanford.edu>
  *   - Additional system includes for other functions.
+ * 2009-10-14  Russ Allbery <rra@stanford.edu>
+ *   - Add ANSI C protototypes for all functions.
+ *   - Remove unused Clone function.
  */
 
 #include <string.h>
@@ -18,11 +21,10 @@
 
 #include "packer.h"
 
-static char vers_id[] = "stringlib.c : v2.3p2 Alec Muffett 18 May 1993";
+static const char vers_id[] = "stringlib.c : v2.3p2 Alec Muffett 18 May 1993";
 
 char
-Chop(string)
-    register char *string;
+Chop(char *string)
 {
     register char c;
     register char *ptr;
@@ -38,8 +40,7 @@ Chop(string)
 }
 
 char *
-Trim(string)
-    register char *string;
+Trim(char *string)
 {
     register char *ptr;
     for (ptr = string; *ptr; ptr++);
@@ -49,17 +50,4 @@ Trim(string)
     *(++ptr) = '\0';
 
     return (ptr);
-}
-
-char *
-Clone(string)
-    char *string;
-{
-    register char *retval;
-    retval = (char *) malloc(strlen(string) + 1);
-    if (retval)
-    {
-	strcpy(retval, string);
-    }
-    return (retval);
 }
