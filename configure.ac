@@ -6,22 +6,19 @@ dnl     Board of Trustees, Leland Stanford Jr. University
 dnl
 dnl See LICENSE for licensing terms.
 
-AC_PREREQ([2.60])
+AC_PREREQ([2.64])
 AC_INIT([krb5-strength], [0.5], [rra@stanford.edu])
-AC_CONFIG_AUX_DIR([tools])
-AM_INIT_AUTOMAKE([1.10 -Wall -Werror])
+AC_CONFIG_AUX_DIR([build-aux])
+AC_CONFIG_MACRO_DIR([m4])
+AM_INIT_AUTOMAKE([1.11 check-news silent-rules -Wall -Werror])
 AM_MAINTAINER_MODE
 
 AC_PROG_CC
+AC_USE_SYSTEM_EXTENSIONS
 AM_PROG_CC_C_O
 AC_PROG_INSTALL
 AM_DISABLE_STATIC
 AC_PROG_LIBTOOL
-
-# Crank up the warnings if we're using GCC.
-if test "x$GCC" = "xyes" ; then
-    CFLAGS="-Wall $CFLAGS"
-fi
 
 AC_CONFIG_FILES([Makefile])
 AC_CONFIG_HEADER([config.h])

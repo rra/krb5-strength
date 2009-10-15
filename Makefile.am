@@ -6,14 +6,9 @@
 # See LICENSE for licensing terms.
 
 AUTOMAKE_OPTIONS = foreign subdir-objects
+ACLOCAL_AMFLAGS = -I m4
 EXTRA_DIST = autogen cracklib/HISTORY cracklib/LICENCE cracklib/README \
 	cracklib/mkdict patches/README patches/mit-krb5-1.4.4
-
-# Handle the standard stuff that make maintainer-clean should probably remove
-# but doesn't.  This breaks the GNU coding standard, but in this area the GNU
-# coding standard is dumb.
-MAINTAINERCLEANFILES = Makefile.in aclocal.m4 config.h.in config.h.in~ \
-        configure
 
 # Put the module into /usr/local/lib/kadmind by default, relative to --libdir.
 moduledir = $(libdir)/kadmind
@@ -33,3 +28,19 @@ module_LTLIBRARIES = plugin/passwd_strength.la
 plugin_passwd_strength_la_SOURCES = plugin/api.c
 plugin_passwd_strength_la_LDFLAGS = -module -avoid-version
 plugin_passwd_strength_la_LIBADD = cracklib/libcracklib.la
+
+# Handle the standard stuff that make maintainer-clean should probably remove
+# but doesn't.  This breaks the GNU coding standard, but in this area the GNU
+# coding standard is dumb.
+MAINTAINERCLEANFILES = Makefile.in aclocal.m4 config.h.in config.h.in~ \
+        configure
+
+# A set of flags for warnings.	Add -O because gcc won't find some warnings
+# without optimization turned on.
+WARNINGS = -g -O -Wall -W -Wendif-labels -Wpointer-arith \
+	-Wbad-function-cast -Wwrite-strings -Wstrict-prototypes \
+	-Wmissing-prototypes -Wnested-externs -Werror
+
+warnings:
+	$(MAKE) V=0 CFLAGS='$(WARNINGS)'
+	$(MAKE) V=0 CFLAGS='$(WARNINGS)' $(check_PROGRAMS)
