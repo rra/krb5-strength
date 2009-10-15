@@ -12,10 +12,14 @@
  * See LICENSE for licensing terms.
  */
 
+#include <config.h>
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+
+#include <plugin/api.h>
 
 /*
  * Used to store local state.  Currently, all we have is the dictionary path,
