@@ -1,5 +1,10 @@
                     User-Visible krb5-strength Changes
 
+krb5-strength 1.0 (unreleased)
+
+    Add heimdal-strength, a program that checks password strength using
+    the protocol for a Heimdal external check program.
+
 krb5-strength 0.5 (2007-07-18)
 
     The check of the password against the principal checked against the

@@ -11,6 +11,7 @@
 /cracklib/packer
 /libtool
 /m4/
+/plugin/heimdal-strength
 /stamp-h1
 .deps/
 .dirstamp
