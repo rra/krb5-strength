@@ -10,6 +10,8 @@ krb5-strength 1.0 (unreleased)
     enough trailing nul bytes for the expected input format, leading to
     uninitialized memory reads in the password lookup.
 
+    Add a test suite using the driver and library from C TAP Harness 1.1.
+
 krb5-strength 0.5 (2007-07-18)
 
     The check of the password against the principal checked against the

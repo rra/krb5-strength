@@ -13,6 +13,9 @@
 /m4/
 /plugin/heimdal-strength
 /stamp-h1
+/tests/data/.placeholder
+/tests/data/dictionary.*
+/tests/runtests
 .deps/
 .dirstamp
 .libs/

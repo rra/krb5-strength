@@ -7,8 +7,9 @@
 
 AUTOMAKE_OPTIONS = foreign subdir-objects
 ACLOCAL_AMFLAGS = -I m4
-EXTRA_DIST = autogen cracklib/HISTORY cracklib/LICENCE cracklib/README \
-	cracklib/mkdict patches/README patches/mit-krb5-1.4.4
+EXTRA_DIST = autogen cracklib/HISTORY cracklib/LICENCE cracklib/README	\
+	cracklib/mkdict patches/README patches/mit-krb5-1.4.4		\
+	tests/tap/libtap.sh
 
 # Put the module into /usr/local/lib/kadmind by default, relative to --libdir.
 moduledir = $(libdir)/kadmind
@@ -39,6 +40,9 @@ plugin_heimdal_strength_LDADD = cracklib/libcracklib.la $(KRB5_LIBS)
 # Handle the standard stuff that make maintainer-clean should probably remove
 # but doesn't.  This breaks the GNU coding standard, but in this area the GNU
 # coding standard is dumb.
+CLEANFILES = tests/data/dictionary.hwm tests/data/dictionary.pwd \
+	tests/data/dictionary.pwi
+DISTCLEANFILES = tests/data/.placeholder
 MAINTAINERCLEANFILES = Makefile.in aclocal.m4 config.h.in config.h.in~ \
         configure
 
@@ -51,3 +55,14 @@ WARNINGS = -g -O -Wall -W -Wendif-labels -Wpointer-arith \
 warnings:
 	$(MAKE) V=0 CFLAGS='$(WARNINGS)'
 	$(MAKE) V=0 CFLAGS='$(WARNINGS)' $(check_PROGRAMS)
+
+# The bits below are for the test suite, not for the main package.
+check_PROGRAMS = tests/runtests
+tests_runtests_CPPFLAGS = -DSOURCE='"$(abs_top_srcdir)/tests"' \
+	-DBUILD='"$(abs_top_builddir)/tests"'
+
+tests/data/dictionary.pwd: cracklib/packer $(srcdir)/tests/data/wordlist
+	cracklib/packer tests/data/dictionary < $(srcdir)/tests/data/wordlist
+
+check-local: $(check_PROGRAMS) tests/data/dictionary.pwd
+	cd tests && ./runtests $(abs_top_srcdir)/tests/TESTS

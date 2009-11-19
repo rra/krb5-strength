@@ -22,6 +22,9 @@ AC_PROG_LIBTOOL
 
 RRA_LIB_KRB5
 
+dnl Create the tests/data directory for builds outside the source directory.
+AC_CONFIG_COMMANDS([tests/data/.placeholder], [touch tests/data/.placeholder])
+
 AC_CONFIG_FILES([Makefile])
 AC_CONFIG_HEADER([config.h])
 AC_OUTPUT
