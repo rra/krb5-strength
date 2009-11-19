@@ -19,6 +19,8 @@
  *   - Add parentheses around assignment used for its truth value.
  *   - Make internal functions static.
  *   - Remove unused variables.
+ * 2009-11-18  Russ Allbery <rra@stanford.edu>
+ *   - Fixed the data format output by packer to properly pad the end.
  */
 
 #include <stdio.h>
@@ -228,6 +230,9 @@ PutPW(PWDICT *pwp, const char *string)
 		for (j = 0; ostr[j] && nstr[j] && (ostr[j] == nstr[j]); j++);
 		putc(j & 0xff, pwp->dfp);
 		fputs(nstr + j, pwp->dfp);
+	    } else
+	    {
+		putc(0, pwp->dfp);
 	    }
 	    putc(0, pwp->dfp);
 
