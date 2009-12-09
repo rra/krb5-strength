@@ -22,6 +22,11 @@ AC_PROG_LIBTOOL
 
 RRA_LIB_KRB5
 
+RRA_LIB_KRB5_SWITCH
+AC_CHECK_HEADERS([kadm5-pwcheck.h])
+AC_CHECK_TYPES([krb5_realm], , , [#include <krb5.h>])
+RRA_LIB_KRB5_RESTORE
+
 dnl Create the tests/data directory for builds outside the source directory.
 AC_CONFIG_COMMANDS([tests/data/.placeholder], [touch tests/data/.placeholder])
 

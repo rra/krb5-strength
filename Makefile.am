@@ -26,7 +26,7 @@ cracklib_packer_LDADD = cracklib/libcracklib.la
 
 # Rules for building the password strength plugin.
 module_LTLIBRARIES = plugin/passwd_strength.la
-plugin_passwd_strength_la_SOURCES = plugin/api.c
+plugin_passwd_strength_la_SOURCES = plugin/api.c plugin/heimdal.c
 plugin_passwd_strength_la_LDFLAGS = -module -avoid-version
 plugin_passwd_strength_la_LIBADD = cracklib/libcracklib.la
 
