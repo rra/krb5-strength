@@ -9,6 +9,7 @@ dnl See LICENSE for licensing terms.
 AC_PREREQ([2.64])
 AC_INIT([krb5-strength], [0.5], [rra@stanford.edu])
 AC_CONFIG_AUX_DIR([build-aux])
+AC_CONFIG_LIBOBJ_DIR([portable])
 AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE([1.11 check-news silent-rules -Wall -Werror])
 AM_MAINTAINER_MODE
@@ -19,6 +20,13 @@ AM_PROG_CC_C_O
 AC_PROG_INSTALL
 AM_DISABLE_STATIC
 AC_PROG_LIBTOOL
+
+AC_HEADER_STDBOOL
+AC_CHECK_HEADERS([sys/bittypes.h])
+AC_CHECK_DECLS([snprintf, vsnprintf])
+AC_TYPE_LONG_LONG_INT
+RRA_FUNC_SNPRINTF
+AC_REPLACE_FUNCS([asprintf strlcat strlcpy])
 
 RRA_LIB_KRB5
 

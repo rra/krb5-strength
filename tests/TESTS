@@ -1,1 +1,5 @@
 heimdal/basic
+portable/asprintf
+portable/snprintf
+portable/strlcat
+portable/strlcpy

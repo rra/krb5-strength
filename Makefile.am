@@ -9,33 +9,38 @@ AUTOMAKE_OPTIONS = foreign subdir-objects
 ACLOCAL_AMFLAGS = -I m4
 EXTRA_DIST = autogen cracklib/HISTORY cracklib/LICENCE cracklib/README	\
 	cracklib/mkdict patches/README patches/mit-krb5-1.4.4		\
-	tests/tap/libtap.sh
+	tests/TESTS tests/heimdal/basic-t tests/tap/libtap.sh
 
 # Put the module into /usr/local/lib/kadmind by default, relative to --libdir.
 moduledir = $(libdir)/kadmind
 
 # Build cracklib as a helper library, currently unconditionally, and build
 # (but don't install) the packer program.
-noinst_LTLIBRARIES = cracklib/libcracklib.la
+noinst_LTLIBRARIES = cracklib/libcracklib.la portable/libportable.la
 cracklib_libcracklib_la_SOURCES = cracklib/fascist.c cracklib/packlib.c \
 	cracklib/rules.c cracklib/stringlib.c
 cracklib_libcracklib_la_CPPFLAGS = -DIN_CRACKLIB
 noinst_PROGRAMS = cracklib/packer
 cracklib_packer_SOURCES = cracklib/packer.c cracklib/packer.h
 cracklib_packer_LDADD = cracklib/libcracklib.la
+portable_libportable_la_SOURCES = portable/dummy.c portable/macros.h \
+        portable/stdbool.h portable/system.h
+portable_libportable_la_LIBADD = $(LTLIBOBJS)
 
 # Rules for building the password strength plugin.
 module_LTLIBRARIES = plugin/passwd_strength.la
 plugin_passwd_strength_la_SOURCES = plugin/api.c plugin/heimdal.c
 plugin_passwd_strength_la_LDFLAGS = -module -avoid-version
-plugin_passwd_strength_la_LIBADD = cracklib/libcracklib.la
+plugin_passwd_strength_la_LIBADD = cracklib/libcracklib.la \
+	portable/libportable.la
 
 # The Heimdal external-check program.
 bin_PROGRAMS = plugin/heimdal-strength
 plugin_heimdal_strength_CFLAGS = $(AM_CFLAGS)
 plugin_heimdal_strength_SOURCES = plugin/api.c plugin/api.h \
 	plugin/heimdal-strength.c
-plugin_heimdal_strength_LDADD = cracklib/libcracklib.la $(KRB5_LIBS)
+plugin_heimdal_strength_LDADD = cracklib/libcracklib.la \
+	portable/libportable.la $(KRB5_LIBS)
 
 # Handle the standard stuff that make maintainer-clean should probably remove
 # but doesn't.  This breaks the GNU coding standard, but in this area the GNU
@@ -57,9 +62,27 @@ warnings:
 	$(MAKE) V=0 CFLAGS='$(WARNINGS)' $(check_PROGRAMS)
 
 # The bits below are for the test suite, not for the main package.
-check_PROGRAMS = tests/runtests
+check_PROGRAMS = tests/runtests tests/portable/asprintf-t	\
+	tests/portable/snprintf-t tests/portable/strlcat-t	\
+	tests/portable/strlcpy-t
 tests_runtests_CPPFLAGS = -DSOURCE='"$(abs_top_srcdir)/tests"' \
 	-DBUILD='"$(abs_top_builddir)/tests"'
+check_LIBRARIES = tests/tap/libtap.a
+tests_tap_libtap_a_CPPFLAGS = -I$(abs_top_srcdir)/tests
+tests_tap_libtap_a_SOURCES = tests/tap/basic.c tests/tap/basic.h
+
+tests_portable_asprintf_t_SOURCES = tests/portable/asprintf-t.c \
+	tests/portable/asprintf.c
+tests_portable_asprintf_t_LDADD = tests/tap/libtap.a portable/libportable.la
+tests_portable_snprintf_t_SOURCES = tests/portable/snprintf-t.c \
+	tests/portable/snprintf.c
+tests_portable_snprintf_t_LDADD = tests/tap/libtap.a portable/libportable.la
+tests_portable_strlcat_t_SOURCES = tests/portable/strlcat-t.c \
+	tests/portable/strlcat.c
+tests_portable_strlcat_t_LDADD = tests/tap/libtap.a portable/libportable.la
+tests_portable_strlcpy_t_SOURCES = tests/portable/strlcpy-t.c \
+	tests/portable/strlcpy.c
+tests_portable_strlcpy_t_LDADD = tests/tap/libtap.a portable/libportable.la
 
 tests/data/dictionary.pwd: cracklib/packer $(srcdir)/tests/data/wordlist
 	cracklib/packer tests/data/dictionary < $(srcdir)/tests/data/wordlist

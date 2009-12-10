@@ -15,7 +15,12 @@
 /stamp-h1
 /tests/data/.placeholder
 /tests/data/dictionary.*
+/tests/portable/asprintf-t
+/tests/portable/snprintf-t
+/tests/portable/strlcat-t
+/tests/portable/strlcpy-t
 /tests/runtests
+/tests/tap/libtap.a
 .deps/
 .dirstamp
 .libs/
