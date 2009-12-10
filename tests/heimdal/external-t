@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Test suite for basic Heimdal plugin functionality.
+# Test suite for basic Heimdal external strength checking functionality.
 #
 # Written by Russ Allbery <rra@stanford.edu>
 # Copyright 2009 Board of Trustees, Leland Stanford Jr. University
@@ -25,7 +25,7 @@ ok_password () {
     echo "principal: $princ" > input
     echo "new-password: $password" >> input
     echo 'end' >> input
-    stdout=`"$BUILD/../plugin/heimdal-strength" "$princ" < input 2> errors`
+    stdout=`"$BUILD/../external/heimdal-strength" "$princ" < input 2> errors`
     status="$?"
     echo "# status: $status"
     echo "# stdout: $stdout"

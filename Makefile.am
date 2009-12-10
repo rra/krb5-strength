@@ -40,11 +40,11 @@ plugin_passwd_strength_la_LIBADD = cracklib/libcracklib.la \
 	portable/libportable.la
 
 # The Heimdal external-check program.
-bin_PROGRAMS = plugin/heimdal-strength
-plugin_heimdal_strength_CFLAGS = $(AM_CFLAGS)
-plugin_heimdal_strength_SOURCES = plugin/api.c plugin/api.h \
-	plugin/heimdal-strength.c
-plugin_heimdal_strength_LDADD = cracklib/libcracklib.la \
+bin_PROGRAMS = external/heimdal-strength
+external_heimdal_strength_CFLAGS = $(AM_CFLAGS)
+external_heimdal_strength_SOURCES = plugin/api.c plugin/api.h \
+	external/heimdal-strength.c
+external_heimdal_strength_LDADD = cracklib/libcracklib.la \
 	portable/libportable.la $(KRB5_LIBS)
 
 # Handle the standard stuff that make maintainer-clean should probably remove

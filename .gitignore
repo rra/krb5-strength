@@ -9,9 +9,9 @@
 /config.status
 /configure
 /cracklib/packer
+/external/heimdal-strength
 /libtool
 /m4/
-/plugin/heimdal-strength
 /stamp-h1
 /tests/data/.placeholder
 /tests/data/dictionary.*
