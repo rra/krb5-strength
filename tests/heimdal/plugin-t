@@ -45,6 +45,13 @@ if [ -z "$krb5conf" ] ; then
     skip_all 'no krb5.conf found, put one in tests/data/krb5.conf'
 fi
 
+# Check whether we can run the test at all.
+"$BUILD/heimdal/plugin" 'test@EXAMPLE.COM' 'test' >/dev/null 2>&1
+if [ $? = 42 ] ; then
+    rm -f krb5.conf
+    skip_all 'not built against Heimdal libraries'
+fi
+
 # Okay, we should be good to run the test suite.
 plan 28
 

@@ -69,6 +69,14 @@ main(int argc, char *argv[])
     int result;
     char error[BUFSIZ] = "";
 
+    /*
+     * If we're not building with Heimdal, we can't run this test.  Exit with
+     * a special status to communicate this to the test wrapper.
+     */
+#ifndef HAVE_KRB5_REALM
+    exit(42);
+#endif
+
     /* Build the path of the plugin. */
     if (argc != 3) {
         fprintf(stderr, "Wrong number of arguments\n");
