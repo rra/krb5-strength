@@ -16,6 +16,10 @@ krb5-strength 1.0 (unreleased)
 
     Add a test suite using the driver and library from C TAP Harness 1.1.
 
+    Add portability code for platforms without a working snprintf or other
+    deficiencies and updated the code to take advantage of those
+    guarantees.
+
 krb5-strength 0.5 (2007-07-18)
 
     The check of the password against the principal checked against the
