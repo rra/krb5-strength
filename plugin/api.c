@@ -13,11 +13,7 @@
  */
 
 #include <config.h>
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
+#include <portable/system.h>
 
 #include <plugin/api.h>
 
@@ -92,13 +88,11 @@ pwcheck_check(void *context, const char *password, const char *principal,
      */
     if (strcasecmp(password, principal) == 0) {
 	snprintf(errstr, errstrlen, "Password based on username");
-        errstr[errstrlen - 1] = '\0';
 	return 1;
     }
     user = strdup(principal);
     if (user == NULL) {
         snprintf(errstr, errstrlen, "Cannot allocate memory");
-        errstr[errstrlen - 1] = '\0';
         return 1;
     }
     for (p = user; p[0] != '\0'; p++) {
@@ -115,7 +109,6 @@ pwcheck_check(void *context, const char *password, const char *principal,
         if (strcasecmp(password, user) == 0) {
             free(user);
             snprintf(errstr, errstrlen, "Password based on username");
-            errstr[errstrlen - 1] = '\0';
             return 1;
         }
         for (i = 0, j = strlen(user) - 1; i < j; i++, j--) {
@@ -126,15 +119,13 @@ pwcheck_check(void *context, const char *password, const char *principal,
         if (strcasecmp(password, user) == 0) {
             free(user);
             snprintf(errstr, errstrlen, "Password based on username");
-            errstr[errstrlen - 1] = '\0';
             return 1;
         }
     }
     free(user);
     result = FascistCheck(password, ctx->dictionary);
     if (result != NULL) {
-        strncpy(errstr, result, errstrlen);
-        errstr[errstrlen - 1] = '\0';
+        strlcpy(errstr, result, errstrlen);
         return 1;
     }
     return 0;
