@@ -46,7 +46,7 @@ if [ -z "$krb5conf" ] ; then
 fi
 
 # Okay, we should be good to run the test suite.
-plan 42
+plan 28
 
 # We don't have a password_dictionary setting, so we should fail with an
 # initialization error.

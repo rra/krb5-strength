@@ -20,10 +20,16 @@
 #include <config.h>
 #include <portable/system.h>
 
+#include <errno.h>
+#include <krb5.h>
+
 #include <plugin/api.h>
 
 /* Skip this entire file if not building with Heimdal. */
 #ifdef HAVE_KRB5_REALM
+
+/* Used for unused parameters to silence gcc warnings. */
+#define UNUSED  __attribute__((__unused__))
 
 /* kadm5-pwcheck.h isn't always installed by Heimdal. */
 # ifdef HAVE_KADM5_PWCHECK_H
@@ -59,7 +65,7 @@ struct kadm5_pw_policy_verifier {
  */
 static int
 heimdal_pwcheck(krb5_context context, krb5_principal principal,
-                krb5_data *password, const char *tuning, char *message,
+                krb5_data *password, const char *tuning UNUSED, char *message,
                 size_t length)
 {
     void *data;
@@ -69,8 +75,7 @@ heimdal_pwcheck(krb5_context context, krb5_principal principal,
     krb5_error_code status;
     int result;
 
-    krb5_get_default_realm(ctx, &realm);
-    krb5_appdefault_string(ctx, "krb5-strength", principal->realm,
+    krb5_appdefault_string(context, "krb5-strength", principal->realm,
                            "password_dictionary", "", &dictionary);
     if (dictionary == NULL || dictionary[0] == '\0') {
         strlcpy(message, "password_dictionary not configured in krb5.conf",
@@ -91,8 +96,8 @@ heimdal_pwcheck(krb5_context context, krb5_principal principal,
     memcpy(pastring, password->data, password->length);
     pastring[password->length] = '\0';
     if (pwcheck_init(&data, dictionary) != 0) {
-        snprintf(message, length, "Cannot initialize strength checking: %s",
-                strerror(errno));
+        snprintf(message, length, "Cannot initialize strength checking"
+                 " with dictionary %s: %s", dictionary, strerror(errno));
         free(pastring);
         return 1;
     }

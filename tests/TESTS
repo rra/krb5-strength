@@ -1,4 +1,5 @@
 heimdal/external
+heimdal/plugin
 portable/asprintf
 portable/snprintf
 portable/strlcat
