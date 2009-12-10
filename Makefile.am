@@ -7,9 +7,14 @@
 
 AUTOMAKE_OPTIONS = foreign subdir-objects
 ACLOCAL_AMFLAGS = -I m4
-EXTRA_DIST = autogen cracklib/HISTORY cracklib/LICENCE cracklib/README	\
-	cracklib/mkdict patches/README patches/mit-krb5-1.4.4		\
-	tests/TESTS tests/heimdal/external-t tests/tap/libtap.sh
+EXTRA_DIST = autogen cracklib/HISTORY cracklib/LICENCE cracklib/README	    \
+	cracklib/mkdict patches/README patches/mit-krb5-1.4.4 tests/TESTS   \
+	tests/heimdal/external-t tests/heimdal/plugin-t tests/tap/libtap.sh
+
+# Do this globally.  Everything needs to find the Kerberos headers and
+# libraries.
+AM_CPPFLAGS = $(KRB5_CPPFLAGS)
+AM_LDFLAGS = $(KRB5_LDFLAGS)
 
 # Put the module into /usr/local/lib/kadmind by default, relative to --libdir.
 moduledir = $(libdir)/kadmind
@@ -62,15 +67,17 @@ warnings:
 	$(MAKE) V=0 CFLAGS='$(WARNINGS)' $(check_PROGRAMS)
 
 # The bits below are for the test suite, not for the main package.
-check_PROGRAMS = tests/runtests tests/portable/asprintf-t	\
+check_PROGRAMS = tests/heimdal/plugin tests/portable/asprintf-t	\
 	tests/portable/snprintf-t tests/portable/strlcat-t	\
-	tests/portable/strlcpy-t
+	tests/portable/strlcpy-t tests/runtests
 tests_runtests_CPPFLAGS = -DSOURCE='"$(abs_top_srcdir)/tests"' \
 	-DBUILD='"$(abs_top_builddir)/tests"'
 check_LIBRARIES = tests/tap/libtap.a
 tests_tap_libtap_a_CPPFLAGS = -I$(abs_top_srcdir)/tests
 tests_tap_libtap_a_SOURCES = tests/tap/basic.c tests/tap/basic.h
 
+tests_heimdal_plugin_SOURCES = tests/heimdal/plugin.c
+tests_heimdal_plugin_LDADD = portable/libportable.la $(KRB5_LIBS) $(DL_LIBS)
 tests_portable_asprintf_t_SOURCES = tests/portable/asprintf-t.c \
 	tests/portable/asprintf.c
 tests_portable_asprintf_t_LDADD = tests/tap/libtap.a portable/libportable.la

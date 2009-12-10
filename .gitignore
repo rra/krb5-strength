@@ -15,6 +15,7 @@
 /stamp-h1
 /tests/data/.placeholder
 /tests/data/dictionary.*
+/tests/heimdal/plugin
 /tests/portable/asprintf-t
 /tests/portable/snprintf-t
 /tests/portable/strlcat-t
