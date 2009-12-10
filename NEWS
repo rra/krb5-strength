@@ -5,6 +5,10 @@ krb5-strength 1.0 (unreleased)
     Add heimdal-strength, a program that checks password strength using
     the protocol for a Heimdal external check program.
 
+    The shared module now also exports the interface expected by Heimdal's
+    dynamically loaded password strength checking API and can be used as a
+    Heimdal kadmin plugin.
+
     Fixed the data format written by the included packer program to add
     enough nul bytes at the end of the data.  Previously, there was not
     enough trailing nul bytes for the expected input format, leading to
