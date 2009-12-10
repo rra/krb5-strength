@@ -9,7 +9,7 @@ AUTOMAKE_OPTIONS = foreign subdir-objects
 ACLOCAL_AMFLAGS = -I m4
 EXTRA_DIST = autogen cracklib/HISTORY cracklib/LICENCE cracklib/README	\
 	cracklib/mkdict patches/README patches/mit-krb5-1.4.4		\
-	tests/TESTS tests/heimdal/basic-t tests/tap/libtap.sh
+	tests/TESTS tests/heimdal/external-t tests/tap/libtap.sh
 
 # Put the module into /usr/local/lib/kadmind by default, relative to --libdir.
 moduledir = $(libdir)/kadmind

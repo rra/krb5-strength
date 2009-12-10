@@ -1,4 +1,4 @@
-heimdal/basic
+heimdal/external
 portable/asprintf
 portable/snprintf
 portable/strlcat
