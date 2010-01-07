@@ -1,7 +1,7 @@
 dnl Process this file with autoconf to produce a configure script.
 dnl
 dnl Written by Russ Allbery <rra@stanford.edu>
-dnl Copyright 2006, 2007, 2009
+dnl Copyright 2006, 2007, 2009, 2010
 dnl     Board of Trustees, Leland Stanford Jr. University
 dnl
 dnl See LICENSE for licensing terms.
@@ -36,7 +36,7 @@ AC_SUBST([DL_LIBS])
 RRA_LIB_KRB5
 
 RRA_LIB_KRB5_SWITCH
-AC_CHECK_HEADERS([kadm5-pwcheck.h])
+AC_CHECK_HEADERS([kadm5-pwcheck.h krb5/pwcheck_plugin.h])
 AC_CHECK_TYPES([krb5_realm], , , [#include <krb5.h>])
 RRA_LIB_KRB5_RESTORE
 

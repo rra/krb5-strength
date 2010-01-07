@@ -1,15 +1,16 @@
 # Automake makefile for krb5-strength.
 #
 # Written by Russ Allbery <rra@stanford.edu>
-# Copyright 2007, 2009 Board of Trustees, Leland Stanford Jr. University
+# Copyright 2007, 2009, 2010 Board of Trustees, Leland Stanford Jr. University
 #
 # See LICENSE for licensing terms.
 
 AUTOMAKE_OPTIONS = foreign subdir-objects
 ACLOCAL_AMFLAGS = -I m4
-EXTRA_DIST = autogen cracklib/HISTORY cracklib/LICENCE cracklib/README	    \
-	cracklib/mkdict patches/README patches/mit-krb5-1.4.4 tests/TESTS   \
-	tests/heimdal/external-t tests/heimdal/plugin-t tests/tap/libtap.sh
+EXTRA_DIST = autogen cracklib/HISTORY cracklib/LICENCE cracklib/README	   \
+	cracklib/mkdict patches/README patches/mit-krb5-1.4.4 tests/TESTS  \
+	tests/heimdal/external-t tests/heimdal/plugin-t tests/mit/plugin-t \
+	tests/tap/libtap.sh
 
 # Do this globally.  Everything needs to find the Kerberos headers and
 # libraries.
@@ -34,7 +35,7 @@ portable_libportable_la_LIBADD = $(LTLIBOBJS)
 
 # Rules for building the password strength plugin.
 module_LTLIBRARIES = plugin/passwd_strength.la
-plugin_passwd_strength_la_SOURCES = plugin/api.c plugin/heimdal.c
+plugin_passwd_strength_la_SOURCES = plugin/api.c plugin/heimdal.c plugin/mit.c
 plugin_passwd_strength_la_LDFLAGS = -module -avoid-version
 plugin_passwd_strength_la_LIBADD = cracklib/libcracklib.la \
 	portable/libportable.la
@@ -67,9 +68,9 @@ warnings:
 	$(MAKE) V=0 CFLAGS='$(WARNINGS)' $(check_PROGRAMS)
 
 # The bits below are for the test suite, not for the main package.
-check_PROGRAMS = tests/heimdal/plugin tests/portable/asprintf-t	\
-	tests/portable/snprintf-t tests/portable/strlcat-t	\
-	tests/portable/strlcpy-t tests/runtests
+check_PROGRAMS = tests/heimdal/plugin tests/mit/plugin			 \
+	tests/portable/asprintf-t tests/portable/snprintf-t		 \
+	tests/portable/strlcat-t tests/portable/strlcpy-t tests/runtests
 tests_runtests_CPPFLAGS = -DSOURCE='"$(abs_top_srcdir)/tests"' \
 	-DBUILD='"$(abs_top_builddir)/tests"'
 check_LIBRARIES = tests/tap/libtap.a
@@ -78,6 +79,8 @@ tests_tap_libtap_a_SOURCES = tests/tap/basic.c tests/tap/basic.h
 
 tests_heimdal_plugin_SOURCES = tests/heimdal/plugin.c
 tests_heimdal_plugin_LDADD = portable/libportable.la $(KRB5_LIBS) $(DL_LIBS)
+tests_mit_plugin_SOURCES = tests/mit/plugin.c
+tests_mit_plugin_LDADD = portable/libportable.la $(KRB5_LIBS) $(DL_LIBS)
 tests_portable_asprintf_t_SOURCES = tests/portable/asprintf-t.c \
 	tests/portable/asprintf.c
 tests_portable_asprintf_t_LDADD = tests/tap/libtap.a portable/libportable.la

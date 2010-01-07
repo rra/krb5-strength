@@ -16,6 +16,7 @@
 /tests/data/.placeholder
 /tests/data/dictionary.*
 /tests/heimdal/plugin
+/tests/mit/plugin
 /tests/portable/asprintf-t
 /tests/portable/snprintf-t
 /tests/portable/strlcat-t

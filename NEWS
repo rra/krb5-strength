@@ -9,6 +9,10 @@ krb5-strength 1.0 (unreleased)
     dynamically loaded password strength checking API and can be used as a
     Heimdal kadmin plugin.
 
+    Add a new plugin API for MIT Kerberos modelled after the plugin API
+    used for other MIT Kerberos plugins.  Thanks to Marcus Watts for
+    substantial research and contributions to the interface design.
+
     Fixed the data format written by the included packer program to add
     enough nul bytes at the end of the data.  Previously, there was not
     enough trailing nul bytes for the expected input format, leading to
