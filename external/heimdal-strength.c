@@ -194,13 +194,16 @@ check_password(void *context)
 /*
  * Main routine.  There will be one argument, the principal, but we ignore it
  * (we get it again via the input data).
+ *
+ * Heimdal 1.3 appears to pass the principal as argv[0], where the name of the
+ * program would normally be, so allow for that behavior as well.
  */
 int
 main(int argc, char *argv[] UNUSED)
 {
     void *context;
 
-    if (argc != 2) {
+    if (argc != 1 && argc != 2) {
         fprintf(stderr, "Usage: heimdal-strength <principal>\n");
         exit(1);
     }
