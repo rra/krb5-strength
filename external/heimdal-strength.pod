@@ -1,3 +1,6 @@
+=for stopwords
+heimdal-strength Heimdal CrackLib krb5.conf krb5-strength Allbery
+
 =head1 NAME
 
 heimdal-strength - Heimdal password quality check embedding CrackLib
