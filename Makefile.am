@@ -7,10 +7,10 @@
 
 AUTOMAKE_OPTIONS = foreign subdir-objects
 ACLOCAL_AMFLAGS = -I m4
-EXTRA_DIST = autogen cracklib/HISTORY cracklib/LICENCE cracklib/README	   \
-	cracklib/mkdict patches/README patches/mit-krb5-1.4.4 tests/TESTS  \
-	tests/heimdal/external-t tests/heimdal/plugin-t tests/mit/plugin-t \
-	tests/tap/libtap.sh
+EXTRA_DIST = autogen cracklib/HISTORY cracklib/LICENCE cracklib/README	\
+	cracklib/mkdict external/heimdal-strength.pod patches/README	\
+	patches/mit-krb5-1.4.4 tests/TESTS tests/heimdal/external-t	\
+	tests/heimdal/plugin-t tests/mit/plugin-t tests/tap/libtap.sh
 
 # Do this globally.  Everything needs to find the Kerberos headers and
 # libraries.
@@ -47,6 +47,7 @@ external_heimdal_strength_SOURCES = plugin/api.c plugin/api.h \
 	external/heimdal-strength.c
 external_heimdal_strength_LDADD = cracklib/libcracklib.la \
 	portable/libportable.la $(KRB5_LIBS)
+dist_man_MANS = external/heimdal-strength.1
 
 # Handle the standard stuff that make maintainer-clean should probably remove
 # but doesn't.  This breaks the GNU coding standard, but in this area the GNU
