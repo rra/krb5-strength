@@ -7,10 +7,11 @@
 
 AUTOMAKE_OPTIONS = foreign subdir-objects
 ACLOCAL_AMFLAGS = -I m4
-EXTRA_DIST = autogen cracklib/HISTORY cracklib/LICENCE cracklib/README	\
-	cracklib/mkdict external/heimdal-strength.pod patches/README	\
-	patches/mit-krb5-1.4.4 tests/TESTS tests/heimdal/external-t	\
-	tests/heimdal/plugin-t tests/mit/plugin-t tests/tap/libtap.sh
+EXTRA_DIST = autogen cracklib/HISTORY cracklib/LICENCE cracklib/README	   \
+	cracklib/mkdict external/heimdal-strength.pod patches/README	   \
+	patches/mit-krb5-1.4.4 tests/TESTS tests/data/wordlist		   \
+	tests/heimdal/external-t tests/heimdal/plugin-t tests/mit/plugin-t \
+	tests/tap/libtap.sh
 
 # Do this globally.  Everything needs to find the Kerberos headers and
 # libraries.
