@@ -5,6 +5,14 @@
    modifications made to the embedded CrackLib and what problems one may
    encounter using an unmodified version.
 
+ * Update to CrackLib 2, which is currently shipped in Debian.  This
+   requires testing to confirm that the on-disk data format is still the
+   same.
+
+ * Feed back modifications to CrackLib 2 to allow a program to use a
+   custom set of rules, which would allow us to stop embedding our own
+   copy of CrackLib customized to add additional rules.
+
  * The kadmind patch needs to abort kadmind startup if the plugin could
    not be loaded, or at least needs to reject every password.
 

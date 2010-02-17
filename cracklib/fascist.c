@@ -15,9 +15,15 @@
  *   - Disable GECOS checking (useless for a server).
  *   - Replace exit(-1) with return when dictionary doesn't exist.
  *   - Additional system includes for other functions.
+ * 2009-10-14  Russ Allbery <rra@stanford.edu>
+ *   - Add ANSI C protototypes for all functions.
+ *   - Tweaks for const cleanliness.
+ *   - Add parentheses around assignment used for its truth value.
+ *   - Change a variable to unsigned int to avoid gcc warnings.
+ *   - Remove the unused FascistGecos function.
  */
 
-static char vers_id[] = "fascist.c : v2.3p3 Alec Muffett 14 dec 1997";
+static const char vers_id[] = "fascist.c : v2.3p3 Alec Muffett 14 dec 1997";
 
 #include "packer.h"
 #include <sys/types.h>
@@ -36,10 +42,7 @@ static char vers_id[] = "fascist.c : v2.3p3 Alec Muffett 14 dec 1997";
 #undef DEBUG
 #undef DEBUG2
 
-extern char *Reverse();
-extern char *Lowercase();
-
-static char *r_destructors[] = {
+static const char *r_destructors[] = {
     ":",                        /* noop - must do this to test raw word. */
 
 #ifdef DEBUG2
@@ -422,224 +425,11 @@ static char *r_destructors[] = {
     (char *) 0
 };
 
-static char *r_constructors[] = {
-    ":",
-
-#ifdef DEBUG2
-    (char *) 0,
-#endif
-
-    "r",
-    "d",
-    "f",
-    "dr",
-    "fr",
-    "rf",
-    (char *) 0
-};
-
-int
-GTry(rawtext, password)
-    char *rawtext;
-    char *password;
+static const char *
+FascistLook(PWDICT *pwp, const char *instring)
 {
-    int i;
-    int len;
-    char *mp;
-
-    /* use destructors to turn password into rawtext */
-    /* note use of Reverse() to save duplicating all rules */
-
-    len = strlen(password);
-
-    for (i = 0; r_destructors[i]; i++)
-    {
-	if (!(mp = Mangle(password, r_destructors[i])))
-	{
-	    continue;
-	}
-
-#ifdef DEBUG
-	printf("%-16s = %-16s (destruct %s)\n", mp, rawtext, r_destructors[i]);
-#endif
-
-	if (!strncmp(mp, rawtext, len))
-	{
-	    return (1);
-	}
-
-#ifdef DEBUG
-	printf("%-16s = %-16s (destruct %s reversed)\n", Reverse(mp), rawtext, r_destructors[i]);
-#endif
-
-	if (!strncmp(Reverse(mp), rawtext, len))
-	{
-	    return (1);
-	}
-    }
-
-    for (i = 0; r_constructors[i]; i++)
-    {
-	if (!(mp = Mangle(rawtext, r_constructors[i])))
-	{
-	    continue;
-	}
-
-#ifdef DEBUG
-	printf("%-16s = %-16s (construct %s)\n", mp, password, r_constructors[i]);
-#endif
-
-	if (!strncmp(mp, password, len))
-	{
-	    return (1);
-	}
-    }
-
-    return (0);
-}
-
-char *
-FascistGecos(password, uid)
-    char *password;
-    int uid;
-{
-    int i;
-    int j;
-    int wc;
-    char *ptr;
-    int gwords;
-    struct passwd *pwp;
-    char gbuffer[STRINGSIZE];
-    char tbuffer[STRINGSIZE];
-    char *uwords[STRINGSIZE];
-    char longbuffer[STRINGSIZE * 2];
-
-    if (!(pwp = getpwuid(uid)))
-    {
-	return ("you are not registered in the password file");
-    }
-
-    /* lets get really paranoid and assume a dangerously long gecos entry */
-
-    strncpy(tbuffer, pwp->pw_name, STRINGSIZE);
-    tbuffer[STRINGSIZE-1] = '\0';
-    if (GTry(tbuffer, password))
-    {
-	return ("it is based on your username");
-    }
-
-    /* it never used to be that you got passwd strings > 1024 chars, but now... */
-
-    strncpy(tbuffer, pwp->pw_gecos, STRINGSIZE);
-    tbuffer[STRINGSIZE-1] = '\0';
-    strcpy(gbuffer, Lowercase(tbuffer));
-
-    wc = 0;
-    ptr = gbuffer;
-    gwords = 0;
-    uwords[0] = (char *)0;
-
-    while (*ptr)
-    {
-	while (*ptr && ISSKIP(*ptr))
-	{
-	    ptr++;
-	}
-
-	if (ptr != gbuffer)
-	{
-	    ptr[-1] = '\0';
-	}
-
-	gwords++;
-	uwords[wc++] = ptr;
-
-	if (wc == STRINGSIZE)
-	{
-	    uwords[--wc] = (char *) 0;  /* to hell with it */
-	    break;
-	} else
-	{
-	    uwords[wc] = (char *) 0;
-	}
-
-	while (*ptr && !ISSKIP(*ptr))
-	{
-	    ptr++;
-	}
-
-	if (*ptr)
-	{
-	    *(ptr++) = '\0';
-	}
-    }
-
-#ifdef DEBUG
-    for (i = 0; uwords[i]; i++)
-    {
-	printf("gecosword %s\n", uwords[i]);
-    }
-#endif
-
-    for (i = 0; uwords[i]; i++)
-    {
-	if (GTry(uwords[i], password))
-	{
-	    return ("it is based upon your password entry");
-	}
-    }
-
-    /* since uwords are taken from gbuffer, no uword can be longer than gbuffer */
-
-    for (j = 1; (j < gwords) && uwords[j]; j++)
-    {
-	for (i = 0; i < j; i++)
-	{
-	    strcpy(longbuffer, uwords[i]);
-	    strcat(longbuffer, uwords[j]);
-
-	    if (GTry(longbuffer, password))
-	    {
-		return ("it is derived from your password entry");
-	    }
-
-	    strcpy(longbuffer, uwords[j]);
-	    strcat(longbuffer, uwords[i]);
-
-	    if (GTry(longbuffer, password))
-	    {
-		return ("it's derived from your password entry");
-	    }
-
-	    longbuffer[0] = uwords[i][0];
-	    longbuffer[1] = '\0';
-	    strcat(longbuffer, uwords[j]);
-
-	    if (GTry(longbuffer, password))
-	    {
-		return ("it is derivable from your password entry");
-	    }
-
-	    longbuffer[0] = uwords[j][0];
-	    longbuffer[1] = '\0';
-	    strcat(longbuffer, uwords[i]);
-
-	    if (GTry(longbuffer, password))
-	    {
-		return ("it's derivable from your password entry");
-	    }
-	}
-    }
-
-    return ((char *) 0);
-}
-
-char *
-FascistLook(pwp, instring)
-    PWDICT *pwp;
-    char *instring;
-{
-    int i, pw_len, mindiff;
+    int i, pw_len;
+    unsigned int mindiff;
     char *ptr;
     char *jptr;
     char junk[STRINGSIZE];
@@ -795,10 +585,8 @@ FascistLook(pwp, instring)
     return ((char *) 0);
 }
 
-char *
-FascistCheck(password, path)
-    char *password;
-    char *path;
+const char *
+FascistCheck(const char *password, const char *path)
 {
     static char lastpath[STRINGSIZE];
     static PWDICT *pwp;

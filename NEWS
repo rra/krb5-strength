@@ -1,5 +1,31 @@
                     User-Visible krb5-strength Changes
 
+krb5-strength 1.0 (2010-02-16)
+
+    Add heimdal-strength, a program that checks password strength using
+    the protocol for a Heimdal external check program.
+
+    The shared module now also exports the interface expected by Heimdal's
+    dynamically loaded password strength checking API and can be used as a
+    Heimdal kadmin plugin.
+
+    Add a new plugin API for MIT Kerberos modelled after the plugin API
+    used for other MIT Kerberos plugins.  Thanks to Marcus Watts for
+    substantial research and contributions to the interface design.  This
+    work is incomplete in this release, missing the corresponding patch to
+    MIT Kerberos.
+
+    Fixed the data format written by the included packer program to add
+    enough nul bytes at the end of the data.  Previously, there was not
+    enough trailing nul bytes for the expected input format, leading to
+    uninitialized memory reads in the password lookup.
+
+    Add a test suite using the driver and library from C TAP Harness 1.1.
+
+    Add portability code for platforms without a working snprintf or other
+    deficiencies and updated the code to take advantage of those
+    guarantees.
+
 krb5-strength 0.5 (2007-07-18)
 
     The check of the password against the principal checked against the

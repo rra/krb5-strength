@@ -13,6 +13,14 @@
  *   - Apply Debian patch to improve the search logic.
  *   - Don't crash if the dictionary is corrupt.
  *   - Additional system includes for other functions.
+ * 2009-10-14  Russ Allbery <rra@stanford.edu>
+ *   - Add ANSI C protototypes for all functions.
+ *   - Tweaks for const cleanliness.
+ *   - Add parentheses around assignment used for its truth value.
+ *   - Make internal functions static.
+ *   - Remove unused variables.
+ * 2009-11-18  Russ Allbery <rra@stanford.edu>
+ *   - Fixed the data format output by packer to properly pad the end.
  */
 
 #include <stdio.h>
@@ -20,19 +28,15 @@
 
 #include "packer.h"
 
-static char vers_id[] = "packlib.c : v2.3p2 Alec Muffett 18 May 1993";
+static const char vers_id[] = "packlib.c : v2.3p2 Alec Muffett 18 May 1993";
 
 PWDICT *
-PWOpen(prefix, mode)
-    char *prefix;
-    char *mode;
+PWOpen(const char *prefix, const char *mode)
 {
-    int32 i;
     static PWDICT pdesc;
     char iname[STRINGSIZE];
     char dname[STRINGSIZE];
     char wname[STRINGSIZE];
-    char buffer[STRINGSIZE];
     FILE *dfp;
     FILE *ifp;
     FILE *wfp;
@@ -62,7 +66,7 @@ PWOpen(prefix, mode)
 	return ((PWDICT *) 0);
     }
 
-    if (pdesc.wfp = fopen(wname, mode))
+    if ((pdesc.wfp = fopen(wname, mode)) != NULL)
     {
 	pdesc.flags |= PFOR_USEHWMS;
     }
@@ -178,9 +182,7 @@ PWClose(pwp)
 }
 
 int
-PutPW(pwp, string)
-    PWDICT *pwp;
-    char *string;
+PutPW(PWDICT *pwp, const char *string)
 {
     if (!(pwp->flags & PFOR_WRITE))
     {
@@ -228,6 +230,9 @@ PutPW(pwp, string)
 		for (j = 0; ostr[j] && nstr[j] && (ostr[j] == nstr[j]); j++);
 		putc(j & 0xff, pwp->dfp);
 		fputs(nstr + j, pwp->dfp);
+	    } else
+	    {
+		putc(0, pwp->dfp);
 	    }
 	    putc(0, pwp->dfp);
 
@@ -240,10 +245,8 @@ PutPW(pwp, string)
     return (0);
 }
 
-char *
-GetPW(pwp, number)
-    PWDICT *pwp;
-    int32 number;
+static char *
+GetPW(PWDICT *pwp, int32 number)
 {
     int32 datum;
     register int i;
@@ -290,7 +293,7 @@ GetPW(pwp, number)
 
     bptr = buffer;
 
-    for (ostr = data[0]; *(ostr++) = *(bptr++); /* nothing */ );
+    for (ostr = data[0]; (*(ostr++) = *(bptr++)) != '\0'; /* nothing */ );
 
     ostr = data[0];
 
@@ -300,7 +303,7 @@ GetPW(pwp, number)
 	strcpy(nstr, ostr);
 
 	ostr = nstr + *(bptr++);
-	while (*(ostr++) = *(bptr++));
+	while ((*(ostr++) = *(bptr++)) != '\0');
 
 	ostr = nstr;
     }
@@ -309,9 +312,7 @@ GetPW(pwp, number)
 }
 
 int32
-FindPW(pwp, string)
-    PWDICT *pwp;
-    char *string;
+FindPW(PWDICT *pwp, const char *string)
 {
     register int32 lwm;
     register int32 hwm;
