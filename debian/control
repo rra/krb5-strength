@@ -2,12 +2,12 @@ Source: krb5-strength
 Section: net
 Priority: extra
 Maintainer: Russ Allbery <rra@debian.org>
-Build-Depends: debhelper (>= 4)
+Build-Depends: debhelper (>= 7.0.50~)
 Standards-Version: 3.7.2
 
 Package: krb5-strength
 Architecture: any
-Depends: ${shlibs:Depends}
+Depends: ${shlibs:Depends}, ${misc:Depends}
 Recommends: krb5-admin-server
 Description: MIT Kerberos KDC plugin for password strength checking
  This plugin checks passwords set via kadmin either through new account
