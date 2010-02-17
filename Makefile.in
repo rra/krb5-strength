@@ -120,8 +120,9 @@ cracklib_libcracklib_la_OBJECTS =  \
 AM_V_lt = $(am__v_lt_$(V))
 am__v_lt_ = $(am__v_lt_$(AM_DEFAULT_VERBOSITY))
 am__v_lt_0 = --silent
+am__DEPENDENCIES_1 =
 plugin_passwd_strength_la_DEPENDENCIES = cracklib/libcracklib.la \
-	portable/libportable.la
+	portable/libportable.la $(am__DEPENDENCIES_1)
 am_plugin_passwd_strength_la_OBJECTS = plugin/api.lo plugin/heimdal.lo \
 	plugin/mit.lo
 plugin_passwd_strength_la_OBJECTS =  \
@@ -144,7 +145,6 @@ am_external_heimdal_strength_OBJECTS =  \
 	external/external_heimdal_strength-heimdal-strength.$(OBJEXT)
 external_heimdal_strength_OBJECTS =  \
 	$(am_external_heimdal_strength_OBJECTS)
-am__DEPENDENCIES_1 =
 external_heimdal_strength_DEPENDENCIES = cracklib/libcracklib.la \
 	portable/libportable.la $(am__DEPENDENCIES_1)
 external_heimdal_strength_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
@@ -404,7 +404,7 @@ module_LTLIBRARIES = plugin/passwd_strength.la
 plugin_passwd_strength_la_SOURCES = plugin/api.c plugin/heimdal.c plugin/mit.c
 plugin_passwd_strength_la_LDFLAGS = -module -avoid-version
 plugin_passwd_strength_la_LIBADD = cracklib/libcracklib.la \
-	portable/libportable.la
+	portable/libportable.la $(KRB5_LIBS)
 
 external_heimdal_strength_CFLAGS = $(AM_CFLAGS)
 external_heimdal_strength_SOURCES = plugin/api.c plugin/api.h \
