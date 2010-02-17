@@ -1,4 +1,4 @@
-                            krb5-strength 0.5
+                            krb5-strength 1.0
                (kadmind password strength checking plugin)
 
               Maintained by Russ Allbery <rra@stanford.edu>

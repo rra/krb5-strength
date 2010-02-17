@@ -7,7 +7,7 @@ dnl
 dnl See LICENSE for licensing terms.
 
 AC_PREREQ([2.64])
-AC_INIT([krb5-strength], [0.5], [rra@stanford.edu])
+AC_INIT([krb5-strength], [1.0], [rra@stanford.edu])
 AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_LIBOBJ_DIR([portable])
 AC_CONFIG_MACRO_DIR([m4])
@@ -34,7 +34,6 @@ LIBS="$save_LIBS"
 AC_SUBST([DL_LIBS])
 
 RRA_LIB_KRB5
-
 RRA_LIB_KRB5_SWITCH
 AC_CHECK_HEADERS([kadm5-pwcheck.h krb5/pwcheck_plugin.h])
 AC_CHECK_TYPES([krb5_realm], , , [#include <krb5.h>])
