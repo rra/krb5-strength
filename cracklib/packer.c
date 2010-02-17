@@ -6,12 +6,17 @@
  * and upwards.
  */
 
+/*
+ * Modified as part of the krb5-strength project as follows:
+ *
+ * 2009-10-14  Russ Allbery <rra@stanford.edu>
+ *   - Add ANSI C protototypes for all functions.
+ */
+
 #include "packer.h"
 
 int
-main(argc, argv)
-    int argc;
-    char *argv[];
+main(int argc, char *argv[])
 {
     int32 readed;
     int32 wrote;

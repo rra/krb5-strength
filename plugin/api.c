@@ -1,16 +1,21 @@
 /*
- * api.c
- *
  * The public APIs of the password strength checking kadmind plugin.
  *
  * Provides the public pwcheck_init, pwcheck_check, and pwcheck_close APIs for
  * the kadmind plugin.
+ *
+ * Developed by Derrick Brashear and Ken Hornstein of Sine Nomine Associates,
+ *     on behalf of Stanford University.
+ * Extensive modifications by Russ Allbery <rra@stanford.edu>
+ * Copyright 2006, 2007, 2009 Board of Trustees, Leland Stanford Jr. Unversity
+ *
+ * See LICENSE for licensing terms.
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
+#include <config.h>
+#include <portable/system.h>
+
+#include <plugin/api.h>
 
 /*
  * Used to store local state.  Currently, all we have is the dictionary path,
@@ -23,6 +28,7 @@ struct context {
 
 /* The public function exported by the cracklib library. */
 extern char *FascistCheck(const char *password, const char *dict);
+
 
 /*
  * Initialize the module.  Ensure that the dictionary file exists and is
@@ -82,13 +88,11 @@ pwcheck_check(void *context, const char *password, const char *principal,
      */
     if (strcasecmp(password, principal) == 0) {
 	snprintf(errstr, errstrlen, "Password based on username");
-        errstr[errstrlen - 1] = '\0';
 	return 1;
     }
     user = strdup(principal);
     if (user == NULL) {
         snprintf(errstr, errstrlen, "Cannot allocate memory");
-        errstr[errstrlen - 1] = '\0';
         return 1;
     }
     for (p = user; p[0] != '\0'; p++) {
@@ -105,7 +109,6 @@ pwcheck_check(void *context, const char *password, const char *principal,
         if (strcasecmp(password, user) == 0) {
             free(user);
             snprintf(errstr, errstrlen, "Password based on username");
-            errstr[errstrlen - 1] = '\0';
             return 1;
         }
         for (i = 0, j = strlen(user) - 1; i < j; i++, j--) {
@@ -116,15 +119,13 @@ pwcheck_check(void *context, const char *password, const char *principal,
         if (strcasecmp(password, user) == 0) {
             free(user);
             snprintf(errstr, errstrlen, "Password based on username");
-            errstr[errstrlen - 1] = '\0';
             return 1;
         }
     }
     free(user);
     result = FascistCheck(password, ctx->dictionary);
     if (result != NULL) {
-        strncpy(errstr, result, errstrlen);
-        errstr[errstrlen - 1] = '\0';
+        strlcpy(errstr, result, errstrlen);
         return 1;
     }
     return 0;

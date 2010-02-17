@@ -1,0 +1,104 @@
+#!/bin/sh
+#
+# Test suite for basic Heimdal external strength checking functionality.
+#
+# Written by Russ Allbery <rra@stanford.edu>
+# Copyright 2009 Board of Trustees, Leland Stanford Jr. University
+#
+# See LICENSE for licensing terms.
+
+. "$SOURCE/tap/libtap.sh"
+cd "$BUILD/data"
+
+# Run heimdal-strength to check a password.  Takes the test description,
+# the principal, the password, the expected exit status, the expected output
+# to standard output, and the expected output to standard error.
+ok_password () {
+    local desc princ password w_status w_stdout w_stderr status stdout stderr
+    desc="$1"
+    princ="$2"
+    password="$3"
+    w_status="$4"
+    w_stdout="$5"
+    w_stderr="$6"
+    rm -f input
+    echo "principal: $princ" > input
+    echo "new-password: $password" >> input
+    echo 'end' >> input
+    stdout=`"$BUILD/../external/heimdal-strength" "$princ" < input 2> errors`
+    status="$?"
+    echo "# status: $status"
+    echo "# stdout: $stdout"
+    ok "$desc: status" [ "$status" -eq "$w_status" ]
+    ok "$desc: stdout" [ "$stdout" = "$w_stdout" ]
+    stderr=`cat errors`
+    echo "# stderr: $stderr"
+    ok "$desc: stderr" [ "$stderr" = "$w_stderr" ]
+    rm -f input errors
+}
+
+# We need a modified krb5.conf file to add the password_dictionary setting.
+# We first generate a modified copy of the krb5.conf file that doesn't contain
+# this setting so that we can test error handling.
+krb5conf=
+for p in /etc/krb5.conf /usr/local/etc/krb5.conf data/krb5.conf ; do
+    if [ -r "$p" ] ; then
+        krb5conf="$p"
+        sed -e '/^[ 	]*password_dictionary[ 	]*=/d' "$p" > ./krb5.conf
+        KRB5_CONFIG="./krb5.conf"
+        export KRB5_CONFIG
+        break
+    fi
+done
+if [ -z "$krb5conf" ] ; then
+    skip_all 'no krb5.conf found, put one in tests/data/krb5.conf'
+fi
+
+# Okay, we should be good to run the test suite.
+plan 42
+
+# We don't have a password_dictionary setting, so we should fail with an
+# initialization error.
+ok_password "no dictionary configured" 'test@EXAMPLE.ORG' 'password' 1 '' \
+    'password_dictionary not configured in krb5.conf'
+
+# Now add the password dictionary configuration.
+cat <<EOF >> ./krb5.conf
+
+[appdefaults]
+    krb5-strength = {
+        password_dictionary = $BUILD/data/dictionary
+    }
+
+EOF
+
+# Check the basic functionality.
+ok_password "good password" 'test@EXAMPLE.ORG' 'known good password' 0 \
+    'APPROVED' ''
+ok_password "password in dictionary" 'test@EXAMPLE.ORG' 'password' 0 '' \
+    'it is based on a dictionary word'
+ok_password "password in dictionary" 'test@EXAMPLE.ORG' 'bitter' 0 '' \
+    'it is based on a dictionary word'
+ok_password "password in dictionary" 'test@EXAMPLE.ORG' 'rettib' 0 '' \
+    'it is based on a (reversed) dictionary word'
+ok_password "password too short" 'test@EXAMPLE.ORG' 'food' 0 '' \
+    "it is too short"
+ok_password "password way too short" 'test@EXAMPLE.ORG' 'foo' 0 '' \
+    "it's WAY too short"
+ok_password "password empty" 'test@EXAMPLE.ORG' '' 0 '' \
+    "it's WAY too short"
+ok_password "password all whitespace" 'test@EXAMPLE.ORG' '  	    ' 0 '' \
+    'it does not contain enough DIFFERENT characters'
+ok_password "password too simplistic" 'test@EXAMPLE.ORG' 'abcdefghi' 0 '' \
+    'it is too simplistic/systematic'
+ok_password "not enough characters" 'test@EXAMPLE.ORG' '22413411' 0 '' \
+    'it does not contain enough DIFFERENT characters'
+ok_password "password based on principal" 'someuser@EXAMPLE.ORG' 'someuser' \
+    0 '' 'Password based on username'
+ok_password "password based on principal" 'someuser@EXAMPLE.ORG' 'resuemos' \
+    0 '' 'Password based on username'
+ok_password "password is principal" 'test@EXAMPLE.ORG' 'test@EXAMPLE.ORG' \
+    0 '' 'Password based on username'
+
+# Clean up.
+rm -f krb5.conf

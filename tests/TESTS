@@ -1,0 +1,9 @@
+heimdal/external
+heimdal/plugin
+heimdal/pod
+heimdal/pod-spelling
+mit/plugin
+portable/asprintf
+portable/snprintf
+portable/strlcat
+portable/strlcpy

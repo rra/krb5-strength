@@ -15,9 +15,18 @@
  *     This goes with a change to fascist.c that adds rules to delete more
  *     leading and trailing characters for longer passwords.
  *   - Additional system includes for other functions.
+ * 2009-10-14  Russ Allbery <rra@stanford.edu>
+ *   - Simplify Debug() function for how it's actually called.
+ *   - Add ANSI C protototypes for all functions.
+ *   - Tweaks for const cleanliness.
+ *   - Make internal functions static.
+ *   - Remove unused variables.
+ *   - Changed a variable to unsigned to avoid gcc warnings.
  */
 
-static char vers_id[] = "rules.c : v5.0p3 Alec Muffett 20 May 1993";
+static const char vers_id[] = "rules.c : v5.0p3 Alec Muffett 20 May 1993";
+
+#include <stdarg.h>
 
 #ifndef IN_CRACKLIB
 
@@ -28,11 +37,15 @@ static char vers_id[] = "rules.c : v5.0p3 Alec Muffett 20 May 1993";
 #include "packer.h"
 
 static void
-Debug(val, a, b, c, d, e, f, g)
-    int val;
-    char *a, *b, *c, *d, *e, *f, *g;
+Debug(int val, const char *fmt, ...)
 {
-    fprintf(stderr, a, b, c, d, e, f);
+    if (val < 2) {
+        va_list args;
+
+        va_start(args, fmt);
+        vfprintf(stderr, fmt, args);
+        va_end(args);
+    }
 }
 
 #endif
@@ -66,10 +79,8 @@ Debug(val, a, b, c, d, e, f, g)
 #define RULE_MFIRST	'('
 #define RULE_MLAST	')'
 
-int
-Suffix(myword, suffix)
-    char *myword;
-    char *suffix;
+static int
+Suffix(const char *myword, const char *suffix)
 {
     register int i;
     register int j;
@@ -85,9 +96,9 @@ Suffix(myword, suffix)
     }
 }
 
+/* return a pointer to a reversal */
 char *
-Reverse(str)			/* return a pointer to a reversal */
-    register char *str;
+Reverse(const char *str)
 {
     register int i;
     register int j;
@@ -101,9 +112,9 @@ Reverse(str)			/* return a pointer to a reversal */
     return (area);
 }
 
-char *
-Uppercase(str)			/* return a pointer to an uppercase */
-    register char *str;
+/* return a pointer to an uppercase */
+static char *
+Uppercase(const char *str)
 {
     register char *ptr;
     static char area[STRINGSIZE];
@@ -118,9 +129,9 @@ Uppercase(str)			/* return a pointer to an uppercase */
     return (area);
 }
 
+/* return a pointer to an lowercase */
 char *
-Lowercase(str)			/* return a pointer to an lowercase */
-    register char *str;
+Lowercase(const char *str)
 {
     register char *ptr;
     static char area[STRINGSIZE];
@@ -135,9 +146,9 @@ Lowercase(str)			/* return a pointer to an lowercase */
     return (area);
 }
 
-char *
-Capitalise(str)			/* return a pointer to an capitalised */
-    register char *str;
+/* return a pointer to an capitalised */
+static char *
+Capitalise(const char *str)
 {
     register char *ptr;
     static char area[STRINGSIZE];
@@ -154,9 +165,9 @@ Capitalise(str)			/* return a pointer to an capitalised */
     return (area);
 }
 
-char *
-Pluralise(string)		/* returns a pointer to a plural */
-    register char *string;
+/* returns a pointer to a plural */
+static char *
+Pluralise(const char *string)
 {
     register int length;
     static char area[STRINGSIZE];
@@ -195,11 +206,9 @@ Pluralise(string)		/* returns a pointer to a plural */
     return (area);
 }
 
-char *
-Substitute(string, old, new)	/* returns pointer to a swapped about copy */
-    register char *string;
-    register char old;
-    register char new;
+/* returns pointer to a swapped about copy */
+static char *
+Substitute(const char *string, char old, char new)
 {
     register char *ptr;
     static char area[STRINGSIZE];
@@ -213,10 +222,9 @@ Substitute(string, old, new)	/* returns pointer to a swapped about copy */
     return (area);
 }
 
-char *
-Purge(string, target)		/* returns pointer to a purged copy */
-    register char *string;
-    register char target;
+/* returns pointer to a purged copy */
+static char *
+Purge(const char *string, char target)
 {
     register char *ptr;
     static char area[STRINGSIZE];
@@ -240,10 +248,8 @@ Purge(string, target)		/* returns pointer to a purged copy */
  * upon restrictions set out below
  */
 
-int
-MatchClass(class, input)
-    register char class;
-    register char input;
+static int
+MatchClass(char class, char input)
 {
     register char c;
     register int retval;
@@ -359,10 +365,8 @@ MatchClass(class, input)
     return (retval);
 }
 
-char *
-PolyStrchr(string, class)
-    register char *string;
-    register char class;
+static const char *
+PolyStrchr(const char *string, char class)
 {
     while (*string)
     {
@@ -375,11 +379,9 @@ PolyStrchr(string, class)
     return ((char *) 0);
 }
 
-char *
-PolySubst(string, class, new)	/* returns pointer to a swapped about copy */
-    register char *string;
-    register char class;
-    register char new;
+/* returns pointer to a swapped about copy */
+static char *
+PolySubst(const char *string, char class, char new)
 {
     register char *ptr;
     static char area[STRINGSIZE];
@@ -393,10 +395,9 @@ PolySubst(string, class, new)	/* returns pointer to a swapped about copy */
     return (area);
 }
 
-char *
-PolyPurge(string, class)	/* returns pointer to a purged copy */
-    register char *string;
-    register char class;
+/* returns pointer to a purged copy */
+static char *
+PolyPurge(const char *string, const char class)
 {
     register char *ptr;
     static char area[STRINGSIZE];
@@ -414,9 +415,8 @@ PolyPurge(string, class)	/* returns pointer to a purged copy */
 }
 /* -------- BACK TO NORMALITY -------- */
 
-int
-Char2Int(character)
-    char character;
+static int
+Char2Int(char character)
 {
     if (isdigit(character))
     {
@@ -431,14 +431,13 @@ Char2Int(character)
     return (-1);
 }
 
+/* returns a pointer to a controlled Mangle */
 char *
-Mangle(input, control)		/* returns a pointer to a controlled Mangle */
-    char *input;
-    char *control;
+Mangle(const char *input, const char *control)
 {
     int limit, min_to_shift;
     register int j;
-    register char *ptr;
+    const char *ptr;
     static char area[STRINGSIZE];
     char area2[STRINGSIZE];
     area[0] = '\0';
@@ -499,7 +498,7 @@ Mangle(input, control)		/* returns a pointer to a controlled Mangle */
 		    Debug(1, "Mangle: '>' weird argument in '%s'\n", control);
 		    return ((char *) 0);
 		}
-		if (strlen(area) <= limit)
+		if (strlen(area) <= (size_t) limit)
 		{
 		    return ((char *) 0);
 		}
@@ -518,7 +517,7 @@ Mangle(input, control)		/* returns a pointer to a controlled Mangle */
 		    Debug(1, "Mangle: '<' weird argument in '%s'\n", control);
 		    return ((char *) 0);
 		}
-		if (strlen(area) >= limit)
+		if (strlen(area) >= (size_t) limit)
 		{
 		    return ((char *) 0);
 		}
@@ -741,7 +740,7 @@ Mangle(input, control)		/* returns a pointer to a controlled Mangle */
 	    break;
 
 	case RULE_DFIRST:
-	    if (area[0] && strlen(area) > min_to_shift)
+	    if (area[0] && strlen(area) > (size_t) min_to_shift)
 	    {
 		register int i;
 		for (i = 1; area[i]; i++)
@@ -753,7 +752,7 @@ Mangle(input, control)		/* returns a pointer to a controlled Mangle */
 	    break;
 
 	case RULE_DLAST:
-	    if (area[0] && strlen(area) > min_to_shift)
+	    if (area[0] && strlen(area) > (size_t) min_to_shift)
 	    {
 		register int i;
 		for (i = 1; area[i]; i++);
@@ -834,9 +833,7 @@ Mangle(input, control)		/* returns a pointer to a controlled Mangle */
 }
 
 int
-PMatch(control, string)
-register char *control;
-register char *string;
+PMatch(const char *control, const char *string)
 {
     while (*string && *control)
     {

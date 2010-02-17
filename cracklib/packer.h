@@ -11,6 +11,8 @@
  *
  * 2007-03-23  Russ Allbery <rra@stanford.edu>
  *   - Add ANSI C prototypes and prototype additional functions.
+ * 2009-10-14  Russ Allbery <rra@stanford.edu>
+ *   - Prototype changes for const cleanliness.
  */
 
 #include <stdio.h>
@@ -58,15 +60,17 @@ typedef struct
 #define PW_WORDS(x) ((x)->header.pih_numwords)
 #define PIH_MAGIC 0x70775631
 
-extern PWDICT *PWOpen(char *, char *);
-extern int32 FindPW(PWDICT *, char *);
-extern int PutPW(PWDICT *, char *);
+extern PWDICT *PWOpen(const char *, const char *);
+extern int32 FindPW(PWDICT *, const char *);
+extern int PutPW(PWDICT *, const char *);
 extern int PWClose(PWDICT *);
-extern char *Mangle(char *, char *);
-extern char *FascistCheck(char *, char *);
+extern char *Mangle(const char *, const char *);
+extern const char *FascistCheck(const char *, const char *);
 extern char Chop(char *);
 extern char *Trim(char *);
-extern int PMatch(char *, char *);
+extern int PMatch(const char *, const char *);
+extern char *Reverse(const char *);
+extern char *Lowercase(const char *);
 
 #define CRACK_TOLOWER(a) 	(isupper(a)?tolower(a):(a)) 
 #define CRACK_TOUPPER(a) 	(islower(a)?toupper(a):(a)) 
