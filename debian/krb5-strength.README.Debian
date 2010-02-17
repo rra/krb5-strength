@@ -1,5 +1,5 @@
-krb5-passwd-strength for Debian
--------------------------------
+krb5-strength for Debian
+------------------------
 
 This plugin requires a patched kadmind that loads plugins for password
 strength checking.  This code will hopefully be in a future official
@@ -25,8 +25,8 @@ dict_file is a prefix for the CrackLib dictionary files.  You can generate
 those files using the utilities in cracklib-runtime.
 
 You will need to have any policy apply to the principal in order for this
-module to be enforced, as a result of how kadmin works (if there is no
+module to be enforced, as a result of how kadmin works.  If there is no
 policy applying either by default or to the principal, password quality is
-not checked).
+not checked.
 
- -- Russ Allbery <rra@debian.org>, Fri, 23 Mar 2007 15:23:43 z
+ -- Russ Allbery <rra@debian.org>, Tue, 16 Feb 2010 21:33:37 -0800
