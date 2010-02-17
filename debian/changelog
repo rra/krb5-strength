@@ -3,6 +3,9 @@ krb5-strength (1.0-1) UNRELEASED; urgency=low
   * New upstream release.
     - Add an external password strength program for Heimdal.
     - Add a plugin for the Heimdal password strength support.
+  * Create a separate heimdal-strength package containing only the
+    external password check program for Heimdal.  The Heimdal version of
+    the libkadm5srv plugin isn't packaged for the time being.
   * Update debhelper compatibility mode to V7.
     - Use debhelper rule minimization with overrides.
     - Add ${misc:Depends} to dependencies.

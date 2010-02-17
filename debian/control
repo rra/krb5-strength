@@ -15,3 +15,15 @@ Description: MIT Kerberos KDC plugin for password strength checking
  patterns and then uses an embedded version of CrackLib to reject
  passwords based on dictionary words.  No dictionary is shipped with this
  package; a dictionary package must be installed separately.
+
+Package: heimdal-strength
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Heimdal external password strength check utility
+ This external password strength checking program implements the Heimdal
+ password checking protocol.  It rejects passwords that fit common
+ patterns and then uses an embedded verison of CrackLib to reject
+ passwords based on dictionary words.  The CrackLib rules are modified
+ from the default to reject more passwords that other password cracking
+ utilities such as John the Ripper can crack.  No dictionary is shipped
+ with this package; a dictionary package must be installed separately.
