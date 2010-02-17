@@ -9,6 +9,7 @@ krb5-strength (1.0-1) UNRELEASED; urgency=low
   * Update debhelper compatibility mode to V7.
     - Use debhelper rule minimization with overrides.
     - Add ${misc:Depends} to dependencies.
+  * Add a watch file.
   * Update standards version to 3.8.4 (no changes required).
 
  -- Russ Allbery <rra@debian.org>  Tue, 16 Feb 2010 18:43:18 -0800
