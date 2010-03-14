@@ -1,5 +1,12 @@
                     User-Visible krb5-strength Changes
 
+krb5-strength 1.1 (unreleased)
+
+    Fix variable sizes in the embedded CrackLib on 64-bit platforms.  This
+    may fix interoperability problems with databases created on platforms
+    with a different native integer size.  Thanks, Karl Lehnberger and
+    Benj Carson.
+
 krb5-strength 1.0 (2010-02-16)
 
     Add heimdal-strength, a program that checks password strength using

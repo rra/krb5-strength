@@ -11,6 +11,8 @@
  *
  * 2009-10-14  Russ Allbery <rra@stanford.edu>
  *   - Add ANSI C protototypes for all functions.
+ * 2010-03-14  Russ Allbery <rra@stanford.edu>
+ *   - Use unsigned long instead of int32 to avoid printf warnings.
  */
 
 #include "packer.h"
@@ -18,8 +20,8 @@
 int
 main(int argc, char *argv[])
 {
-    int32 readed;
-    int32 wrote;
+    unsigned long readed;
+    unsigned long wrote;
     PWDICT *pwp;
     char buffer[STRINGSIZE];
 
