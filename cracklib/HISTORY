@@ -11,6 +11,7 @@ following modifications have been made:
  * Add ANSI C prototypes for all functions and mark const variables.
  * Remove unused functions.
  * Various compilation warning and portability fixes.
+ * Use Autoconf and portable/system.h to find types of specific lengths.
 
 Below is the original changelog for CrackLib:
 
