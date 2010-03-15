@@ -2,6 +2,9 @@
 
 krb5-strength 1.1 (unreleased)
 
+    Support linking with the system CrackLib instead of the embedded and
+    stricter copy by passing --with-cracklib to configure.
+
     Fix variable sizes in the embedded CrackLib on 64-bit platforms.  This
     may fix interoperability problems with databases created on platforms
     with a different native integer size.  Thanks, Karl Lehnberger and

@@ -38,31 +38,36 @@ DESCRIPTION
   an optimized, compressed on-disk database format.
 
   This toolkit therefore provides the ability to check password quality
-  against a modified version of CrackLib that only passes passwords that
-  resist attacks from both Crack and Jack the Ripper using the same rule
-  sets.  For Heimdal, it includes both a program usable as an external
-  password quality check and a plugin that implements the dynamic module
-  API.  For MIT Kerberos, it includes two pieces:
+  against the standard version of CrackLib, or against a modified version
+  of CrackLib that only passes passwords that resist attacks from both
+  Crack and Jack the Ripper using the same rule sets.  For Heimdal, it
+  includes both a program usable as an external password quality check and
+  a plugin that implements the dynamic module API.  For MIT Kerberos, it
+  includes two pieces:
 
    * A patch to MIT Kerberos to add a plugin system for password strength
      checking.  This patch adds initialization and shutdown hooks plus a
      hook that's run prior to each password change.  The code in kadmind
      is independent of what the plugin might do.
 
-   * A kadmind plugin that provides a wrapper around the included,
-     slightly modified version of CrackLib.
+   * A libkadm5srv or Heimdal kpasswdd plugin that provides a wrapper
+     around CrackLib.
 
-  Currently, the embedded CrackLib is built unconditionally.  In a future
-  release, I hope to add support for building against an already-installed
-  CrackLib if so desired (although built that way this package is only
-  useful for MIT Kerberos, since Heimdal provides a similar facility as an
-  example in the distribution).
+  krb5-strength can be built with either the system CrackLib or with the
+  modified version of CrackLib included in this package.  Note, however,
+  that if you're building against the system CrackLib, Heimdal includes in
+  the distribution a strength-checking plugin and an external password
+  check program that use the system CrackLib.  With Heimdal, it would
+  probably be easier to use that plugin or program than build this package
+  unless you want the modified CrackLib.
 
   For information about the changes to the CrackLib included in this
-  toolkit, see cracklib/HISTORY.  They are minor changes to tighten the
-  rules in some places, be stricter with longer passwords, fix portability
-  issues, and remove some code that doesn't make sense in the kadmind
-  context.
+  toolkit, see cracklib/HISTORY.  The primary changes are tighter rules,
+  which are more aggressive at finding dictionary words with characters
+  appended and prepended, which tighten the requirements for password
+  entropy, and which add stricter rules for longer passwords.  They are
+  also minor changes to fix portability issues and remove some code that
+  doesn't make sense in the kadmind context.
 
   My eventual hope is to submit to CrackLib 2.x modifications that allow
   the rule set to be configured at runtime, at which point this package
@@ -81,6 +86,12 @@ REQUIREMENTS
   kadmind is constructed, the changes are actually in the libkadm5srv
   library, not in the kadmind binary, so you'll need to install the
   modified libraries.
+
+  You can optionally build against the system CrackLib library.  Any
+  version should be supported, but note that some versions, particularly
+  older versions close to the original code, do things like printing
+  diagnostics to stderr, calling exit, and otherwise not being
+  well-behaved for use inside plugins or libraries.
 
   For this module to be effective for either Heimdal or MIT Kerberos, you
   will also need to construct a dictionary.  The mkdict and packer
@@ -112,6 +123,10 @@ COMPILING AND INSTALLING
       make
       make install
 
+  Pass --enable-silent-rules to configure for a quieter build (similar to
+  the Linux kernel).  Use make warnings instead of make to build with full
+  GCC compiler warnings (requires a relatively current version of GCC).
+
   The last step will probably have to be done as root.  By default, the
   plugin is installed as /usr/local/lib/kadmind/passwd_strength.so and the
   Heimdal external password check function is installed as
@@ -119,10 +134,55 @@ COMPILING AND INSTALLING
   --prefix, --libdir, and --bindir options to configure.
 
   For MIT Kerberos, you also have to apply the patch provided in the
-  patches directory and install the new libkadm5srv library.  See
-  patches/README for more information about the patch.  If you're using a
-  different version of MIT Kerberos, you may need to adjust the patch
-  accordingly.
+  patches directory to the MIT Kerberos source and install the new
+  libkadm5srv library.  See patches/README for more information about the
+  patch.  If you're using a different version of MIT Kerberos, you may
+  need to adjust the patch accordingly.
+
+  To build with the system version of CrackLib, pass --with-cracklib to
+  configure.  You can optionally add a directory, giving the root
+  directory where CrackLib was installed, or separately set the include
+  and library path with --with-cracklib-include and --with-cracklib-lib.
+
+  Normally, configure will use krb5-config to determine the flags to use
+  to compile with your Kerberos libraries.  If krb5-config isn't found, it
+  will look for the standard Kerberos libraries in locations already
+  searched by your compiler.  If the the krb5-config script first in your
+  path is not the one corresponding to the Kerberos libraries you want to
+  use or if your Kerberos libraries and includes aren't in a location
+  searched by default by your compiler, you need to specify a different
+  Kerberos installation root via --with-krb5=PATH.  For example:
+
+      ./configure --with-krb5=/usr/pubsw
+
+  You can also individually set the paths to the include directory and the
+  library directory with --with-krb5-include and --with-krb5-lib.  You may
+  need to do this if Autoconf can't figure out whether to use lib, lib32,
+  or lib64 on your platform.  Note that these settings aren't used if a
+  krb5-config script is found, so you may need to disable the krb5-config
+  script as described below.
+
+  To specify a particular krb5-config script to use, either set the
+  KRB5_CONFIG environment variable or pass it to configure like:
+
+      ./configure KRB5_CONFIG=/path/to/krb5-config
+
+  To not use krb5-config and force library probing even if there is a
+  krb5-config script on your path, set KRB5_CONFIG to a nonexistent path:
+
+      ./configure KRB5_CONFIG=/nonexistent
+
+  You can pass the --enable-reduced-depends flag to configure to try to
+  minimize the shared library dependencies encoded in the binaries.  This
+  omits from the link line all the libraries included solely because the
+  Kerberos libraries depend on them and instead links the programs only
+  against libraries whose APIs are called directly.  This will only work
+  with shared Kerberos libraries and will only work on platforms where
+  shared libraries properly encode their own dependencies (such as Linux).
+  It is intended primarily for building packages for Linux distributions
+  to avoid encoding unnecessary shared library dependencies that make
+  shared library migrations more difficult.  If none of the above made any
+  sense to you, don't bother with this flag.
 
 CONFIGURATION
 

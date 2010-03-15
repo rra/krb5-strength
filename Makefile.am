@@ -15,40 +15,54 @@ EXTRA_DIST = .gitignore LICENSE autogen cracklib/HISTORY cracklib/LICENCE   \
 	tests/heimdal/pod-t tests/mit/plugin-t tests/tap/libtap.sh
 
 # Do this globally.  Everything needs to find the Kerberos headers and
-# libraries.
-AM_CPPFLAGS = $(KRB5_CPPFLAGS)
-AM_LDFLAGS = $(KRB5_LDFLAGS)
+# libraries, and if we're using the system CrackLib, add its location
+# unconditionally as well.
+AM_CPPFLAGS = $(CRACKLIB_CPPFLAGS) $(KRB5_CPPFLAGS)
+AM_LDFLAGS = $(CRACKLIB_LDFLAGS) $(KRB5_LDFLAGS)
 
 # Put the module into /usr/local/lib/kadmind by default, relative to --libdir.
 moduledir = $(libdir)/kadmind
 
-# Build cracklib as a helper library, currently unconditionally, and build
-# (but don't install) the packer program.
-noinst_LTLIBRARIES = cracklib/libcracklib.la portable/libportable.la
-cracklib_libcracklib_la_SOURCES = cracklib/fascist.c cracklib/packlib.c \
-	cracklib/rules.c cracklib/stringlib.c
-cracklib_libcracklib_la_CPPFLAGS = -DIN_CRACKLIB
-noinst_PROGRAMS = cracklib/packer
-cracklib_packer_SOURCES = cracklib/packer.c cracklib/packer.h
-cracklib_packer_LDADD = cracklib/libcracklib.la
+# Build our portability library.
+noinst_LTLIBRARIES = portable/libportable.la
 portable_libportable_la_SOURCES = portable/dummy.c portable/macros.h \
         portable/stdbool.h portable/system.h
 portable_libportable_la_LIBADD = $(LTLIBOBJS)
+
+# If we're building with the embedded cracklib, build cracklib as a helper
+# library and build (but don't install) the packer program.
+cracklib_libcracklib_la_SOURCES = cracklib/fascist.c cracklib/packlib.c \
+	cracklib/rules.c cracklib/stringlib.c
+cracklib_libcracklib_la_CPPFLAGS = -DIN_CRACKLIB
+cracklib_packer_SOURCES = cracklib/packer.c cracklib/packer.h
+cracklib_packer_LDADD = cracklib/libcracklib.la
+if EMBEDDED_CRACKLIB
+    noinst_LTLIBRARIES += cracklib/libcracklib.la
+    noinst_PROGRAMS = cracklib/packer
+endif
 
 # Rules for building the password strength plugin.
 module_LTLIBRARIES = plugin/passwd_strength.la
 plugin_passwd_strength_la_SOURCES = plugin/api.c plugin/heimdal.c plugin/mit.c
 plugin_passwd_strength_la_LDFLAGS = -module -avoid-version
-plugin_passwd_strength_la_LIBADD = cracklib/libcracklib.la \
-	portable/libportable.la $(KRB5_LIBS)
+if EMBEDDED_CRACKLIB
+    plugin_passwd_strength_la_LIBADD = cracklib/libcracklib.la
+else
+    plugin_passwd_strength_la_LIBADD = $(CRACKLIB_LIBS)
+endif
+plugin_passwd_strength_la_LIBADD += portable/libportable.la $(KRB5_LIBS)
 
 # The Heimdal external-check program.
 bin_PROGRAMS = external/heimdal-strength
 external_heimdal_strength_CFLAGS = $(AM_CFLAGS)
 external_heimdal_strength_SOURCES = plugin/api.c plugin/api.h \
 	external/heimdal-strength.c
-external_heimdal_strength_LDADD = cracklib/libcracklib.la \
-	portable/libportable.la $(KRB5_LIBS)
+if EMBEDDED_CRACKLIB
+    external_heimdal_strength_LDADD = cracklib/libcracklib.la
+else
+    external_heimdal_strength_LDADD = $(CRACKLIB_LIBS)
+endif
+external_heimdal_strength_LDADD += portable/libportable.la $(KRB5_LIBS)
 dist_man_MANS = external/heimdal-strength.1
 
 # Handle the standard stuff that make maintainer-clean should probably remove

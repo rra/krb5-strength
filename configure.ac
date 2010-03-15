@@ -36,6 +36,7 @@ AC_SEARCH_LIBS([dlopen], [dl], [DL_LIBS="$LIBS"])
 LIBS="$save_LIBS"
 AC_SUBST([DL_LIBS])
 
+RRA_LIB_CRACKLIB
 RRA_LIB_KRB5
 RRA_LIB_KRB5_SWITCH
 AC_CHECK_HEADERS([kadm5-pwcheck.h krb5/pwcheck_plugin.h])
