@@ -9,6 +9,7 @@ krb5-strength (1.1-1) UNRELEASED; urgency=low
   * Update to debhelper compatibility level V8.
   * Switch to Debian source package format 3.0 (quilt) with a custom local
     patch header.
+  * Update standards version to 3.9.3 (no changes required).
 
  -- Russ Allbery <rra@debian.org>  Fri, 11 May 2012 14:49:16 -0700
 
