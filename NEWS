@@ -17,6 +17,8 @@ krb5-strength 1.1 (unreleased)
     with a different native integer size.  Thanks, Karl Lehnberger and
     Benj Carson.
 
+    Stop using local in the test suite for portability to Solaris /bin/sh.
+
     Update to rra-c-util 4.4:
 
     * Use PATH_KRB5_CONFIG to override krb5-config location.

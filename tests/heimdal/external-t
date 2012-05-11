@@ -15,7 +15,6 @@ cd "$BUILD/data"
 # the principal, the password, the expected exit status, the expected output
 # to standard output, and the expected output to standard error.
 ok_password () {
-    local desc princ password w_status w_stdout w_stderr status stdout stderr
     desc="$1"
     princ="$2"
     password="$3"
