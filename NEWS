@@ -1,5 +1,48 @@
                     User-Visible krb5-strength Changes
 
+krb5-strength 1.1 (2012-05-11)
+
+    Change the minimum password length in the embedded CrackLib to 8.
+
+    Reject passwords formed from the username portion of the principal
+    with digits appended.
+
+    In the embedded CrackLib, also check for a duplicated dictionary word.
+
+    Support linking with the system CrackLib instead of the embedded and
+    stricter copy by passing --with-cracklib to configure.
+
+    Fix variable sizes in the embedded CrackLib on 64-bit platforms.  This
+    may fix interoperability problems with databases created on platforms
+    with a different native integer size.  Thanks, Karl Lehnberger and
+    Benj Carson.
+
+    Stop using local in the test suite for portability to Solaris /bin/sh.
+
+    Update to rra-c-util 4.4:
+
+    * Use PATH_KRB5_CONFIG to override krb5-config location.
+    * Fix probing for ibm_svc/krb5_svc.h on AIX.
+    * Support Heimdal libraries without libroken, like OpenBSD.
+    * Fix manual Kerberos library probing without transitive dependencies.
+    * Support systems that only have krb5/krb5.h.
+    * Pass --deps to krb5-config in the non-reduced-dependencies case.
+    * Silence __attribute__ warnings on more compilers.
+    * Update warning flags for make warnings.
+    * Flesh out MAINTCLEANFILES to remove autogen results.
+    * Add notices to all files copied from rra-c-util.
+
+    Update to C TAP Harness 1.12:
+
+    * Drop is_double from the C TAP library to avoid requiring -lm.
+    * Avoid using local in the shell libtap.sh library.
+    * Silence __attribute__ warnings on more compilers.
+    * runtests now frees all allocated resources on exit.
+    * Fix runtests to still honor SOURCE and -s without BUILD and -b.
+    * Add tests/HOWTO documenting how to add new tests.
+    * Ensure correct output ordering in test results.
+    * Add -h and a better usage message to tests/runtests.
+
 krb5-strength 1.0 (2010-02-16)
 
     Add heimdal-strength, a program that checks password strength using

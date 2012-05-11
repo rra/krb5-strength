@@ -12,7 +12,8 @@
  * instead.
  *
  * Written by Russ Allbery <rra@stanford.edu>
- * Copyright 2009 Board of Trustees, Leland Stanford Jr. Unversity
+ * Copyright 2009
+ *     The Board of Trustees of the Leland Stanford Junior Unversity
  *
  * See LICENSE for licensing terms.
  */
