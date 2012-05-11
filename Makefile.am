@@ -1,7 +1,8 @@
 # Automake makefile for krb5-strength.
 #
 # Written by Russ Allbery <rra@stanford.edu>
-# Copyright 2007, 2009, 2010 Board of Trustees, Leland Stanford Jr. University
+# Copyright 2007, 2009, 2010, 2012
+#     The Board of Trustees of the Leland Stanford Junior University
 #
 # See LICENSE for licensing terms.
 
@@ -38,7 +39,6 @@ cracklib_packer_SOURCES = cracklib/packer.c cracklib/packer.h
 cracklib_packer_LDADD = cracklib/libcracklib.la
 if EMBEDDED_CRACKLIB
     noinst_LTLIBRARIES += cracklib/libcracklib.la
-    noinst_PROGRAMS = cracklib/packer
 endif
 
 # Rules for building the password strength plugin.
@@ -88,6 +88,9 @@ warnings:
 check_PROGRAMS = tests/heimdal/plugin tests/mit/plugin			 \
 	tests/portable/asprintf-t tests/portable/snprintf-t		 \
 	tests/portable/strlcat-t tests/portable/strlcpy-t tests/runtests
+if EMBEDDED_CRACKLIB
+    check_PROGRAMS += cracklib/packer
+endif
 tests_runtests_CPPFLAGS = -DSOURCE='"$(abs_top_srcdir)/tests"' \
 	-DBUILD='"$(abs_top_builddir)/tests"'
 check_LIBRARIES = tests/tap/libtap.a
