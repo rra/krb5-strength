@@ -3,7 +3,8 @@
 # Test suite wrapper for the Heimdal shared module API.
 #
 # Written by Russ Allbery <rra@stanford.edu>
-# Copyright 2009 Board of Trustees, Leland Stanford Jr. University
+# Copyright 2009, 2012
+#     The Board of Trustees of the Leland Stanford Junior University
 #
 # See LICENSE for licensing terms.
 
@@ -74,9 +75,9 @@ EOF
 ok_password "good password" 'test@EXAMPLE.ORG' 'known good password' 0 ''
 ok_password "password in dictionary" 'test@EXAMPLE.ORG' 'password' 1 \
     'it is based on a dictionary word'
-ok_password "password in dictionary" 'test@EXAMPLE.ORG' 'bitter' 1 \
+ok_password "password in dictionary" 'test@EXAMPLE.ORG' 'bitterbane' 1 \
     'it is based on a dictionary word'
-ok_password "password in dictionary" 'test@EXAMPLE.ORG' 'rettib' 1 \
+ok_password "password in dictionary" 'test@EXAMPLE.ORG' 'enabrettib' 1 \
     'it is based on a (reversed) dictionary word'
 ok_password "password too short" 'test@EXAMPLE.ORG' 'food' 1 \
     "it is too short"
@@ -84,7 +85,7 @@ ok_password "password way too short" 'test@EXAMPLE.ORG' 'foo' 1 \
     "it's WAY too short"
 ok_password "password empty" 'test@EXAMPLE.ORG' '' 1 \
     "it's WAY too short"
-ok_password "password all whitespace" 'test@EXAMPLE.ORG' '  	    ' 1 \
+ok_password "password all whitespace" 'test@EXAMPLE.ORG' '  	       ' 1 \
     'it does not contain enough DIFFERENT characters'
 ok_password "password too simplistic" 'test@EXAMPLE.ORG' 'abcdefghi' 1 \
     'it is too simplistic/systematic'
