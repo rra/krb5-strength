@@ -12,6 +12,8 @@ following modifications have been made:
  * Remove unused functions.
  * Various compilation warning and portability fixes.
  * Use Autoconf and portable/system.h to find types of specific lengths.
+ * Increase MINLENGTH.
+ * Add a check for a duplicated dictionary word.
 
 Below is the original changelog for CrackLib:
 

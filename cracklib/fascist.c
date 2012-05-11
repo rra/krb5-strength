@@ -23,6 +23,8 @@
  *   - Remove the unused FascistGecos function.
  * 2012-05-11  Russ Allbery <rra@stanford.edu>
  *   - Change MINLENGTH to 8.
+ *   - Use a separate buffer to hold the reversed password.
+ *   - Also check whether a password is a duplicated dictionary word.
  */
 
 static const char vers_id[] = "fascist.c : v2.3p3 Alec Muffett 14 dec 1997";
@@ -437,6 +439,7 @@ FascistLook(PWDICT *pwp, const char *instring)
     char junk[STRINGSIZE];
     char *password;
     char rpassword[STRINGSIZE];
+    char reverse[STRINGSIZE];
     int32 notfound;
 
     notfound = PW_WORDS(pwp);
@@ -565,13 +568,13 @@ FascistLook(PWDICT *pwp, const char *instring)
 	}
     }
 
-    strcpy(password, Reverse(password));
+    strcpy(reverse, Reverse(password));
 
     for (i = 0; r_destructors[i]; i++)
     {
 	char *a;
 
-	if (!(a = Mangle(password, r_destructors[i])))
+	if (!(a = Mangle(reverse, r_destructors[i])))
 	{
 	    continue;
 	}
@@ -582,6 +585,32 @@ FascistLook(PWDICT *pwp, const char *instring)
 	{
 	    return ("it is based on a (reversed) dictionary word");
 	}
+    }
+
+    /* Check for a duplicated word. */
+
+    if ((pw_len % 2) == 0)
+    {
+        if (strncmp(password, password + (pw_len / 2), pw_len / 2) == 0)
+        {
+            password[pw_len / 2] = '\0';
+            for (i = 0; r_destructors[i]; i++)
+            {
+                char *a;
+
+                if (!(a = Mangle(password, r_destructors[i])))
+                {
+                    continue;
+                }
+#ifdef DEBUG
+                printf("%-16s (duplicated dict)\n", a);
+#endif
+                if (FindPW(pwp, a) != notfound)
+                {
+                    return ("it is based on a (duplicated) dictionary word");
+                }
+            }
+        }
     }
 
     return ((char *) 0);

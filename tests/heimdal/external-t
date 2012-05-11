@@ -56,7 +56,7 @@ if [ -z "$krb5conf" ] ; then
 fi
 
 # Okay, we should be good to run the test suite.
-plan 48
+plan 51
 
 # We don't have a password_dictionary setting, so we should fail with an
 # initialization error.
@@ -80,6 +80,8 @@ ok_password 'password in dictionary' 'test@EXAMPLE.ORG' 'password' 0 '' \
     'it is based on a dictionary word'
 ok_password 'password in dictionary' 'test@EXAMPLE.ORG' 'bitterbane' 0 '' \
     'it is based on a dictionary word'
+ok_password 'password in dictionary repeated' 'test@EXAMPLE.ORG' \
+    'stanfordstanford' 0 '' 'it is based on a (duplicated) dictionary word'
 ok_password 'password in dictionary' 'test@EXAMPLE.ORG' 'enabrettib' 0 '' \
     'it is based on a (reversed) dictionary word'
 ok_password 'password seven characters' 'test@EXAMPLE.ORG' 'dfareas' 0 '' \

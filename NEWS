@@ -7,6 +7,8 @@ krb5-strength 1.1 (unreleased)
     Reject passwords formed from the username portion of the principal
     with digits appended.
 
+    In the embedded CrackLib, also check for a duplicated dictionary word.
+
     Support linking with the system CrackLib instead of the embedded and
     stricter copy by passing --with-cracklib to configure.
 
