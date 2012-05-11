@@ -7,7 +7,8 @@
  * information from kadmind to the plugin.
  *
  * Written by Russ Allbery <rra@stanford.edu>
- * Copyright 2010 Board of Trustees, Leland Stanford Jr. Unversity
+ * Copyright 2010
+ *     The Board of Trustees of the Leland Stanford Junior Unversity
  *
  * See LICENSE for licensing terms.
  */

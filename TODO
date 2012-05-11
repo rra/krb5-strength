@@ -1,10 +1,5 @@
                          krb5-strength To-Do List
 
- * Offer the option of building with a system CrackLib library instead of
-   the embedded one.  This should come with better documentation of the
-   modifications made to the embedded CrackLib and what problems one may
-   encounter using an unmodified version.
-
  * Update to CrackLib 2, which is currently shipped in Debian.  This
    requires testing to confirm that the on-disk data format is still the
    same.
@@ -15,6 +10,3 @@
 
  * The kadmind patch needs to abort kadmind startup if the plugin could
    not be loaded, or at least needs to reject every password.
-
- * Use a better method to determine 8-bit, 16-bit, and 32-bit types for
-   CrackLib.

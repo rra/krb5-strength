@@ -13,17 +13,21 @@
  *   - Add ANSI C prototypes and prototype additional functions.
  * 2009-10-14  Russ Allbery <rra@stanford.edu>
  *   - Prototype changes for const cleanliness.
+ * 2010-03-14  Russ Allbery <rra@stanford.edu>
+ *   - Fix int8, int16, and int32 definitions.
  */
 
-#include <stdio.h>
+#include <config.h>
+#include <portable/system.h>
+
 #include <ctype.h>
 
 #define STRINGSIZE	1024
 #define TRUNCSTRINGSIZE	(STRINGSIZE/4)
 
-typedef unsigned char int8;
-typedef unsigned short int int16;
-typedef unsigned long int int32;
+typedef uint8_t int8;
+typedef uint16_t int16;
+typedef uint32_t int32;
 #ifndef NUMWORDS
 #define NUMWORDS 	16
 #endif

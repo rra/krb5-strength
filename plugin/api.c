@@ -7,13 +7,16 @@
  * Developed by Derrick Brashear and Ken Hornstein of Sine Nomine Associates,
  *     on behalf of Stanford University.
  * Extensive modifications by Russ Allbery <rra@stanford.edu>
- * Copyright 2006, 2007, 2009 Board of Trustees, Leland Stanford Jr. Unversity
+ * Copyright 2006, 2007, 2009, 2012
+ *     The Board of Trustees of the Leland Stanford Junior Unversity
  *
  * See LICENSE for licensing terms.
  */
 
 #include <config.h>
 #include <portable/system.h>
+
+#include <ctype.h>
 
 #include <plugin/api.h>
 
@@ -75,6 +78,7 @@ pwcheck_check(void *context, const char *password, const char *principal,
               char *errstr, int errstrlen)
 {
     char *user, *p;
+    const char *q;
     size_t i, j;
     char c;
     const char *result;
@@ -82,9 +86,9 @@ pwcheck_check(void *context, const char *password, const char *principal,
 
     /*
      * We get the principal (in krb5_unparse_name format) from kadmind and we
-     * want to be sure that the password doesn't match the username or the
-     * username reversed.  We therefore have to copy the string so that we can
-     * manipulate it a bit.
+     * want to be sure that the password doesn't match the username, the
+     * username reversed, or the username with trailing digits.  We therefore
+     * have to copy the string so that we can manipulate it a bit.
      */
     if (strcasecmp(password, principal) == 0) {
 	snprintf(errstr, errstrlen, "Password based on username");
@@ -111,6 +115,8 @@ pwcheck_check(void *context, const char *password, const char *principal,
             snprintf(errstr, errstrlen, "Password based on username");
             return 1;
         }
+
+        /* Check against the reversed username. */
         for (i = 0, j = strlen(user) - 1; i < j; i++, j--) {
             c = user[i];
             user[i] = user[j];
@@ -122,6 +128,17 @@ pwcheck_check(void *context, const char *password, const char *principal,
             return 1;
         }
     }
+    if (strlen(password) > strlen(user))
+        if (strncasecmp(password, user, strlen(user)) == 0) {
+            q = password + strlen(user);
+            while (isdigit((int) *q))
+                q++;
+            if (*q == '\0') {
+                free(user);
+                snprintf(errstr, errstrlen, "Password based on username");
+                return 1;
+            }
+        }
     free(user);
     result = FascistCheck(password, ctx->dictionary);
     if (result != NULL) {
