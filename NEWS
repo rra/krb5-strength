@@ -1,6 +1,6 @@
                     User-Visible krb5-strength Changes
 
-krb5-strength 1.1 (unreleased)
+krb5-strength 1.1 (2012-05-11)
 
     Change the minimum password length in the embedded CrackLib to 8.
 
