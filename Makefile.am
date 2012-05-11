@@ -6,7 +6,6 @@
 #
 # See LICENSE for licensing terms.
 
-AUTOMAKE_OPTIONS = foreign subdir-objects
 ACLOCAL_AMFLAGS = -I m4
 EXTRA_DIST = .gitignore LICENSE autogen cracklib/HISTORY cracklib/LICENCE   \
 	cracklib/README cracklib/genrules.pl cracklib/mkdict		    \
@@ -71,14 +70,27 @@ dist_man_MANS = external/heimdal-strength.1
 CLEANFILES = tests/data/dictionary.hwm tests/data/dictionary.pwd \
 	tests/data/dictionary.pwi
 DISTCLEANFILES = tests/data/.placeholder
-MAINTAINERCLEANFILES = Makefile.in aclocal.m4 config.h.in config.h.in~ \
-        configure
+MAINTAINERCLEANFILES = Makefile.in aclocal.m4 build-aux/compile		 \
+	build-aux/config.guess build-aux/config.sub build-aux/depcomp	 \
+	build-aux/install-sh build-aux/ltmain.sh build-aux/missing	 \
+	config.h.in config.h.in~ configure m4/libtool.m4 m4/ltoptions.m4 \
+	m4/ltsugar.m4 m4/ltversion.m4 m4/lt~obsolete.m4
 
-# A set of flags for warnings.	Add -O because gcc won't find some warnings
-# without optimization turned on.
-WARNINGS = -g -O -Wall -W -Wendif-labels -Wpointer-arith \
-	-Wbad-function-cast -Wwrite-strings -Wstrict-prototypes \
-	-Wmissing-prototypes -Wnested-externs -Werror
+# A set of flags for warnings.  Add -O because gcc won't find some warnings
+# without optimization turned on.  Desirable warnings that can't be turned
+# on due to other problems:
+#
+#     -Wconversion      http://bugs.debian.org/488884 (htons warnings)
+#
+# Last checked against gcc 4.6.1 (2011-05-04).  -D_FORTIFY_SOURCE=2 enables
+# warn_unused_result attribute markings on glibc functions on Linux, which
+# catches a few more issues.
+WARNINGS = -g -O -D_FORTIFY_SOURCE=2 -Wall -Wextra -Wendif-labels	    \
+	-Wformat=2 -Winit-self -Wswitch-enum -Wdeclaration-after-statement  \
+	-Wshadow -Wpointer-arith -Wbad-function-cast -Wcast-align	    \
+	-Wwrite-strings -Wjump-misses-init -Wlogical-op			    \
+	-Wstrict-prototypes -Wmissing-prototypes -Wredundant-decls	    \
+	-Wnested-externs -Werror
 
 warnings:
 	$(MAKE) V=0 CFLAGS='$(WARNINGS)'
