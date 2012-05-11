@@ -10,9 +10,10 @@ ACLOCAL_AMFLAGS = -I m4
 EXTRA_DIST = .gitignore LICENSE autogen cracklib/HISTORY cracklib/LICENCE   \
 	cracklib/README cracklib/genrules.pl cracklib/mkdict		    \
 	external/heimdal-strength.pod patches/README patches/mit-krb5-1.4.4 \
-	tests/TESTS tests/data/wordlist tests/heimdal/external-t	    \
-	tests/heimdal/plugin-t tests/heimdal/pod-spelling-t		    \
-	tests/heimdal/pod-t tests/mit/plugin-t tests/tap/libtap.sh
+	tests/HOWTO tests/TESTS tests/data/wordlist			    \
+	tests/heimdal/external-t tests/heimdal/plugin-t			    \
+	tests/heimdal/pod-spelling-t tests/heimdal/pod-t tests/mit/plugin-t \
+	tests/tap/libtap.sh
 
 # Do this globally.  Everything needs to find the Kerberos headers and
 # libraries, and if we're using the system CrackLib, add its location
@@ -107,7 +108,8 @@ tests_runtests_CPPFLAGS = -DSOURCE='"$(abs_top_srcdir)/tests"' \
 	-DBUILD='"$(abs_top_builddir)/tests"'
 check_LIBRARIES = tests/tap/libtap.a
 tests_tap_libtap_a_CPPFLAGS = -I$(abs_top_srcdir)/tests
-tests_tap_libtap_a_SOURCES = tests/tap/basic.c tests/tap/basic.h
+tests_tap_libtap_a_SOURCES = tests/tap/basic.c tests/tap/basic.h \
+	tests/tap/macros.h
 
 tests_heimdal_plugin_SOURCES = tests/heimdal/plugin.c
 tests_heimdal_plugin_LDADD = portable/libportable.la $(KRB5_LIBS) $(DL_LIBS)
