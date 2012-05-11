@@ -2,6 +2,8 @@
 
 krb5-strength 1.1 (unreleased)
 
+    Change the minimum password length in the embedded CrackLib to 8.
+
     Support linking with the system CrackLib instead of the embedded and
     stricter copy by passing --with-cracklib to configure.
 

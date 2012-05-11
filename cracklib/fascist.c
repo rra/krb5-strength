@@ -21,6 +21,8 @@
  *   - Add parentheses around assignment used for its truth value.
  *   - Change a variable to unsigned int to avoid gcc warnings.
  *   - Remove the unused FascistGecos function.
+ * 2012-05-11  Russ Allbery <rra@stanford.edu>
+ *   - Change MINLENGTH to 8.
  */
 
 static const char vers_id[] = "fascist.c : v2.3p3 Alec Muffett 14 dec 1997";
@@ -35,7 +37,7 @@ static const char vers_id[] = "fascist.c : v2.3p3 Alec Muffett 14 dec 1997";
 #define ISSKIP(x) (isspace(x) || ispunct(x))
 
 #define MINDIFF 5
-#define MINLEN 6
+#define MINLEN 8
 #define MAXSTEP 4
 #define MAXMINDIFF 8
 
