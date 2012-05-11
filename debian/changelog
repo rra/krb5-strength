@@ -7,6 +7,8 @@ krb5-strength (1.1-1) UNRELEASED; urgency=low
     - Fix variable sizes on 64-bit platforms.
   * Add a Bugs header directing bug reports to me personally.
   * Update to debhelper compatibility level V8.
+  * Switch to Debian source package format 3.0 (quilt) with a custom local
+    patch header.
 
  -- Russ Allbery <rra@debian.org>  Fri, 11 May 2012 14:49:16 -0700
 
