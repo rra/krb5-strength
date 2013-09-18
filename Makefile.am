@@ -111,6 +111,7 @@ tests_tap_libtap_a_CPPFLAGS = -I$(abs_top_srcdir)/tests
 tests_tap_libtap_a_SOURCES = tests/tap/basic.c tests/tap/basic.h \
 	tests/tap/macros.h
 
+# The actual test programs.
 tests_heimdal_plugin_SOURCES = tests/heimdal/plugin.c
 tests_heimdal_plugin_LDADD = portable/libportable.la $(KRB5_LIBS) $(DL_LIBS)
 tests_mit_plugin_SOURCES = tests/mit/plugin.c
@@ -128,8 +129,9 @@ tests_portable_strlcpy_t_SOURCES = tests/portable/strlcpy-t.c \
 	tests/portable/strlcpy.c
 tests_portable_strlcpy_t_LDADD = tests/tap/libtap.a portable/libportable.la
 
+# The dictionary is used by the tests and needs to be built first.
 tests/data/dictionary.pwd: cracklib/packer $(srcdir)/tests/data/wordlist
 	cracklib/packer tests/data/dictionary < $(srcdir)/tests/data/wordlist
 
 check-local: $(check_PROGRAMS) tests/data/dictionary.pwd
-	cd tests && ./runtests $(abs_top_srcdir)/tests/TESTS
+	cd tests && ./runtests -l $(abs_top_srcdir)/tests/TESTS

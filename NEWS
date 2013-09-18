@@ -1,13 +1,6 @@
                     User-Visible krb5-strength Changes
 
-krb5-strength 1.1 (2012-05-11)
-
-    Change the minimum password length in the embedded CrackLib to 8.
-
-    Reject passwords formed from the username portion of the principal
-    with digits appended.
-
-    In the embedded CrackLib, also check for a duplicated dictionary word.
+krb5-strength 2.0 (unreleased)
 
     CrackLib checks for passwords where a character is a simple increment
     or decrement of the previous character.  In previous versions, the
@@ -18,6 +11,27 @@ krb5-strength 1.1 (2012-05-11)
     one such simple increment for every three characters in the password,
     which tightens the check somewhat for shorter passwords and loosens it
     considerably for longer passwords.
+
+    Update to rra-c-util 4.9:
+
+    * Probe for Kerberos headers using file checks instead of compiles.
+    * Improve probe for the Heimdal libroken library.
+    * Always build with large file support.
+    * Conditionally call AM_PROG_AR for portability to new Autotools.
+
+    Update to C TAP Harness 2.2:
+
+    * Allow more easily running single programs under tests/runtests.
+    * Flush the output from the test harness after each test.
+
+krb5-strength 1.1 (2012-05-11)
+
+    Change the minimum password length in the embedded CrackLib to 8.
+
+    Reject passwords formed from the username portion of the principal
+    with digits appended.
+
+    In the embedded CrackLib, also check for a duplicated dictionary word.
 
     Support linking with the system CrackLib instead of the embedded and
     stricter copy by passing --with-cracklib to configure.
