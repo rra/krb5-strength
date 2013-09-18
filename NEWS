@@ -9,6 +9,16 @@ krb5-strength 1.1 (2012-05-11)
 
     In the embedded CrackLib, also check for a duplicated dictionary word.
 
+    CrackLib checks for passwords where a character is a simple increment
+    or decrement of the previous character.  In previous versions, the
+    embedded version of CrackLib allowed at most four such occurrences in
+    the entire password.  This results in false positives on long
+    passphrases, since such accidental letter relationships aren't
+    uncommon in human languages.  Change the embedded CrackLib to allow
+    one such simple increment for every three characters in the password,
+    which tightens the check somewhat for shorter passwords and loosens it
+    considerably for longer passwords.
+
     Support linking with the system CrackLib instead of the embedded and
     stricter copy by passing --with-cracklib to configure.
 

@@ -25,6 +25,8 @@
  *   - Change MINLENGTH to 8.
  *   - Use a separate buffer to hold the reversed password.
  *   - Also check whether a password is a duplicated dictionary word.
+ * 2013-09-18  Russ Allbery <rra@stanford.edu>
+ *   - Replaced MAXSTEP with allowing one increment per four characters.
  */
 
 static const char vers_id[] = "fascist.c : v2.3p3 Alec Muffett 14 dec 1997";
@@ -40,7 +42,6 @@ static const char vers_id[] = "fascist.c : v2.3p3 Alec Muffett 14 dec 1997";
 
 #define MINDIFF 5
 #define MINLEN 8
-#define MAXSTEP 4
 #define MAXMINDIFF 8
 
 #undef DEBUG
@@ -527,7 +528,8 @@ FascistLook(PWDICT *pwp, const char *instring)
 	ptr++;
     }
 
-    if (i > MAXSTEP)
+    /* Allow one simple letter increment per three characters. */
+    if (i > (int) strlen(password) / 3)
     {
 	return ("it is too simplistic/systematic");
     }
