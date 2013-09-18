@@ -50,9 +50,6 @@ AC_CHECK_TYPES([ssize_t], [], [],
 RRA_FUNC_SNPRINTF
 AC_REPLACE_FUNCS([asprintf strlcat strlcpy])
 
-dnl Create the tests/data directory for builds outside the source directory.
-AC_CONFIG_COMMANDS([tests/data/.placeholder], [touch tests/data/.placeholder])
-
 AC_CONFIG_FILES([Makefile])
 AC_CONFIG_HEADER([config.h])
 AC_OUTPUT

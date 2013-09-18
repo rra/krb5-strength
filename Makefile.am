@@ -131,6 +131,7 @@ tests_portable_strlcpy_t_LDADD = tests/tap/libtap.a portable/libportable.la
 
 # The dictionary is used by the tests and needs to be built first.
 tests/data/dictionary.pwd: cracklib/packer $(srcdir)/tests/data/wordlist
+	mkdir -p tests/data
 	cracklib/packer tests/data/dictionary < $(srcdir)/tests/data/wordlist
 
 check-local: $(check_PROGRAMS) tests/data/dictionary.pwd
