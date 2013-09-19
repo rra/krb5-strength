@@ -1,8 +1,8 @@
 /*
- * Kerberos shared module API for MIT krb5 1.9 or later.
+ * Kerberos shared module API for MIT Kerberos 1.9 or later.
  *
  * This is the glue required for a password quality check via a dynamically
- * loaded module using the MIT krb5 pwqual interface.
+ * loaded module using the MIT Kerberos pwqual plugin interface.
  *
  * Written by Greg Hudson <ghudson@mit.edu>
  * Copyright 2010 the Massachusetts Institute of Technology
