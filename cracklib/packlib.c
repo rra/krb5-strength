@@ -21,6 +21,8 @@
  *   - Remove unused variables.
  * 2009-11-18  Russ Allbery <rra@stanford.edu>
  *   - Fixed the data format output by packer to properly pad the end.
+ * 2013-09-18  Russ Allbery <rra@stanford.edu>
+ *   - Add a missing ANSI C prototype.
  */
 
 #include <stdio.h>
@@ -130,8 +132,7 @@ PWOpen(const char *prefix, const char *mode)
 }
 
 int
-PWClose(pwp)
-    PWDICT *pwp;
+PWClose(PWDICT *pwp)
 {
     if (pwp->header.pih_magic != PIH_MAGIC)
     {
