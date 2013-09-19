@@ -22,12 +22,16 @@
 #endif
 
 #include <plugin/api.h>
+#include <util/macros.h>
 
 /* Skip this entire file if building with Heimdal or pre-1.9 MIT. */
 #ifdef HAVE_KRB5_PWQUAL_PLUGIN_H
 
-/* Used for unused parameters to silence gcc warnings. */
-# define UNUSED  __attribute__((__unused__))
+/* Prototype for the public interface. */
+krb5_error_code
+pwqual_strength_initvt(krb5_context context, int maj_ver, int min_ver,
+                       krb5_plugin_vtable vtable);
+
 
 /*
  * Initialize the library.  We can't just call pwcheck_init, since currently
@@ -48,6 +52,7 @@ init(krb5_context context, const char *dict_file, krb5_pwqual_moddata *data)
     *data = d;
     return 0;
 }
+
 
 /*
  * Check the password.  We need to transform the principal passed us by kadmind
@@ -72,6 +77,7 @@ check(krb5_context context, krb5_pwqual_moddata data, const char *password,
     return status;
 }
 
+
 /*
  * Shut down the library.
  */
@@ -81,11 +87,11 @@ fini(krb5_context context UNUSED, krb5_pwqual_moddata data)
     pwcheck_close(data);
 }
 
-/* The public symbol that MIT Kerberos looks for. */
-krb5_error_code
-pwqual_strength_initvt(krb5_context context, int maj_ver, int min_ver,
-                       krb5_plugin_vtable vtable);
 
+/*
+ * The public symbol that MIT Kerberos looks for.  Builds and returns the
+ * vtable.
+ */
 krb5_error_code
 pwqual_strength_initvt(krb5_context context UNUSED, int maj_ver,
                        int min_ver UNUSED, krb5_plugin_vtable vtable)

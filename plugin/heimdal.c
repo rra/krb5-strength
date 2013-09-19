@@ -25,12 +25,10 @@
 #include <errno.h>
 
 #include <plugin/api.h>
+#include <util/macros.h>
 
 /* Skip this entire file if not building with Heimdal. */
 #ifdef HAVE_KRB5_REALM
-
-/* Used for unused parameters to silence gcc warnings. */
-# define UNUSED  __attribute__((__unused__))
 
 /* kadm5/kadm5-pwcheck.h isn't always installed by Heimdal. */
 # ifdef HAVE_KADM5_KADM5_PWCHECK_H
