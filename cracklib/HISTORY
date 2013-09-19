@@ -3,6 +3,8 @@ following modifications have been made:
 
  * Require more different characters in the password.
  * Strengthen the prefix and suffix rules for longer passwords.
+ * Increased the minimum password length to 8 characters.
+ * Modified the adjacent character check to depend on the password length.
  * Remove checks against the user's GECOS entry.
  * Don't exit on failure to open the database.
  * Improve the search algorithm in FindPW somewhat.
