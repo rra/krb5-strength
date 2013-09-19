@@ -28,9 +28,8 @@
 #ifdef HAVE_KRB5_PWQUAL_PLUGIN_H
 
 /* Prototype for the public interface. */
-krb5_error_code
-pwqual_strength_initvt(krb5_context context, int maj_ver, int min_ver,
-                       krb5_plugin_vtable vtable);
+krb5_error_code pwqual_strength_initvt(krb5_context, int, int,
+                                       krb5_plugin_vtable);
 
 
 /*
