@@ -12,7 +12,7 @@
  * instead.
  *
  * Written by Russ Allbery <rra@stanford.edu>
- * Copyright 2009
+ * Copyright 2009, 2013
  *     The Board of Trustees of the Leland Stanford Junior Unversity
  *
  * See LICENSE for licensing terms.
@@ -30,11 +30,11 @@
 #ifdef HAVE_KRB5_REALM
 
 /* Used for unused parameters to silence gcc warnings. */
-#define UNUSED  __attribute__((__unused__))
+# define UNUSED  __attribute__((__unused__))
 
-/* kadm5-pwcheck.h isn't always installed by Heimdal. */
-# ifdef HAVE_KADM5_PWCHECK_H
-#  include <kadm5-pwcheck.h>
+/* kadm5/kadm5-pwcheck.h isn't always installed by Heimdal. */
+# ifdef HAVE_KADM5_KADM5_PWCHECK_H
+#  include <kadm5/kadm5-pwcheck.h>
 # else
 #  define KADM5_PASSWD_VERSION_V1 1
 
