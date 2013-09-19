@@ -9,11 +9,11 @@
  */
 
 #include <config.h>
+#include <portable/krb5.h>
 #include <portable/system.h>
 
 #include <dlfcn.h>
 #include <errno.h>
-#include <krb5.h>
 #ifdef HAVE_KRB5_PWQUAL_PLUGIN_H
 # include <krb5/pwqual_plugin.h>
 #endif

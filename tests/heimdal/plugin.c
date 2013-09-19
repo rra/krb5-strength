@@ -9,11 +9,11 @@
  */
 
 #include <config.h>
+#include <portable/krb5.h>
 #include <portable/system.h>
 
 #include <dlfcn.h>
 #include <errno.h>
-#include <krb5.h>
 
 /* kadm5-pwcheck.h isn't always installed by Heimdal. */
 #ifdef HAVE_KADM5_PWCHECK_H
