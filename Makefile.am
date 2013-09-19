@@ -1,7 +1,7 @@
 # Automake makefile for krb5-strength.
 #
 # Written by Russ Allbery <rra@stanford.edu>
-# Copyright 2007, 2009, 2010, 2012
+# Copyright 2007, 2009, 2010, 2012, 2013
 #     The Board of Trustees of the Leland Stanford Junior University
 #
 # See LICENSE for licensing terms.
@@ -83,15 +83,16 @@ MAINTAINERCLEANFILES = Makefile.in aclocal.m4 build-aux/compile		 \
 #
 #     -Wconversion      http://bugs.debian.org/488884 (htons warnings)
 #
-# Last checked against gcc 4.6.1 (2011-05-04).  -D_FORTIFY_SOURCE=2 enables
+# Last checked against gcc 4.7.2 (2013-04-22).  -D_FORTIFY_SOURCE=2 enables
 # warn_unused_result attribute markings on glibc functions on Linux, which
 # catches a few more issues.
-WARNINGS = -g -O -D_FORTIFY_SOURCE=2 -Wall -Wextra -Wendif-labels	    \
-	-Wformat=2 -Winit-self -Wswitch-enum -Wdeclaration-after-statement  \
-	-Wshadow -Wpointer-arith -Wbad-function-cast -Wcast-align	    \
-	-Wwrite-strings -Wjump-misses-init -Wlogical-op			    \
-	-Wstrict-prototypes -Wmissing-prototypes -Wredundant-decls	    \
-	-Wnested-externs -Werror
+WARNINGS = -g -O -D_FORTIFY_SOURCE=2 -Wall -Wextra -Wendif-labels	   \
+	-Wformat=2 -Winit-self -Wswitch-enum -Wuninitialized -Wfloat-equal \
+	-Wdeclaration-after-statement -Wshadow -Wpointer-arith		   \
+	-Wbad-function-cast -Wcast-align -Wwrite-strings		   \
+	-Wjump-misses-init -Wlogical-op -Wstrict-prototypes		   \
+	-Wold-style-definition -Wmissing-prototypes -Wnormalized=nfc	   \
+	-Wpacked -Wredundant-decls -Wnested-externs -Winline -Wvla -Werror
 
 warnings:
 	$(MAKE) V=0 CFLAGS='$(WARNINGS)'
