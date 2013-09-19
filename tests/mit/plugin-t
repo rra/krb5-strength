@@ -3,7 +3,7 @@
 # Test suite wrapper for the MIT Kerberos shared module API.
 #
 # Written by Russ Allbery <rra@stanford.edu>
-# Copyright 2009, 2010
+# Copyright 2009, 2010, 2013
 #     The Board of Trustees of the Leland Stanford Junior University
 #
 # See LICENSE for licensing terms.
@@ -20,7 +20,8 @@ ok_password () {
     password="$3"
     w_status="$4"
     w_stderr="$5"
-    stderr=`"$BUILD/mit/plugin" "$princ" "$password" 2>&1`
+    dict="${BUILD}/data/dictionary"
+    stderr=`"$BUILD/mit/plugin" "$princ" "$password" "$dict" 2>&1`
     status="$?"
     echo "# status: $status"
     echo "# stderr: $stderr"
@@ -53,22 +54,7 @@ if [ $? = 42 ] ; then
 fi
 
 # Okay, we should be good to run the test suite.
-plan 28
-
-# We don't have a password_dictionary setting, so we should fail with an
-# initialization error.
-ok_password "no dictionary configured" 'test@EXAMPLE.ORG' 'password' 1 \
-    'password_dictionary not configured in krb5.conf'
-
-# Now add the password dictionary configuration.
-cat <<EOF >> ./krb5.conf
-
-[appdefaults]
-    krb5-strength = {
-        password_dictionary = $BUILD/data/dictionary
-    }
-
-EOF
+plan `expr 13 \* 2`
 
 # Check the basic functionality.
 ok_password "good password" 'test@EXAMPLE.ORG' 'known good password' 0 ''

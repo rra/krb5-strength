@@ -1,10 +1,10 @@
                             krb5-strength 1.1
-               (kadmind password strength checking plugin)
+               (Kerberos password strength checking plugin)
 
               Maintained by Russ Allbery <rra@stanford.edu>
 
-  Copyright 2006, 2007, 2009, 2010, 2012 The Board of Trustees of the
-  Leland Stanford Junior University.  Portions copyright 1993 Alec
+  Copyright 2006, 2007, 2009, 2010, 2012, 2013 The Board of Trustees of
+  the Leland Stanford Junior University.  Portions copyright 1993 Alec
   Muffett.  Developed by Derrick Brashear and Ken Hornstein of Sine Nomine
   Associates, on behalf of Stanford University.
 
@@ -18,9 +18,7 @@ BLURB
   in a Kerberos KDC.  It is roughly equivalent to checking password
   strength via CrackLib, except that it embeds a copy of Alec Muffett's
   CrackLib that has been modified to perform slightly more strenuous
-  tests.  It is usable as-is with Heimdal.  With MIT Kerberos, it requires
-  an included patch to libkadm5srv to support a dynamically loaded
-  password check module.
+  tests.  It supports both Heimdal and MIT Kerberos (1.9 or later).
 
 DESCRIPTION
 
@@ -30,28 +28,13 @@ DESCRIPTION
   transform rules does not catch passwords that can be guessed using the
   same dictionary with other tools, such as Jack the Ripper.
 
-  The MIT Kerberos kadmind supports password strength checking against a
-  dictionary out of the box.  Unfortunately, that support loads the entire
-  dictionary into memory, requires uncompressed dictionaries, and doesn't
-  apply any transformations to the password before checking it against the
-  dictionary.  CrackLib provides more sophisticated strength checking and
-  an optimized, compressed on-disk database format.
-
-  This toolkit therefore provides the ability to check password quality
-  against the standard version of CrackLib, or against a modified version
-  of CrackLib that only passes passwords that resist attacks from both
-  Crack and Jack the Ripper using the same rule sets.  For Heimdal, it
-  includes both a program usable as an external password quality check and
-  a plugin that implements the dynamic module API.  For MIT Kerberos, it
-  includes two pieces:
-
-   * A patch to MIT Kerberos to add a plugin system for password strength
-     checking.  This patch adds initialization and shutdown hooks plus a
-     hook that's run prior to each password change.  The code in kadmind
-     is independent of what the plugin might do.
-
-   * A libkadm5srv or Heimdal kpasswdd plugin that provides a wrapper
-     around CrackLib.
+  This plugin provides the ability to check password quality against the
+  standard version of CrackLib, or against a modified version of CrackLib
+  that only passes passwords that resist attacks from both Crack and Jack
+  the Ripper using the same rule sets.  For Heimdal, it includes both a
+  program usable as an external password quality check and a plugin that
+  implements the dynamic module API.  For MIT Kerberos (1.9 or later), it
+  includes a plugin for the password quality (pwqual) plugin API.
 
   krb5-strength can be built with either the system CrackLib or with the
   modified version of CrackLib included in this package.  Note, however,
@@ -69,29 +52,29 @@ DESCRIPTION
   also minor changes to fix portability issues and remove some code that
   doesn't make sense in the kadmind context.
 
-  My eventual hope is to submit to CrackLib 2.x modifications that allow
-  the rule set to be configured at runtime, at which point this package
-  can likely wither away in favor of much simpler plugins that link to the
-  standard CrackLib library.
+  Ideally, the changes to CrackLib should be added to the standard
+  CrackLib distribution by adding an additional interface to configure its
+  behavior, at which point this package can likely wither away in favor of
+  much simpler plugins that link to the standard CrackLib library.
 
 REQUIREMENTS
 
-  For Heimdal, this package is usable without any special considerations.
-  You may use either the external password quality check tool, installed
-  as heimdal-strength, or the plugin as you choose.  It has been tested
-  with Heimdal 1.2.1 and later.
+  For Heimdal, you may use either the external password quality check
+  tool, installed as heimdal-strength, or the plugin as you choose.  It
+  has been tested with Heimdal 1.2.1 and later, but has not recently been
+  tested with versions prior to 1.5.
 
-  To use this plugin with MIT Kerberos, you will need to apply the patch
-  in the patches directory to MIT Kerberos and rebuild.  Due to how
-  kadmind is constructed, the changes are actually in the libkadm5srv
-  library, not in the kadmind binary, so you'll need to install the
-  modified libraries.
+  For MIT Kerberos, version 1.9 or higher is required for the password
+  quality plugin interface.  MIT Kerberos does not support an external
+  password quality check tool directly, so you will need to install the
+  plugin.
 
   You can optionally build against the system CrackLib library.  Any
   version should be supported, but note that some versions, particularly
   older versions close to the original code, do things like printing
   diagnostics to stderr, calling exit, and otherwise not being
-  well-behaved for use inside plugins or libraries.
+  well-behaved for use inside plugins or libraries.  If using a system
+  CrackLib library, use version 2.8.22 or later to avoid these problems.
 
   For this module to be effective for either Heimdal or MIT Kerberos, you
   will also need to construct a dictionary.  The mkdict and packer
@@ -103,11 +86,9 @@ REQUIREMENTS
 
   For a word list to use as source for the dictionary, you can use
   /usr/share/dict/words if it's available on your system, but it would be
-  better to find a more comprehensive word list (or even better, find
-  every word list you can locate on the Internet and combine them).  Since
-  word lists are bulky, often covered by murky copyrights, and easily
-  locatable on the Internet with a modicum of searching, none are included
-  in this toolkit.
+  better to find a more comprehensive word list.  Since word lists are
+  bulky, often covered by murky copyrights, and easily locatable on the
+  Internet with a modicum of searching, none are included in this toolkit.
 
   To bootstrap from a Git checkout, or If you change the Automake files
   and need to regenerate Makefile.in, you will need Automake 1.11 or
@@ -133,12 +114,6 @@ COMPILING AND INSTALLING
   /usr/local/bin/heimdal-strength.  You can change these paths with the
   --prefix, --libdir, and --bindir options to configure.
 
-  For MIT Kerberos, you also have to apply the patch provided in the
-  patches directory to the MIT Kerberos source and install the new
-  libkadm5srv library.  See patches/README for more information about the
-  patch.  If you're using a different version of MIT Kerberos, you may
-  need to adjust the patch accordingly.
-
   To build with the system version of CrackLib, pass --with-cracklib to
   configure.  You can optionally add a directory, giving the root
   directory where CrackLib was installed, or separately set the include
@@ -158,9 +133,7 @@ COMPILING AND INSTALLING
   You can also individually set the paths to the include directory and the
   library directory with --with-krb5-include and --with-krb5-lib.  You may
   need to do this if Autoconf can't figure out whether to use lib, lib32,
-  or lib64 on your platform.  Note that these settings aren't used if a
-  krb5-config script is found, so you may need to disable the krb5-config
-  script as described below.
+  or lib64 on your platform.
 
   To specify a particular krb5-config script to use, either set the
   PATH_KRB5_CONFIG environment variable or pass it to configure like:
@@ -171,7 +144,10 @@ COMPILING AND INSTALLING
   krb5-config script on your path, set PATH_KRB5_CONFIG to a nonexistent
   path:
 
-      ./configure KRB5_CONFIG=/nonexistent
+      ./configure PATH_KRB5_CONFIG=/nonexistent
+
+  krb5-config is not used and library probing is always done if either
+  --with-krb5-include or --with-krb5-lib are given.
 
   You can pass the --enable-reduced-depends flag to configure to try to
   minimize the shared library dependencies encoded in the binaries.  This
@@ -230,9 +206,9 @@ CONFIGURATION
           policies         = krb5-strength
           policy_libraries = /usr/local/lib/kadmind/passwd_strength.so
 
-  in either krb5.conf or kdc.conf.  Note that some versions of Heimdal
-  have a bug in the support for loading modules when policy_libraries is
-  set.  If you get an error like:
+  in either krb5.conf or kdc.conf.  Note that some older versions of
+  Heimdal have a bug in the support for loading modules when
+  policy_libraries is set.  If you get an error like:
 
       didn't find `kadm5_password_verifier' symbol in `(null)'
 
@@ -242,32 +218,38 @@ CONFIGURATION
 
  MIT Kerberos
 
-  In the [realms] section of your kdc.conf, under the appropriate realm or
-  realms, specify the path to the dictionary:
+  To add this module to the list of password quality checks, add a section
+  to krb5.conf (or to a separate kdc.conf if you use that) like:
+
+      [plugins]
+          pwqual = {
+              module = strength:/usr/local/lib/kadmind/passwd_strength.so
+          }
+
+  to register the plugin.
+
+  There are two ways to tell where the dictionary is.  One option is to
+  use krb5.conf (and in this case you must use krb5.conf, even if you use
+  a separate kdc.conf file).  For this approach, add the following to the
+  [appdefaults] section:
+
+      krb5-strength = {
+          password_dictionary = /path/to/cracklib/dictionary
+      }
+
+  The second option is to use the normal dict_path setting.  In the
+  [realms] section of your krb5.conf kdc.conf, under the appropriate realm
+  or realms, specify the path to the dictionary:
 
       dict_file = /path/to/cracklib/dictionary
 
   The provided path should be the full path to the dictionary files,
-  omitting the trailing *.hwm, *.pwd, or *.pwi extension.  Then, specify
-  the path to the plugin by adding:
+  omitting the trailing *.hwm, *.pwd, or *.pwi extension.  However, be
+  aware that, if you use this approach, you will probably want to disable
+  the built-in standard dict pwqual plugin by adding the line:
 
-      pwcheck_plugin = /usr/local/lib/kadmind/passwd_strength.so
+      disable = dict
 
-  to the same section of the kdc.conf, giving the correct full path to the
-  plugin.  Restart kadmind and password strength checking should be
-  enabled.
-
-  Be aware that, for MIT Kerberos, password strength checking is only
-  applied to principals with a policy set.  If you want to check all user
-  passwords, assign all user principals a password policy.  (Similarly,
-  you can avoid checking the strength of passwords for particular
-  principals by clearing their policy.)  Also be aware that enabling this
-  plugin will disable the normal kadmind dictionary check.  There
-  currently is no way to have them both enabled at the same time.
-
-  Finally, note that the default rules of this plugin will reject the
-  temporary password used by addprinc -randkey or ktadd -randkey when
-  initializing a principal.  When generating service principals using that
-  flag, you will need to pass in the -clearpolicy flag as well to avoid
-  rejecting the initial temporary password.  You can then add a policy
-  later with modprinc if desired.
+  to the pwqual block of the [plugins] section as shown above.  Otherwise,
+  it will also try to load a dictionary at the same path to do simple
+  dictionary matching.

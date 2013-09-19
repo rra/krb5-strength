@@ -14,20 +14,28 @@
 #include <dlfcn.h>
 #include <errno.h>
 #include <krb5.h>
+#ifdef HAVE_KRB5_PWQUAL_PLUGIN_H
+# include <krb5/pwqual_plugin.h>
+#endif
 
-/* Allow for a build without the plugin header. */
-# ifdef HAVE_KRB5_PWCHECK_PLUGIN_H
-#  include <krb5/pwcheck_plugin.h>
-# else
-typedef struct krb5plugin_kadmin_pwcheck_ftable_v0 {
-    int minor_version;
-    krb5_error_code (*init)(krb5_context, void **);
-    void (*fini)(krb5_context, void *);
-    int (*check)(krb5_context, void *, krb5_const_principal,
-                 const krb5_data *password);
-} krb5plugin_kadmin_pwcheck_ftable_v0;
-# endif /* !HAVE_KRB5_PWCHECK_PLUGIN_H */
+#include <tests/tap/macros.h>
 
+#ifndef HAVE_KRB5_PWQUAL_PLUGIN_H
+/*
+ * If we're not building with MIT Kerberos, we can't run this test.  Exit with
+ * a special status to communicate this to the test wrapper.
+ */
+int
+main(int argc UNUSED, char *argv[] UNUSED)
+{
+    exit(42);
+}
+
+#else
+
+/* The public symbol that we load and call to get the vtable. */
+typedef krb5_error_code pwqual_strength_initvt(krb5_context, int, int,
+                                       krb5_plugin_vtable);
 
 /*
  * Expects a principal and a password to check on the command line.  Loads the
@@ -49,21 +57,14 @@ main(int argc, char *argv[])
     size_t length;
     krb5_context ctx;
     krb5_principal princ;
-    krb5_data password;
     krb5_error_code status;
-    void *handle, *data;
-    struct krb5plugin_kadmin_pwcheck_ftable_v0 *verifier;
-
-    /*
-     * If we're not building with MIT Kerberos, we can't run this test.  Exit
-     * with a special status to communicate this to the test wrapper.
-     */
-#ifdef HAVE_KRB5_REALM
-    exit(42);
-#endif
+    void *handle;
+    krb5_pwqual_moddata data;
+    krb5_pwqual_vtable verifier = NULL;
+    krb5_error_code (*init)(krb5_context, int, int, krb5_plugin_vtable);
 
     /* Build the path of the plugin. */
-    if (argc != 3) {
+    if (argc != 4) {
         fprintf(stderr, "Wrong number of arguments\n");
         exit(1);
     }
@@ -92,8 +93,6 @@ main(int argc, char *argv[])
         fprintf(stderr, "Cannot parse principal name\n");
         exit(1);
     }
-    password.length = strlen(argv[2]);
-    password.data = argv[2];
 
     /* Load the module and find the correct symbol. */
     handle = dlopen(path, RTLD_NOW);
@@ -101,26 +100,40 @@ main(int argc, char *argv[])
         fprintf(stderr, "Cannot dlopen %s: %s\n", path, dlerror());
         exit(1);
     }
-    verifier = dlsym(handle, "kadmin_pwcheck_0");
-    if (verifier == NULL) {
-        fprintf(stderr, "Cannot get kadmin_pwcheck_0 symbol: %s\n", dlerror());
+    init = dlsym(handle, "pwqual_strength_initvt");
+    if (init == NULL) {
+        fprintf(stderr, "Cannot get pwqual_strength_initvt symbol: %s\n",
+                dlerror());
         exit(1);
     }
-    if (verifier->minor_version != 0
-        || verifier->init == NULL
-        || verifier->check == NULL
-        || verifier->fini == NULL) {
+
+    /* Call that function to get the vtable. */
+    verifier = malloc(sizeof(*verifier));
+    if (verifier == NULL) {
+        fprintf(stderr, "Cannot allocate memory: %s\n", strerror(errno));
+        exit(1);
+    }
+    status = init(ctx, 1, 1, (krb5_plugin_vtable) verifier);
+    if (status != 0) {
+        fprintf(stderr, "Cannot obtain module vtable\n");
+        exit(1);
+    }
+    if (strcmp(verifier->name, "krb5-strength") != 0) {
         fprintf(stderr, "Invalid metadata in plugin\n");
         exit(1);
     }
-    status = verifier->init(ctx, &data);
+
+    /* Open the verifier, run the check function, and close it. */
+    status = verifier->open(ctx, argv[3], &data);
     if (status != 0) {
         fprintf(stderr, "%s\n", krb5_get_error_message(ctx, status));
         exit(1);
     }
-    status = verifier->check(ctx, data, princ, &password);
+    status = verifier->check(ctx, data, argv[2], NULL, princ, NULL);
     if (status != 0)
         fprintf(stderr, "%s\n", krb5_get_error_message(ctx, status));
-    verifier->fini(ctx, data);
+    verifier->close(ctx, data);
     exit(status);
 }
+
+#endif /* HAVE_KRB5_PWQUAL_PLUGIN_H */

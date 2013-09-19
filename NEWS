@@ -2,6 +2,11 @@
 
 krb5-strength 2.0 (unreleased)
 
+    Add support for the MIT Kerberos password quality plugin interface,
+    available in MIT Kerberos 1.9 and later, contributed by Greg Hudson
+    and MIT.  Drop the patch for MIT Kerberos 1.4 (and hence support for
+    versions of MIT Kerberos prior to 1.9).
+
     CrackLib checks for passwords where a character is a simple increment
     or decrement of the previous character.  In previous versions, the
     embedded version of CrackLib allowed at most four such occurrences in
