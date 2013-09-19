@@ -4,7 +4,7 @@
  * Developed by Derrick Brashear and Ken Hornstein of Sine Nomine Associates,
  *     on behalf of Stanford University.
  * Extensive modifications by Russ Allbery <rra@stanford.edu>
- * Copyright 2006, 2007, 2009, 2012
+ * Copyright 2006, 2007, 2009, 2012, 2013
  *     The Board of Trustees of the Leland Stanford Junior Unversity
  *
  * See LICENSE for licensing terms.
