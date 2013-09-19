@@ -103,6 +103,7 @@ heimdal_pwcheck(krb5_context context, krb5_principal principal,
         return 1;
     }
     result = pwcheck_check(data, pastring, name, message, length);
+    krb5_free_unparsed_name(ctx, name);
     free(pastring);
     pwcheck_close(data);
     return result;

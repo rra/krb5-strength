@@ -115,7 +115,7 @@ initialize(void)
         exit(1);
     }
     if (realm != NULL) {
-        free(realm);
+        krb5_free_default_realm(ctx, realm);
         free_realm(&realm_data);
     }
     if (pwcheck_init(&context, dictionary) != 0) {
