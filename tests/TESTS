@@ -7,3 +7,5 @@ portable/asprintf
 portable/snprintf
 portable/strlcat
 portable/strlcpy
+util/messages
+util/xmalloc

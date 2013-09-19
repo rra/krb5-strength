@@ -30,6 +30,11 @@ portable_libportable_la_SOURCES = portable/dummy.c portable/macros.h \
         portable/stdbool.h portable/system.h
 portable_libportable_la_LIBADD = $(LTLIBOBJS)
 
+# Build our command-line utility library.
+noinst_LIBRARIES = util/libutil.a
+util_libutil_a_SOURCES = util/macros.h util/messages.c util/messages.h \
+	util/xmalloc.c util/xmalloc.h
+
 # If we're building with the embedded cracklib, build cracklib as a helper
 # library and build (but don't install) the packer program.
 cracklib_libcracklib_la_SOURCES = cracklib/fascist.c cracklib/packlib.c \
@@ -63,7 +68,8 @@ if EMBEDDED_CRACKLIB
 else
     external_heimdal_strength_LDADD = $(CRACKLIB_LIBS)
 endif
-external_heimdal_strength_LDADD += portable/libportable.la $(KRB5_LIBS)
+external_heimdal_strength_LDADD += util/libutil.a portable/libportable.la \
+	$(KRB5_LIBS)
 dist_man_MANS = external/heimdal-strength.1
 
 # Handle the standard stuff that make maintainer-clean should probably remove
@@ -102,7 +108,8 @@ warnings:
 # The bits below are for the test suite, not for the main package.
 check_PROGRAMS = tests/heimdal/plugin tests/mit/plugin			 \
 	tests/portable/asprintf-t tests/portable/snprintf-t		 \
-	tests/portable/strlcat-t tests/portable/strlcpy-t tests/runtests
+	tests/portable/strlcat-t tests/portable/strlcpy-t tests/runtests \
+	tests/util/messages-t tests/util/xmalloc
 if EMBEDDED_CRACKLIB
     check_PROGRAMS += cracklib/packer
 endif
@@ -110,8 +117,9 @@ tests_runtests_CPPFLAGS = -DSOURCE='"$(abs_top_srcdir)/tests"' \
 	-DBUILD='"$(abs_top_builddir)/tests"'
 check_LIBRARIES = tests/tap/libtap.a
 tests_tap_libtap_a_CPPFLAGS = -I$(abs_top_srcdir)/tests
-tests_tap_libtap_a_SOURCES = tests/tap/basic.c tests/tap/basic.h \
-	tests/tap/macros.h
+tests_tap_libtap_a_SOURCES = tests/tap/basic.c tests/tap/basic.h	\
+	tests/tap/macros.h tests/tap/process.c tests/tap/process.h	\
+	tests/tap/string.c tests/tap/string.h
 
 # The actual test programs.
 tests_heimdal_plugin_SOURCES = tests/heimdal/plugin.c
@@ -130,6 +138,9 @@ tests_portable_strlcat_t_LDADD = tests/tap/libtap.a portable/libportable.la
 tests_portable_strlcpy_t_SOURCES = tests/portable/strlcpy-t.c \
 	tests/portable/strlcpy.c
 tests_portable_strlcpy_t_LDADD = tests/tap/libtap.a portable/libportable.la
+tests_util_messages_t_LDADD = tests/tap/libtap.a util/libutil.a \
+	portable/libportable.la
+tests_util_xmalloc_LDADD = util/libutil.a portable/libportable.la
 
 # The dictionary is used by the tests and needs to be built first.
 tests/data/dictionary.pwd: cracklib/packer $(srcdir)/tests/data/wordlist

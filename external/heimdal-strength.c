@@ -20,9 +20,9 @@
 #include <errno.h>
 
 #include <plugin/api.h>
-
-/* Used for unused parameters to silence gcc warnings. */
-#define UNUSED  __attribute__((__unused__))
+#include <util/macros.h>
+#include <util/messages.h>
+#include <util/xmalloc.h>
 
 
 /*
@@ -39,14 +39,11 @@ free_realm(krb5_realm *realm_data)
     }
 }
 
-static krb5_error_code
+static void
 set_realm(krb5_realm *realm_data, const char *realm)
 {
     free_realm(realm_data);
-    *realm_data = strdup(realm);
-    if (*realm_data == NULL)
-        return errno;
-    return 0;
+    *realm_data = xstrdup(realm);
 }
 
 #else /* !HAVE_KRB5_REALM */
@@ -62,22 +59,14 @@ free_realm(krb5_data **realm_data)
     }
 }
 
-static krb5_error_code
+static void
 set_realm(krb5_data **realm_data, const char *realm)
 {
     free_realm(realm_data);
-    *realm_data = malloc(sizeof(**realm_data));
-    if (*realm_data == NULL)
-        return errno;
-    (*realm_data)->data = strdup(realm);
-    if ((*realm_data)->data == NULL) {
-        free(*realm_data);
-        *realm_data = NULL;
-        return errno;
-    }
+    *realm_data = xmalloc(sizeof(**realm_data));
+    (*realm_data)->data = xstrdup(realm);
     (*realm_data)->magic = KV5M_DATA;
     (*realm_data)->length = strlen(realm);
-    return 0;
 }
 
 #endif /* !HAVE_KRB5_REALM */
@@ -101,28 +90,21 @@ initialize(void)
 #endif
 
     /* We need to create a Kerberos context just to get the dictionary path. */
-    if (krb5_init_context(&ctx) != 0) {
-        fprintf(stderr, "Cannot create Kerberos context\n");
-        exit(1);
-    }
+    if (krb5_init_context(&ctx) != 0)
+        die("Cannot create Kerberos context");
     krb5_get_default_realm(ctx, &realm);
     if (realm != NULL)
         set_realm(&realm_data, realm);
     krb5_appdefault_string(ctx, "krb5-strength", realm_data,
                            "password_dictionary", "", &dictionary);
-    if (dictionary == NULL || dictionary[0] == '\0') {
-        fprintf(stderr, "password_dictionary not configured in krb5.conf\n");
-        exit(1);
-    }
+    if (dictionary == NULL || dictionary[0] == '\0')
+        die("password_dictionary not configured in krb5.conf");
     if (realm != NULL) {
         krb5_free_default_realm(ctx, realm);
         free_realm(&realm_data);
     }
-    if (pwcheck_init(&context, dictionary) != 0) {
-        fprintf(stderr, "Cannot initialize strength checking: %s\n",
-                strerror(errno));
-        exit(1);
-    }
+    if (pwcheck_init(&context, dictionary) != 0)
+        sysdie("Cannot initialize strength checking");
     free(dictionary);
     return context;
 }
@@ -138,24 +120,16 @@ read_key(const char *key, char *buffer, size_t length)
 {
     char *p;
 
-    if (fgets(buffer, length, stdin) == NULL) {
-        fprintf(stderr, "Cannot read %s: %s\n", key, strerror(errno));
-        exit(1);
-    }
-    if (strlen(buffer) < 1 || buffer[strlen(buffer) - 1] != '\n') {
-        fprintf(stderr, "Malformed or too long %s line\n", key);
-        exit(1);
-    }
+    if (fgets(buffer, length, stdin) == NULL)
+        sysdie("Cannot read %s", key);
+    if (strlen(buffer) < 1 || buffer[strlen(buffer) - 1] != '\n')
+        die("Malformed or too long %s line", key);
     buffer[strlen(buffer) - 1] = '\0';
-    if (strncmp(buffer, key, strlen(key)) != 0) {
-        fprintf(stderr, "Malformed %s line\n", key);
-        exit(1);
-    }
+    if (strncmp(buffer, key, strlen(key)) != 0)
+        die("Malformed %s line", key);
     p = buffer + strlen(key);
-    if (p[0] != ':' || p[1] != ' ') {
-        fprintf(stderr, "Malformed %s line\n", key);
-        exit(1);
-    }
+    if (p[0] != ':' || p[1] != ' ')
+        die("Malformed %s line", key);
     p += 2;
     memmove(buffer, p, strlen(p) + 1);
 }
@@ -174,21 +148,14 @@ check_password(void *context)
 
     read_key("principal", principal, sizeof(principal));
     read_key("new-password", password, sizeof(password));
-    if (fgets(end, sizeof(end), stdin) == NULL) {
-        fprintf(stderr, "Cannot read end of entry: %s\n", strerror(errno));
-        exit(1);
-    }
-    if (strcmp(end, "end\n") != 0) {
-        fprintf(stderr, "Malformed end line\n");
-        exit(1);
-    }
-    if (pwcheck_check(context, password, principal, error, sizeof(error))) {
+    if (fgets(end, sizeof(end), stdin) == NULL)
+        sysdie("Cannot read end of entry");
+    if (strcmp(end, "end\n") != 0)
+        die("Malformed end line");
+    if (pwcheck_check(context, password, principal, error, sizeof(error)))
         fprintf(stderr, "%s\n", error);
-        exit(0);
-    } else {
+    else
         printf("APPROVED\n");
-        exit(0);
-    }
 }
 
 
@@ -204,12 +171,9 @@ main(int argc, char *argv[] UNUSED)
 {
     void *context;
 
-    if (argc != 1 && argc != 2) {
-        fprintf(stderr, "Usage: heimdal-strength <principal>\n");
-        exit(1);
-    }
+    if (argc != 1 && argc != 2)
+        die("Usage: heimdal-strength <principal>");
     context = initialize();
     check_password(context);
-
-    return 1;
+    exit(0);
 }

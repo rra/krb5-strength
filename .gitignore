@@ -29,9 +29,12 @@
 /tests/portable/strlcpy-t
 /tests/runtests
 /tests/tap/libtap.a
+/tests/util/messages-t
+/tests/util/xmalloc
 .deps/
 .dirstamp
 .libs/
+*.a
 *.lo
 *.la
 *.o
