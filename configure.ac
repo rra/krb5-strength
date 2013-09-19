@@ -6,6 +6,7 @@ dnl     The Board of Trustees of the Leland Stanford Junior University
 dnl
 dnl See LICENSE for licensing terms.
 
+dnl Basic Autoconf configuration.
 AC_PREREQ([2.64])
 AC_INIT([krb5-strength], [1.1], [rra@stanford.edu])
 AC_CONFIG_AUX_DIR([build-aux])
@@ -15,6 +16,7 @@ AM_INIT_AUTOMAKE([1.11 check-news dist-xz foreign silent-rules subdir-objects
     -Wall -Werror])
 AM_MAINTAINER_MODE
 
+dnl Probe for basic build system tools.
 AC_PROG_CC
 AC_USE_SYSTEM_EXTENSIONS
 AC_SYS_LARGEFILE
@@ -24,19 +26,25 @@ m4_ifdef([AM_PROG_AR], [AM_PROG_AR])
 AM_DISABLE_STATIC
 AC_PROG_LIBTOOL
 
+dnl External libraries.
 RRA_LIB_CRACKLIB
 RRA_LIB_KRB5
 RRA_LIB_KRB5_SWITCH
 AC_CHECK_HEADERS([kadm5/kadm5-pwcheck.h krb5/pwqual_plugin.h], [], [],
     [RRA_INCLUDES_KRB5])
 AC_CHECK_TYPES([krb5_realm], [], [], [RRA_INCLUDES_KRB5])
+AC_CHECK_FUNCS([krb5_free_default_realm \
+    krb5_xfree])
+AC_LIBOBJ([krb5-extra])
 RRA_LIB_KRB5_RESTORE
 
+dnl Probe for libdl, which is used for the test suite.
 save_LIBS="$LIBS"
 AC_SEARCH_LIBS([dlopen], [dl], [DL_LIBS="$LIBS"])
 LIBS="$save_LIBS"
 AC_SUBST([DL_LIBS])
 
+dnl Checks for basic C functionality.
 AC_HEADER_STDBOOL
 AC_CHECK_HEADERS([sys/bittypes.h])
 AC_CHECK_DECLS([snprintf, vsnprintf])
@@ -51,6 +59,7 @@ AC_CHECK_TYPES([ssize_t], [], [],
 RRA_FUNC_SNPRINTF
 AC_REPLACE_FUNCS([asprintf strlcat strlcpy])
 
+dnl Write out the results.
 AC_CONFIG_FILES([Makefile])
 AC_CONFIG_HEADER([config.h])
 AC_OUTPUT
