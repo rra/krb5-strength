@@ -11,3 +11,6 @@ autoreconf -i --force
 version=`grep '^krb5-strength' NEWS | head -1 | cut -d' ' -f2`
 pod2man --release="$version" --center='krb5-strength' \
     external/heimdal-strength.pod > external/heimdal-strength.1
+
+# Generate the C version of our password test data.
+tests/data/make-c-data tests/data/cracklib.json > tests/data/cracklib.c

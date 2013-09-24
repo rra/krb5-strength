@@ -1,0 +1,39 @@
+#!/bin/sh
+#
+# Generate a krb5.conf file with an [appdefault] password_dictionary setting
+# pointing to the password dictionary we generated for the build.  This script
+# is used by C tests to set up the environment.
+#
+# Written by Russ Allbery <rra@stanford.edu>
+# Copyright 2009, 2013
+#     The Board of Trustees of the Leland Stanford Junior University
+#
+# See LICENSE for licensing terms.
+
+set -e
+
+# Command-line arguments are the path to the password dictionary, the source
+# krb5.conf template, and the directory into which to write the resulting
+# krb5.conf file.
+dict="$1"
+source="$2"
+tmpdir="$3"
+if [ -z "$tmpdir" ] ; then
+    echo 'Syntax: make-krb5-conf <dict> <source> <tmpdir>' >&2
+    exit 1
+fi
+
+# Copy over the template.
+cp "$source" "$tmpdir"/krb5.conf
+
+# Add the appdefaults section.
+cat <<EOF >>"$tmpdir"/krb5.conf
+
+[appdefaults]
+    krb5-strength = {
+        password_dictionary = $dict
+    }
+EOF
+
+# Done.
+exit 0

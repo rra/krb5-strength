@@ -99,3 +99,38 @@ krb5_free_error_message(krb5_context ctx UNUSED, const char *msg)
 # endif
 }
 #endif /* !HAVE_KRB5_FREE_ERROR_MESSAGE */
+
+
+#ifndef HAVE_KRB5_GET_INIT_CREDS_OPT_ALLOC
+/*
+ * Allocate and initialize a krb5_get_init_creds_opt struct.  This code
+ * assumes that an all-zero bit pattern will create a NULL pointer.
+ */
+krb5_error_code
+krb5_get_init_creds_opt_alloc(krb5_context ctx UNUSED,
+                              krb5_get_init_creds_opt **opts)
+{
+    *opts = calloc(1, sizeof(krb5_get_init_creds_opt));
+    if (*opts == NULL)
+        return errno;
+    krb5_get_init_creds_opt_init(*opts);
+    return 0;
+}
+#endif /* !HAVE_KRB5_GET_INIT_CREDS_OPT_ALLOC */
+
+
+#ifndef HAVE_KRB5_PRINCIPAL_GET_REALM
+/*
+ * Return the realm of a principal as a const char *.
+ */
+const char *
+krb5_principal_get_realm(krb5_context ctx UNUSED, krb5_const_principal princ)
+{
+    const krb5_data *data;
+
+    data = krb5_princ_realm(ctx, princ);
+    if (data == NULL || data->data == NULL)
+        return NULL;
+    return data->data;
+}
+#endif /* !HAVE_KRB5_PRINCIPAL_GET_REALM */

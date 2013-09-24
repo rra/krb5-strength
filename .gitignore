@@ -20,8 +20,9 @@
 /m4/lt~obsolete.m4
 /stamp-h1
 /tests/data/.placeholder
+/tests/data/cracklib.c
 /tests/data/dictionary.*
-/tests/heimdal/plugin
+/tests/heimdal/plugin-t
 /tests/mit/plugin
 /tests/portable/asprintf-t
 /tests/portable/snprintf-t

@@ -11,9 +11,8 @@ EXTRA_DIST = .gitignore LICENSE autogen cracklib/HISTORY cracklib/LICENCE   \
 	cracklib/README cracklib/genrules.pl cracklib/mkdict		    \
 	external/heimdal-strength.pod patches/README patches/mit-krb5-1.4.4 \
 	tests/HOWTO tests/TESTS tests/data/wordlist			    \
-	tests/heimdal/external-t tests/heimdal/plugin-t			    \
-	tests/heimdal/pod-spelling-t tests/heimdal/pod-t tests/mit/plugin-t \
-	tests/tap/libtap.sh
+	tests/heimdal/external-t tests/heimdal/pod-spelling-t		    \
+	tests/heimdal/pod-t tests/mit/plugin-t tests/tap/libtap.sh
 
 # Do this globally.  Everything needs to find the Kerberos headers and
 # libraries, and if we're using the system CrackLib, add its location
@@ -106,7 +105,7 @@ warnings:
 	$(MAKE) V=0 CFLAGS='$(WARNINGS)' $(check_PROGRAMS)
 
 # The bits below are for the test suite, not for the main package.
-check_PROGRAMS = tests/heimdal/plugin tests/mit/plugin			 \
+check_PROGRAMS = tests/heimdal/plugin-t tests/mit/plugin		 \
 	tests/portable/asprintf-t tests/portable/snprintf-t		 \
 	tests/portable/strlcat-t tests/portable/strlcpy-t tests/runtests \
 	tests/util/messages-t tests/util/xmalloc
@@ -116,14 +115,16 @@ endif
 tests_runtests_CPPFLAGS = -DSOURCE='"$(abs_top_srcdir)/tests"' \
 	-DBUILD='"$(abs_top_builddir)/tests"'
 check_LIBRARIES = tests/tap/libtap.a
-tests_tap_libtap_a_CPPFLAGS = -I$(abs_top_srcdir)/tests
+tests_tap_libtap_a_CPPFLAGS = -I$(abs_top_srcdir)/tests $(KRB5_CPPFLAGS)
 tests_tap_libtap_a_SOURCES = tests/tap/basic.c tests/tap/basic.h	\
-	tests/tap/macros.h tests/tap/process.c tests/tap/process.h	\
-	tests/tap/string.c tests/tap/string.h
+	tests/tap/kerberos.c tests/tap/kerberos.h tests/tap/macros.h	\
+	tests/tap/process.c tests/tap/process.h tests/tap/string.c	\
+	tests/tap/string.h
 
 # The actual test programs.
-tests_heimdal_plugin_SOURCES = tests/heimdal/plugin.c
-tests_heimdal_plugin_LDADD = portable/libportable.la $(KRB5_LIBS) $(DL_LIBS)
+tests_heimdal_plugin_t_CPPFLAGS = $(KRB5_CPPFLAGS)
+tests_heimdal_plugin_t_LDADD = tests/tap/libtap.a portable/libportable.la \
+	$(KRB5_LIBS) $(DL_LIBS)
 tests_mit_plugin_SOURCES = tests/mit/plugin.c
 tests_mit_plugin_LDADD = portable/libportable.la $(KRB5_LIBS) $(DL_LIBS)
 tests_portable_asprintf_t_SOURCES = tests/portable/asprintf-t.c \
