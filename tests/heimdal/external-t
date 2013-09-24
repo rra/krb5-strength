@@ -122,6 +122,13 @@ sub load_password_tests {
     return $json->decode($testdata);
 }
 
+# Load the password tests from JSON.
+my $tests = load_password_tests(test_file_path('data/cracklib.json'));
+
+# We can now calculate our plan: three tests for each password test, with an
+# extra set for testing behavior when password_dictionary is not configured.
+plan(tests => (scalar(@{$tests}) + 1) * 3);
+
 # Find our initial test krb5.conf file.
 local $ENV{KRB5_CONFIG} = test_file_path('data/krb5.conf');
 
@@ -140,14 +147,10 @@ check_password($test);
 # dictionary.
 local $ENV{KRB5_CONFIG} = create_krb5_conf();
 
-# Load and run the password tests from JSON.
-my $tests = load_password_tests(test_file_path('data/cracklib.json'));
+# Run the password tests from JSON.
 for my $test (@{$tests}) {
     check_password($test);
 }
-
-# Tell Test::More that we've finished running all of our test cases.
-done_testing();
 
 # Clean up our temporary krb5.conf file on any exit.
 END {
