@@ -206,7 +206,6 @@ main(void)
     setup_argv[4] = NULL;
     run_setup((const char **) setup_argv);
     test_file_path_free(setup_argv[0]);
-    free(dictionary);
     test_file_path_free(path);
 
     /* Point KRB5_CONFIG at the newly-generated krb5.conf file. */
@@ -233,6 +232,7 @@ main(void)
     test_tmpdir_free(tmpdir);
 
     /* Keep valgrind clean by freeing all memory. */
+    free(dictionary);
     krb5_free_context(ctx);
     free(vtable);
     putenv((char *) "KRB5_CONFIG=");
