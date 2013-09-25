@@ -146,9 +146,18 @@ tests_util_messages_t_LDADD = tests/tap/libtap.a util/libutil.a \
 tests_util_xmalloc_LDADD = util/libutil.a portable/libportable.la
 
 # The dictionary is used by the tests and needs to be built first.
-tests/data/dictionary.pwd: cracklib/packer $(srcdir)/tests/data/wordlist
+if EMBEDDED_CRACKLIB
+tests/data/dictionary.pwd: cracklib/packer $(srcdir)/cracklib/mkdict \
+		$(srcdir)/tests/data/wordlist
 	mkdir -p tests/data
-	cracklib/packer tests/data/dictionary < $(srcdir)/tests/data/wordlist
+	$(srcdir)/cracklib/mkdict $(srcdir)/tests/data/wordlist \
+	    | cracklib/packer tests/data/dictionary
+else
+tests/data/dictionary.pwd: $(srcdir)/tests/data/wordlist
+	mkdir -p tests/data
+	cracklib-format $(srcdir)/tests/data/wordlist \
+	    | cracklib-packer tests/data/dictionary
+endif
 
 check-local: $(check_PROGRAMS) tests/data/dictionary.pwd
 	cd tests && ./runtests -l $(abs_top_srcdir)/tests/TESTS
