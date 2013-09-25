@@ -150,7 +150,7 @@ main(void)
         "test@EXAMPLE.ORG",
         "password",
         1,
-        "password_dictionary not configured in krb5.conf",
+        "cannot initialize strength checking",
     };
 
     /* If we're not building with Heimdal, we can't run this test. */

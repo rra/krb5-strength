@@ -26,91 +26,6 @@
 
 
 /*
- * Heimdal and MIT use different structures for the realm.  This doesn't
- * really need to build on MIT, but may as well.
- */
-#ifdef HAVE_KRB5_REALM
-static void
-free_realm(krb5_realm *realm_data)
-{
-    if (*realm_data != NULL) {
-        free(*realm_data);
-        *realm_data = NULL;
-    }
-}
-
-static void
-set_realm(krb5_realm *realm_data, const char *realm)
-{
-    free_realm(realm_data);
-    *realm_data = xstrdup(realm);
-}
-
-#else /* !HAVE_KRB5_REALM */
-
-static void
-free_realm(krb5_data **realm_data)
-{
-    if (*realm_data != NULL) {
-        if ((*realm_data)->data != NULL)
-            free((*realm_data)->data);
-        free(*realm_data);
-        *realm_data = NULL;
-    }
-}
-
-static void
-set_realm(krb5_data **realm_data, const char *realm)
-{
-    free_realm(realm_data);
-    *realm_data = xmalloc(sizeof(**realm_data));
-    (*realm_data)->data = xstrdup(realm);
-    (*realm_data)->magic = KV5M_DATA;
-    (*realm_data)->length = strlen(realm);
-}
-
-#endif /* !HAVE_KRB5_REALM */
-
-
-/*
- * Initialize the password strength checking functions and returns the context
- * handle for the strength checking plugin.  Exits on failure.
- */
-static void *
-initialize(void)
-{
-    void *context;
-    krb5_context ctx;
-    char *realm = NULL;
-    char *dictionary = NULL;
-#ifdef HAVE_KRB5_REALM
-    krb5_realm realm_data = NULL;
-#else
-    krb5_data *realm_data = NULL;
-#endif
-
-    /* We need to create a Kerberos context just to get the dictionary path. */
-    if (krb5_init_context(&ctx) != 0)
-        die("Cannot create Kerberos context");
-    krb5_get_default_realm(ctx, &realm);
-    if (realm != NULL)
-        set_realm(&realm_data, realm);
-    krb5_appdefault_string(ctx, "krb5-strength", realm_data,
-                           "password_dictionary", "", &dictionary);
-    if (dictionary == NULL || dictionary[0] == '\0')
-        die("password_dictionary not configured in krb5.conf");
-    if (realm != NULL) {
-        krb5_free_default_realm(ctx, realm);
-        free_realm(&realm_data);
-    }
-    if (pwcheck_init(&context, dictionary) != 0)
-        sysdie("Cannot initialize strength checking");
-    free(dictionary);
-    return context;
-}
-
-
-/*
  * Read a key/value pair from stdin, check that the key is the one expected,
  * and if so, copy the value into the provided buffer.  Exits with an
  * appropriate error on failure.
@@ -142,7 +57,7 @@ read_key(const char *key, char *buffer, size_t length)
  * context.
  */
 static void
-check_password(void *context)
+check_password(krb5_context ctx, krb5_pwqual_moddata data)
 {
     char principal[BUFSIZ], password[BUFSIZ], error[BUFSIZ], end[BUFSIZ];
 
@@ -152,7 +67,7 @@ check_password(void *context)
         sysdie("Cannot read end of entry");
     if (strcmp(end, "end\n") != 0)
         die("Malformed end line");
-    if (pwcheck_check(context, password, principal, error, sizeof(error)))
+    if (pwcheck_check(ctx, data, password, principal, error, sizeof(error)))
         fprintf(stderr, "%s\n", error);
     else
         printf("APPROVED\n");
@@ -169,11 +84,24 @@ check_password(void *context)
 int
 main(int argc, char *argv[] UNUSED)
 {
-    void *context;
+    krb5_context ctx;
+    krb5_pwqual_moddata data;
 
+    /* Check command-line arguments. */
     if (argc != 1 && argc != 2)
         die("Usage: heimdal-strength <principal>");
-    context = initialize();
-    check_password(context);
+
+    /* Initialize Kerberos and the module. */
+    if (krb5_init_context(&ctx) != 0)
+        die("Cannot create Kerberos context");
+    if (pwcheck_init(ctx, NULL, &data) != 0)
+        die("cannot initialize strength checking");
+
+    /* Check the password and report results. */
+    check_password(ctx, data);
+
+    /* Close and free resources. */
+    pwcheck_close(ctx, data);
+    krb5_free_context(ctx);
     exit(0);
 }

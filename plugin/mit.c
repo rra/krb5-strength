@@ -39,33 +39,19 @@ krb5_error_code pwqual_strength_initvt(krb5_context, int, int,
  * dictionary is, and then call pwcheck_init.
  */
 static krb5_error_code
-init(krb5_context context, const char *dict_file, krb5_pwqual_moddata *data)
+init(krb5_context ctx, const char *dictionary, krb5_pwqual_moddata *data)
 {
-    void *d;
     krb5_error_code code;
-    char *dictionary = NULL;
 
-    if (dict_file == NULL)
-        dict_file = "";
-    krb5_appdefault_string(context, "krb5-strength", NULL,
-                           "password_dictionary", dict_file, &dictionary);
-    if (dictionary == NULL || dictionary[0] == '\0') {
-        krb5_set_error_message(context, KADM5_MISSING_CONF_PARAMS,
-                               "Cannot initialize strength checking without"
-                               " dictionary");
-        krb5_free_string(context, dictionary);
-        return KADM5_MISSING_CONF_PARAMS;
-    }
-    code = pwcheck_init(&d, dictionary);
+    code = pwcheck_init(ctx, dictionary, data);
     if (code != 0) {
-        krb5_set_error_message(context, code, "Cannot initialize strength"
-                               " checking with dictionary %s: %s", dictionary,
+        krb5_set_error_message(ctx, code, "cannot initialize strength"
+                               " checking%s%s: %s",
+                               dictionary == NULL ? "" : " with dictionary",
+                               dictionary == NULL ? "" : dictionary,
                                strerror(errno));
-        krb5_free_string(context, dictionary);
         return code;
     }
-    krb5_free_string(context, dictionary);
-    *data = d;
     return 0;
 }
 
@@ -75,21 +61,21 @@ init(krb5_context context, const char *dict_file, krb5_pwqual_moddata *data)
  * into a string for our check.
  */
 static krb5_error_code
-check(krb5_context context, krb5_pwqual_moddata data, const char *password,
+check(krb5_context ctx, krb5_pwqual_moddata data, const char *password,
       const char *policy_name UNUSED, krb5_principal princ,
       const char **languages UNUSED)
 {
     char *name = NULL;
     krb5_error_code status;
-    char message[BUFSIZ];
+    char error[BUFSIZ];
 
-    status = krb5_unparse_name(context, princ, &name);
+    status = krb5_unparse_name(ctx, princ, &name);
     if (status != 0)
         return status;
-    status = pwcheck_check(data, password, name, message, sizeof(message));
+    status = pwcheck_check(ctx, data, password, name, error, sizeof(error));
     if (status != 0)
-        krb5_set_error_message(context, status, "%s", message);
-    krb5_free_unparsed_name(context, name);
+        krb5_set_error_message(ctx, status, "%s", error);
+    krb5_free_unparsed_name(ctx, name);
     return status;
 }
 
@@ -98,9 +84,9 @@ check(krb5_context context, krb5_pwqual_moddata data, const char *password,
  * Shut down the library.
  */
 static void
-fini(krb5_context context UNUSED, krb5_pwqual_moddata data)
+fini(krb5_context ctx, krb5_pwqual_moddata data)
 {
-    pwcheck_close(data);
+    pwcheck_close(ctx, data);
 }
 
 
@@ -116,7 +102,7 @@ pwqual_strength_initvt(krb5_context context UNUSED, int maj_ver,
 
     if (maj_ver != 1)
         return KRB5_PLUGIN_VER_NOTSUPP;
-    vt = (krb5_pwqual_vtable)vtable;
+    vt = (krb5_pwqual_vtable) vtable;
     vt->name = "krb5-strength";
     vt->open = init;
     vt->check = check;

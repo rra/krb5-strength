@@ -22,68 +22,144 @@
 #include <errno.h>
 
 #include <plugin/api.h>
+#include <util/macros.h>
 
 /* Heimdal doesn't define KADM5_PASS_Q_GENERIC. */
 #ifndef KADM5_PASS_Q_GENERIC
 # define KADM5_PASS_Q_GENERIC KADM5_PASS_Q_DICT
 #endif
 
-/*
- * Used to store local state.  Currently, all we have is the dictionary path,
- * which we get from kadmind rather than from krb5.conf since it's already a
- * kdc.conf setting.
- */
-struct context {
-    char *dictionary;
-};
-
 /* The public function exported by the cracklib library. */
 extern char *FascistCheck(const char *password, const char *dict);
+
+
+/*
+ * Load a string option from Kerberos appdefaults.  Takes the Kerberos
+ * context, the section name, the realm, the option, and the result location.
+ *
+ * This requires an annoying workaround because one cannot specify a default
+ * value of NULL with MIT Kerberos, since MIT Kerberos unconditionally calls
+ * strdup on the default value.  There's also no way to determine if memory
+ * allocation failed while parsing or while setting the default value, so we
+ * don't return an error code.
+ */
+static void
+default_string(krb5_context ctx, const char *section, const char *opt,
+               char **result)
+{
+    char *value = NULL;
+    char *realm = NULL;
+    krb5_error_code code;
+#ifdef HAVE_KRB5_REALM
+    krb5_const_realm rdata;
+#else
+    krb5_data realm_struct;
+    const krb5_data *rdata;
+#endif
+
+    /* Get the default realm.  This is annoying for MIT Kerberos. */
+    code = krb5_get_default_realm(ctx, &realm);
+    if (code != 0)
+        realm = NULL;
+#ifdef HAVE_KRB5_REALM
+    rdata = realm;
+#else
+    if (realm == NULL)
+        rdata = NULL;
+    else {
+        rdata = &realm_struct;
+        realm_struct.magic = KV5M_DATA;
+        realm_struct.data = (void *) realm;
+        realm_struct.length = strlen(realm);
+    }
+#endif
+
+    /* Obtain the string from [appdefaults]. */
+    krb5_appdefault_string(ctx, section, rdata, opt, "", &value);
+
+    /* If we got something back, store it in result. */
+    if (value != NULL) {
+        if (value[0] == '\0')
+            free(value);
+        else {
+            if (*result != NULL)
+                free(*result);
+            *result = strdup(value);
+            krb5_free_string(ctx, value);
+        }
+    }
+
+    /* Free the realm if we got one. */
+    if (realm != NULL)
+        krb5_free_default_realm(ctx, realm);
+}
 
 
 /*
  * Initialize the module.  Ensure that the dictionary file exists and is
  * readable and store the path in the module context.  Returns 0 on success,
  * non-zero on failure.  This function returns failure only if it could not
- * allocate memory.
+ * allocate memory or internal Kerberos calls that shouldn't fail do.
  *
  * The dictionary file should not include the trailing .pwd extension.
  * Currently, we don't cope with a NULL dictionary path.
  */
 krb5_error_code
-pwcheck_init(void **context, const char *dictionary)
+pwcheck_init(krb5_context ctx, const char *dictionary,
+             krb5_pwqual_moddata *data)
 {
-    char *path;
-    size_t length;
-    struct context *ctx;
+    char *file;
+    char *path = NULL;
+    int oerrno;
 
+    /* Use dictionary if given, otherwise get from krb5.conf. */
     if (dictionary == NULL)
-        return KADM5_MISSING_CONF_PARAMS;
-    length = strlen(dictionary) + strlen(".pwd") + 1;
-    path = malloc(length);
+        default_string(ctx, "krb5-strength", "password_dictionary", &path);
+    else {
+        path = strdup(dictionary);
+        if (path == NULL)
+            return errno;
+    }
+
+    /* If there is no dictionary, abort our setup with an error. */
     if (path == NULL)
-        return errno;
-    snprintf(path, length, "%s.pwd", dictionary);
-    if (access(path, R_OK) != 0)
-        return errno;
-    path[strlen(path) - strlen(".pwd")] = '\0';
-    ctx = malloc(sizeof(struct context));
-    if (ctx == NULL)
-        return errno;
-    ctx->dictionary = path;
-    *context = ctx;
+        return KADM5_MISSING_CONF_PARAMS;
+
+    /* Sanity-check the dictionary path. */
+    if (asprintf(&file, "%s.pwd", path) < 0) {
+        oerrno = errno;
+        free(path);
+        return oerrno;
+    }
+    if (access(file, R_OK) != 0) {
+        oerrno = errno;
+        free(path);
+        free(file);
+        return oerrno;
+    }
+    free(file);
+
+    /* Everything looks good.  Allocate and store our internal data. */
+    *data = malloc(sizeof(**data));
+    if (*data == NULL) {
+        oerrno = errno;
+        free(path);
+        return oerrno;
+    }
+    (*data)->dictionary = path;
     return 0;
 }
 
 
 /*
- * Check a given password.  Takes our local context, the password, the
- * principal the password is for, and a buffer and buffer length into which to
- * put any failure message.
+ * Check a given password.  Takes a Kerberos context, our module data, the
+ * password, the principal the password is for, and a buffer and buffer length
+ * into which to put any failure message.
  */
 krb5_error_code
-pwcheck_check(void *context, const char *password, const char *principal,
-              char *errstr, int errstrlen)
+pwcheck_check(krb5_context ctx UNUSED, krb5_pwqual_moddata data,
+              const char *password, const char *principal, char *errstr,
+              int errstrlen)
 {
     char *user, *p;
     const char *q;
@@ -91,7 +167,6 @@ pwcheck_check(void *context, const char *password, const char *principal,
     char c;
     int err;
     const char *result;
-    struct context *ctx = context;
 
     /*
      * We get the principal (in krb5_unparse_name format) from kadmind and we
@@ -150,7 +225,7 @@ pwcheck_check(void *context, const char *password, const char *principal,
             }
         }
     free(user);
-    result = FascistCheck(password, ctx->dictionary);
+    result = FascistCheck(password, data->dictionary);
     if (result != NULL) {
         strlcpy(errstr, result, errstrlen);
         return KADM5_PASS_Q_GENERIC;
@@ -161,16 +236,13 @@ pwcheck_check(void *context, const char *password, const char *principal,
 
 /*
  * Cleanly shut down the password strength plugin.  The only thing we have to
- * do is free our context memory.
+ * do is free the memory allocated for our internal data.
  */
 void
-pwcheck_close(void *context)
+pwcheck_close(krb5_context ctx UNUSED, krb5_pwqual_moddata data)
 {
-    struct context *ctx = context;
-
-    if (ctx != NULL) {
-        if (ctx->dictionary != NULL)
-            free(ctx->dictionary);
-        free(ctx);
+    if (data != NULL) {
+        free(data->dictionary);
+        free(data);
     }
 }

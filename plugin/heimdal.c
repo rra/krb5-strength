@@ -63,47 +63,40 @@ struct kadm5_pw_policy_verifier {
  * strings we expect, and return the result.
  */
 static int
-heimdal_pwcheck(krb5_context context, krb5_principal principal,
+heimdal_pwcheck(krb5_context ctx, krb5_principal principal,
                 krb5_data *password, const char *tuning UNUSED, char *message,
                 size_t length)
 {
-    void *data;
+    krb5_pwqual_moddata data;
     char *pastring;
     char *name = NULL;
-    char *dictionary = NULL;
-    krb5_error_code status;
+    krb5_error_code code;
     int result;
 
-    krb5_appdefault_string(context, "krb5-strength", principal->realm,
-                           "password_dictionary", "", &dictionary);
-    if (dictionary == NULL || dictionary[0] == '\0') {
-        strlcpy(message, "password_dictionary not configured in krb5.conf",
-                length);
-        return 1;
-    }
-    status = krb5_unparse_name(context, principal, &name);
-    if (status != 0) {
-        strlcpy(message, "Cannot unparse principal name", length);
-        return 1;
-    }
     pastring = malloc(password->length + 1);
     if (pastring == NULL) {
-        snprintf(message, length, "Cannot allocate memory: %s",
+        snprintf(message, length, "cannot allocate memory: %s",
                  strerror(errno));
         return 1;
     }
     memcpy(pastring, password->data, password->length);
     pastring[password->length] = '\0';
-    if (pwcheck_init(&data, dictionary) != 0) {
-        snprintf(message, length, "Cannot initialize strength checking"
-                 " with dictionary %s: %s", dictionary, strerror(errno));
+    if (pwcheck_init(ctx, NULL, &data) != 0) {
+        snprintf(message, length, "cannot initialize strength checking");
         free(pastring);
         return 1;
     }
-    result = pwcheck_check(data, pastring, name, message, length);
+    code = krb5_unparse_name(ctx, principal, &name);
+    if (code != 0) {
+        strlcpy(message, "cannot unparse principal name", length);
+        free(pastring);
+        pwcheck_close(ctx, data);
+        return 1;
+    }
+    result = pwcheck_check(ctx, data, pastring, name, message, length);
     krb5_free_unparsed_name(ctx, name);
     free(pastring);
-    pwcheck_close(data);
+    pwcheck_close(ctx, data);
     return (result == 0) ? 0 : 1;
 }
 

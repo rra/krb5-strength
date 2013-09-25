@@ -139,7 +139,7 @@ my $test = {
     principal => 'test@EXAMPLE.COM',
     password  => 'password',
     status    => 1,
-    error     => 'password_dictionary not configured in krb5.conf',
+    error     => 'cannot initialize strength checking',
 };
 check_password($test);
 
