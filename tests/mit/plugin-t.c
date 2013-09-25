@@ -232,7 +232,9 @@ main(void)
     free(path);
     test_tmpdir_free(tmpdir);
 
-    /* Keep valgrind clean by freeing environmental memory. */
+    /* Keep valgrind clean by freeing all memory. */
+    krb5_free_context(ctx);
+    free(vtable);
     putenv((char *) "KRB5_CONFIG=");
     free(krb5_config);
     return 0;
