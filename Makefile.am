@@ -48,7 +48,6 @@ endif
 
 # Rules for building the password strength plugin.
 module_LTLIBRARIES = plugin/passwd_strength.la
-plugin_passwd_strength_la_CPPFLAGS = $(KRB5_CPPFLAGS)
 plugin_passwd_strength_la_SOURCES = plugin/api.c plugin/heimdal.c \
 	plugin/mit.c
 plugin_passwd_strength_la_LDFLAGS = -module -avoid-version
