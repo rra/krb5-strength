@@ -23,7 +23,7 @@
 /tests/data/cracklib.c
 /tests/data/dictionary.*
 /tests/heimdal/plugin-t
-/tests/mit/plugin
+/tests/mit/plugin-t
 /tests/portable/asprintf-t
 /tests/portable/snprintf-t
 /tests/portable/strlcat-t
