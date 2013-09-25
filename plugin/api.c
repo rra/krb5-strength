@@ -14,11 +14,19 @@
  */
 
 #include <config.h>
+#include <portable/kadmin.h>
+#include <portable/krb5.h>
 #include <portable/system.h>
 
 #include <ctype.h>
+#include <errno.h>
 
 #include <plugin/api.h>
+
+/* Heimdal doesn't define KADM5_PASS_Q_GENERIC. */
+#ifndef KADM5_PASS_Q_GENERIC
+# define KADM5_PASS_Q_GENERIC KADM5_PASS_Q_DICT
+#endif
 
 /*
  * Used to store local state.  Currently, all we have is the dictionary path,
@@ -42,7 +50,7 @@ extern char *FascistCheck(const char *password, const char *dict);
  * The dictionary file should not include the trailing .pwd extension.
  * Currently, we don't cope with a NULL dictionary path.
  */
-int
+krb5_error_code
 pwcheck_init(void **context, const char *dictionary)
 {
     char *path;
@@ -50,18 +58,18 @@ pwcheck_init(void **context, const char *dictionary)
     struct context *ctx;
 
     if (dictionary == NULL)
-        return 1;
+        return KADM5_MISSING_CONF_PARAMS;
     length = strlen(dictionary) + strlen(".pwd") + 1;
     path = malloc(length);
     if (path == NULL)
-        return 1;
+        return errno;
     snprintf(path, length, "%s.pwd", dictionary);
     if (access(path, R_OK) != 0)
-        return 1;
+        return errno;
     path[strlen(path) - strlen(".pwd")] = '\0';
     ctx = malloc(sizeof(struct context));
     if (ctx == NULL)
-        return 1;
+        return errno;
     ctx->dictionary = path;
     *context = ctx;
     return 0;
@@ -73,7 +81,7 @@ pwcheck_init(void **context, const char *dictionary)
  * principal the password is for, and a buffer and buffer length into which to
  * put any failure message.
  */
-int
+krb5_error_code
 pwcheck_check(void *context, const char *password, const char *principal,
               char *errstr, int errstrlen)
 {
@@ -81,6 +89,7 @@ pwcheck_check(void *context, const char *password, const char *principal,
     const char *q;
     size_t i, j;
     char c;
+    int err;
     const char *result;
     struct context *ctx = context;
 
@@ -91,13 +100,14 @@ pwcheck_check(void *context, const char *password, const char *principal,
      * have to copy the string so that we can manipulate it a bit.
      */
     if (strcasecmp(password, principal) == 0) {
-	snprintf(errstr, errstrlen, "Password based on username");
-	return 1;
+        snprintf(errstr, errstrlen, "Password based on username");
+        return KADM5_PASS_Q_GENERIC;
     }
     user = strdup(principal);
     if (user == NULL) {
+        err = errno;
         snprintf(errstr, errstrlen, "Cannot allocate memory");
-        return 1;
+        return err;
     }
     for (p = user; p[0] != '\0'; p++) {
         if (p[0] == '\\' && p[1] != '\0') {
@@ -113,7 +123,7 @@ pwcheck_check(void *context, const char *password, const char *principal,
         if (strcasecmp(password, user) == 0) {
             free(user);
             snprintf(errstr, errstrlen, "Password based on username");
-            return 1;
+            return KADM5_PASS_Q_GENERIC;
         }
 
         /* Check against the reversed username. */
@@ -125,7 +135,7 @@ pwcheck_check(void *context, const char *password, const char *principal,
         if (strcasecmp(password, user) == 0) {
             free(user);
             snprintf(errstr, errstrlen, "Password based on username");
-            return 1;
+            return KADM5_PASS_Q_GENERIC;
         }
     }
     if (strlen(password) > strlen(user))
@@ -136,14 +146,14 @@ pwcheck_check(void *context, const char *password, const char *principal,
             if (*q == '\0') {
                 free(user);
                 snprintf(errstr, errstrlen, "Password based on username");
-                return 1;
+                return KADM5_PASS_Q_GENERIC;
             }
         }
     free(user);
     result = FascistCheck(password, ctx->dictionary);
     if (result != NULL) {
         strlcpy(errstr, result, errstrlen);
-        return 1;
+        return KADM5_PASS_Q_GENERIC;
     }
     return 0;
 }

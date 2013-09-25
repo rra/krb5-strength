@@ -47,6 +47,7 @@ endif
 
 # Rules for building the password strength plugin.
 module_LTLIBRARIES = plugin/passwd_strength.la
+plugin_passwd_strength_la_CPPFLAGS = $(KRB5_CPPFLAGS)
 plugin_passwd_strength_la_SOURCES = plugin/api.c plugin/heimdal.c \
 	plugin/mit.c
 plugin_passwd_strength_la_LDFLAGS = -module -avoid-version
@@ -105,7 +106,7 @@ warnings:
 	$(MAKE) V=0 CFLAGS='$(WARNINGS)' $(check_PROGRAMS)
 
 # The bits below are for the test suite, not for the main package.
-check_PROGRAMS = tests/heimdal/plugin-t tests/mit/plugin		 \
+check_PROGRAMS = tests/heimdal/plugin-t tests/mit/plugin-t		 \
 	tests/portable/asprintf-t tests/portable/snprintf-t		 \
 	tests/portable/strlcat-t tests/portable/strlcpy-t tests/runtests \
 	tests/util/messages-t tests/util/xmalloc
@@ -125,8 +126,9 @@ tests_tap_libtap_a_SOURCES = tests/tap/basic.c tests/tap/basic.h	\
 tests_heimdal_plugin_t_CPPFLAGS = $(KRB5_CPPFLAGS)
 tests_heimdal_plugin_t_LDADD = tests/tap/libtap.a portable/libportable.la \
 	$(KRB5_LIBS) $(DL_LIBS)
-tests_mit_plugin_SOURCES = tests/mit/plugin.c
-tests_mit_plugin_LDADD = portable/libportable.la $(KRB5_LIBS) $(DL_LIBS)
+tests_mit_plugin_t_CPPFLAGS = $(KRB5_CPPFLAGS)
+tests_mit_plugin_t_LDADD = tests/tap/libtap.a portable/libportable.la \
+	$(KRB5_LIBS) $(DL_LIBS)
 tests_portable_asprintf_t_SOURCES = tests/portable/asprintf-t.c \
 	tests/portable/asprintf.c
 tests_portable_asprintf_t_LDADD = tests/tap/libtap.a portable/libportable.la

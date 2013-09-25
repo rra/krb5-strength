@@ -13,6 +13,7 @@
  */
 
 #include <config.h>
+#include <portable/kadmin.h>
 #include <portable/krb5.h>
 #include <portable/system.h>
 
@@ -41,13 +42,29 @@ static krb5_error_code
 init(krb5_context context, const char *dict_file, krb5_pwqual_moddata *data)
 {
     void *d;
+    krb5_error_code code;
+    char *dictionary = NULL;
 
-    if (pwcheck_init(&d, dict_file) != 0) {
-        krb5_set_error_message(context, errno, "Cannot initialize strength"
-                               " checking with dictionary %s: %s", dict_file,
-                               strerror(errno));
-        return errno;
+    if (dict_file == NULL)
+        dict_file = "";
+    krb5_appdefault_string(context, "krb5-strength", NULL,
+                           "password_dictionary", dict_file, &dictionary);
+    if (dictionary == NULL || dictionary[0] == '\0') {
+        krb5_set_error_message(context, KADM5_MISSING_CONF_PARAMS,
+                               "Cannot initialize strength checking without"
+                               " dictionary");
+        krb5_free_string(context, dictionary);
+        return KADM5_MISSING_CONF_PARAMS;
     }
+    code = pwcheck_init(&d, dictionary);
+    if (code != 0) {
+        krb5_set_error_message(context, code, "Cannot initialize strength"
+                               " checking with dictionary %s: %s", dictionary,
+                               strerror(errno));
+        krb5_free_string(context, dictionary);
+        return code;
+    }
+    krb5_free_string(context, dictionary);
     *data = d;
     return 0;
 }

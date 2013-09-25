@@ -12,14 +12,8 @@
  */
 
 #include <config.h>
+#include <portable/kadmin.h>
 #include <portable/krb5.h>
-
-#include <kadm5/kadm5_err.h>
-
-/* Heimdal doesn't define KADM5_PASS_Q_GENERIC. */
-#ifndef KADM5_PASS_Q_GENERIC
-# define KADM5_PASS_Q_GENERIC KADM5_PASS_Q_DICT
-#endif
 
 struct password_test {
     const char *name;

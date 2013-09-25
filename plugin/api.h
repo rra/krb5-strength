@@ -16,9 +16,10 @@
 #include <config.h>
 
 /* General public API. */
-int pwcheck_init(void **context, const char *dictionary);
-int pwcheck_check(void *context, const char *password, const char *principal,
-                  char *errstr, int errstrlen);
+krb5_error_code pwcheck_init(void **context, const char *dictionary);
+krb5_error_code pwcheck_check(void *context, const char *password,
+                              const char *principal, char *errstr,
+                              int errstrlen);
 void pwcheck_close(void *context);
 
 #endif /* !PLUGIN_INTERNAL_H */

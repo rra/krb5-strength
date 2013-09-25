@@ -104,7 +104,7 @@ heimdal_pwcheck(krb5_context context, krb5_principal principal,
     krb5_free_unparsed_name(ctx, name);
     free(pastring);
     pwcheck_close(data);
-    return result;
+    return (result == 0) ? 0 : 1;
 }
 
 /* The public symbol that Heimdal looks for. */

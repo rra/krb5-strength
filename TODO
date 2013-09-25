@@ -7,3 +7,6 @@
  * Feed back modifications to CrackLib 2 to allow a program to use a
    custom set of rules, which would allow us to stop embedding our own
    copy of CrackLib customized to add additional rules.
+
+ * Pass the default realm into krb5_appdefault_string when getting
+   defaults for the MIT Kerberos plugin.
