@@ -25,8 +25,9 @@
  *   - Change MINLENGTH to 8.
  *   - Use a separate buffer to hold the reversed password.
  *   - Also check whether a password is a duplicated dictionary word.
- * 2013-09-18  Russ Allbery <rra@stanford.edu>
+ * 2013-09-24  Russ Allbery <rra@stanford.edu>
  *   - Replaced MAXSTEP with allowing one increment per four characters.
+ *   - Changed error for very short passwords to match current CrackLib.
  */
 
 static const char vers_id[] = "fascist.c : v2.3p3 Alec Muffett 14 dec 1997";
@@ -453,7 +454,7 @@ FascistLook(PWDICT *pwp, const char *instring)
     pw_len = strlen(password); 
     if (pw_len < 4)
     {
-	return ("it's WAY too short");
+	return ("it is WAY too short");
     }
 
     if (pw_len < MINLEN)

@@ -16,6 +16,7 @@ following modifications have been made:
  * Use Autoconf and portable/system.h to find types of specific lengths.
  * Increase MINLENGTH.
  * Add a check for a duplicated dictionary word.
+ * Changed error for very short passwords to match current CrackLib.
 
 Below is the original changelog for CrackLib:
 

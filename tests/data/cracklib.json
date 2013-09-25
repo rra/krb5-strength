@@ -52,14 +52,14 @@
         "principal": "test@EXAMPLE.ORG",
         "password": "foo",
         "code": "KADM5_PASS_Q_GENERIC",
-        "error": "it's WAY too short"
+        "error": "it is WAY too short"
     },
     {
         "name": "empty",
         "principal": "test@EXAMPLE.ORG",
         "password": "",
         "code": "KADM5_PASS_Q_GENERIC",
-        "error": "it's WAY too short"
+        "error": "it is WAY too short"
     },
     {
         "name": "all whitespace",
