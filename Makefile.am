@@ -7,12 +7,12 @@
 # See LICENSE for licensing terms.
 
 ACLOCAL_AMFLAGS = -I m4
-EXTRA_DIST = .gitignore LICENSE autogen cracklib/HISTORY cracklib/LICENCE   \
-	cracklib/README cracklib/genrules.pl cracklib/mkdict		    \
-	external/heimdal-strength.pod patches/README patches/mit-krb5-1.4.4 \
-	tests/HOWTO tests/TESTS tests/data/wordlist			    \
-	tests/heimdal/external-t tests/heimdal/pod-spelling-t		    \
-	tests/heimdal/pod-t tests/mit/plugin-t tests/tap/libtap.sh
+EXTRA_DIST = .gitignore LICENSE autogen cracklib/HISTORY cracklib/LICENCE \
+	cracklib/README cracklib/genrules.pl cracklib/mkdict		  \
+	external/heimdal-strength.pod tests/HOWTO tests/TESTS		  \
+	tests/data/wordlist tests/heimdal/external-t			  \
+	tests/heimdal/pod-spelling-t tests/heimdal/pod-t		  \
+	tests/tap/libtap.sh
 
 # Do this globally.  Everything needs to find the Kerberos headers and
 # libraries, and if we're using the system CrackLib, add its location
@@ -25,8 +25,9 @@ moduledir = $(libdir)/kadmind
 
 # Build our portability library.
 noinst_LTLIBRARIES = portable/libportable.la
-portable_libportable_la_SOURCES = portable/dummy.c portable/macros.h \
-        portable/stdbool.h portable/system.h
+portable_libportable_la_SOURCES = portable/dummy.c portable/kadmin.h	\
+        portable/krb5.h portable/macros.h portable/stdbool.h		\
+        portable/system.h
 portable_libportable_la_LIBADD = $(LTLIBOBJS)
 
 # Build our command-line utility library.
