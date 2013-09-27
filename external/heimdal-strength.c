@@ -22,6 +22,7 @@
 #include <plugin/api.h>
 #include <util/macros.h>
 #include <util/messages.h>
+#include <util/messages-krb5.h>
 #include <util/xmalloc.h>
 
 
@@ -85,6 +86,7 @@ int
 main(int argc, char *argv[] UNUSED)
 {
     krb5_context ctx;
+    krb5_error_code code;
     krb5_pwqual_moddata data;
 
     /* Check command-line arguments. */
@@ -92,8 +94,9 @@ main(int argc, char *argv[] UNUSED)
         die("Usage: heimdal-strength <principal>");
 
     /* Initialize Kerberos and the module. */
-    if (krb5_init_context(&ctx) != 0)
-        die("Cannot create Kerberos context");
+    code = krb5_init_context(&ctx);
+    if (code != 0)
+        die_krb5(ctx, code, "cannot create Kerberos context");
     if (pwcheck_init(ctx, NULL, &data) != 0)
         die("cannot initialize strength checking");
 

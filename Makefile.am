@@ -32,8 +32,9 @@ portable_libportable_la_LIBADD = $(LTLIBOBJS)
 
 # Build our command-line utility library.
 noinst_LIBRARIES = util/libutil.a
-util_libutil_a_SOURCES = util/macros.h util/messages.c util/messages.h \
-	util/xmalloc.c util/xmalloc.h
+util_libutil_a_SOURCES = util/macros.h util/messages-krb5.c		    \
+	util/messages-krb5.h util/messages.c util/messages.h util/xmalloc.c \
+	util/xmalloc.h
 
 # If we're building with the embedded cracklib, build cracklib as a helper
 # library and build (but don't install) the packer program.
