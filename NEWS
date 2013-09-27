@@ -7,6 +7,10 @@ krb5-strength 2.0 (unreleased)
     and MIT.  Drop the patch for MIT Kerberos 1.4 (and hence support for
     versions of MIT Kerberos prior to 1.9).
 
+    The plugin now sets the Kerberos error message in the context to pass
+    error information, resulting in higher-quality error reporting in the
+    MIT Kerberos plugin.
+
     CrackLib checks for passwords where a character is a simple increment
     or decrement of the previous character.  In previous versions, the
     embedded version of CrackLib allowed at most four such occurrences in

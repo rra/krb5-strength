@@ -71,7 +71,7 @@ heimdal_pwcheck(krb5_context ctx, krb5_principal principal,
     char *pastring;
     char *name = NULL;
     krb5_error_code code;
-    int result;
+    const char *error;
 
     pastring = malloc(password->length + 1);
     if (pastring == NULL) {
@@ -81,23 +81,34 @@ heimdal_pwcheck(krb5_context ctx, krb5_principal principal,
     }
     memcpy(pastring, password->data, password->length);
     pastring[password->length] = '\0';
-    if (pwcheck_init(ctx, NULL, &data) != 0) {
-        snprintf(message, length, "cannot initialize strength checking");
+    code = pwcheck_init(ctx, NULL, &data);
+    if (code != 0) {
+        error = krb5_get_error_message(ctx, code);
+        snprintf(message, length, "cannot initialize strength checking: %s",
+                 error);
+        krb5_free_error_message(ctx, error);
         free(pastring);
         return 1;
     }
     code = krb5_unparse_name(ctx, principal, &name);
     if (code != 0) {
-        strlcpy(message, "cannot unparse principal name", length);
+        error = krb5_get_error_message(ctx, code);
+        snprintf(message, length, "cannot unparse principal name: %s", error);
+        krb5_free_error_message(ctx, error);
         free(pastring);
         pwcheck_close(ctx, data);
         return 1;
     }
-    result = pwcheck_check(ctx, data, pastring, name, message, length);
+    code = pwcheck_check(ctx, data, pastring, name);
+    if (code != 0) {
+        error = krb5_get_error_message(ctx, code);
+        snprintf(message, length, "%s", error);
+        krb5_free_error_message(ctx, error);
+    }
     krb5_free_unparsed_name(ctx, name);
     free(pastring);
     pwcheck_close(ctx, data);
-    return (result == 0) ? 0 : 1;
+    return (code == 0) ? 0 : 1;
 }
 
 /* The public symbol that Heimdal looks for. */

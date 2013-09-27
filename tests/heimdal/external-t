@@ -134,12 +134,14 @@ local $ENV{KRB5_CONFIG} = test_file_path('data/krb5.conf');
 
 # Run a test with no Kerberos password dictionary configuration and check that
 # we get the correct error message.
+my $error = 'Cannot initialize strength checking: password_dictionary not'
+  . ' configured in krb5.conf';
 my $test = {
     name      => 'no dictionary configured',
     principal => 'test@EXAMPLE.COM',
     password  => 'password',
     status    => 1,
-    error     => 'cannot initialize strength checking',
+    error     => $error,
 };
 check_password($test);
 

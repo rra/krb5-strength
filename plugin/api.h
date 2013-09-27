@@ -36,12 +36,11 @@ krb5_error_code pwcheck_init(krb5_context, const char *dictionary,
                              krb5_pwqual_moddata *);
 
 /*
- * Check a password.  Returns 0 if okay, non-zero on rejection, and stores
- * the rejection method in the provided errstr buffer.
+ * Check a password.  Returns 0 if okay.  On error, sets the Kerberos error
+ * message and returns a Kerberos status code.
  */
 krb5_error_code pwcheck_check(krb5_context, krb5_pwqual_moddata,
-                              const char *password, const char *principal,
-                              char *errstr, int errstrlen);
+                              const char *password, const char *principal);
 
 /* Finished checking passwords.  Free internal data. */
 void pwcheck_close(krb5_context, krb5_pwqual_moddata);

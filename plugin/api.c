@@ -117,22 +117,31 @@ pwcheck_init(krb5_context ctx, const char *dictionary,
         default_string(ctx, "krb5-strength", "password_dictionary", &path);
     else {
         path = strdup(dictionary);
-        if (path == NULL)
-            return errno;
+        if (path == NULL) {
+            oerrno = errno;
+            krb5_set_error_message(ctx, oerrno, "cannot allocate memory");
+            return oerrno;
+        }
     }
 
     /* If there is no dictionary, abort our setup with an error. */
-    if (path == NULL)
+    if (path == NULL) {
+        krb5_set_error_message(ctx, KADM5_MISSING_CONF_PARAMS,
+            "password_dictionary not configured in krb5.conf");
         return KADM5_MISSING_CONF_PARAMS;
+    }
 
     /* Sanity-check the dictionary path. */
     if (asprintf(&file, "%s.pwd", path) < 0) {
         oerrno = errno;
+        krb5_set_error_message(ctx, oerrno, "cannot allocate memory");
         free(path);
         return oerrno;
     }
     if (access(file, R_OK) != 0) {
         oerrno = errno;
+        krb5_set_error_message(ctx, oerrno, "dictionary %s does not exist",
+                               file);
         free(path);
         free(file);
         return oerrno;
@@ -143,6 +152,7 @@ pwcheck_init(krb5_context ctx, const char *dictionary,
     *data = malloc(sizeof(**data));
     if (*data == NULL) {
         oerrno = errno;
+        krb5_set_error_message(ctx, oerrno, "cannot allocate memory");
         free(path);
         return oerrno;
     }
@@ -158,14 +168,13 @@ pwcheck_init(krb5_context ctx, const char *dictionary,
  */
 krb5_error_code
 pwcheck_check(krb5_context ctx UNUSED, krb5_pwqual_moddata data,
-              const char *password, const char *principal, char *errstr,
-              int errstrlen)
+              const char *password, const char *principal)
 {
     char *user, *p;
     const char *q;
     size_t i, j;
     char c;
-    int err;
+    int oerrno;
     const char *result;
 
     /*
@@ -175,14 +184,15 @@ pwcheck_check(krb5_context ctx UNUSED, krb5_pwqual_moddata data,
      * have to copy the string so that we can manipulate it a bit.
      */
     if (strcasecmp(password, principal) == 0) {
-        snprintf(errstr, errstrlen, "Password based on username");
+        krb5_set_error_message(ctx, KADM5_PASS_Q_GENERIC,
+                               "password based on username");
         return KADM5_PASS_Q_GENERIC;
     }
     user = strdup(principal);
     if (user == NULL) {
-        err = errno;
-        snprintf(errstr, errstrlen, "Cannot allocate memory");
-        return err;
+        oerrno = errno;
+        krb5_set_error_message(ctx, oerrno, "cannot allocate memory");
+        return oerrno;
     }
     for (p = user; p[0] != '\0'; p++) {
         if (p[0] == '\\' && p[1] != '\0') {
@@ -197,7 +207,8 @@ pwcheck_check(krb5_context ctx UNUSED, krb5_pwqual_moddata data,
     if (strlen(password) == strlen(user)) {
         if (strcasecmp(password, user) == 0) {
             free(user);
-            snprintf(errstr, errstrlen, "Password based on username");
+            krb5_set_error_message(ctx, KADM5_PASS_Q_GENERIC,
+                                   "password based on username");
             return KADM5_PASS_Q_GENERIC;
         }
 
@@ -209,7 +220,8 @@ pwcheck_check(krb5_context ctx UNUSED, krb5_pwqual_moddata data,
         }
         if (strcasecmp(password, user) == 0) {
             free(user);
-            snprintf(errstr, errstrlen, "Password based on username");
+            krb5_set_error_message(ctx, KADM5_PASS_Q_GENERIC,
+                                   "password based on username");
             return KADM5_PASS_Q_GENERIC;
         }
     }
@@ -220,14 +232,15 @@ pwcheck_check(krb5_context ctx UNUSED, krb5_pwqual_moddata data,
                 q++;
             if (*q == '\0') {
                 free(user);
-                snprintf(errstr, errstrlen, "Password based on username");
+                krb5_set_error_message(ctx, KADM5_PASS_Q_GENERIC,
+                                       "password based on username");
                 return KADM5_PASS_Q_GENERIC;
             }
         }
     free(user);
     result = FascistCheck(password, data->dictionary);
     if (result != NULL) {
-        strlcpy(errstr, result, errstrlen);
+        krb5_set_error_message(ctx, KADM5_PASS_Q_GENERIC, "%s", result);
         return KADM5_PASS_Q_GENERIC;
     }
     return 0;

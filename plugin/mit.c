@@ -41,18 +41,7 @@ krb5_error_code pwqual_strength_initvt(krb5_context, int, int,
 static krb5_error_code
 init(krb5_context ctx, const char *dictionary, krb5_pwqual_moddata *data)
 {
-    krb5_error_code code;
-
-    code = pwcheck_init(ctx, dictionary, data);
-    if (code != 0) {
-        krb5_set_error_message(ctx, code, "cannot initialize strength"
-                               " checking%s%s: %s",
-                               dictionary == NULL ? "" : " with dictionary",
-                               dictionary == NULL ? "" : dictionary,
-                               strerror(errno));
-        return code;
-    }
-    return 0;
+    return pwcheck_init(ctx, dictionary, data);
 }
 
 
@@ -66,17 +55,14 @@ check(krb5_context ctx, krb5_pwqual_moddata data, const char *password,
       const char **languages UNUSED)
 {
     char *name = NULL;
-    krb5_error_code status;
-    char error[BUFSIZ];
+    krb5_error_code code;
 
-    status = krb5_unparse_name(ctx, princ, &name);
-    if (status != 0)
-        return status;
-    status = pwcheck_check(ctx, data, password, name, error, sizeof(error));
-    if (status != 0)
-        krb5_set_error_message(ctx, status, "%s", error);
+    code = krb5_unparse_name(ctx, princ, &name);
+    if (code != 0)
+        return code;
+    code = pwcheck_check(ctx, data, password, name);
     krb5_free_unparsed_name(ctx, name);
-    return status;
+    return code;
 }
 
 
