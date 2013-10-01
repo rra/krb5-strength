@@ -76,13 +76,21 @@ REQUIREMENTS
   well-behaved for use inside plugins or libraries.  If using a system
   CrackLib library, use version 2.8.22 or later to avoid these problems.
 
+  You can also optionally build against the TinyCDB library, which
+  provides support for simpler and faster password checking against a CDB
+  dictionary file.  Building a CDB dictionary with cdbmake-wordlist
+  (included) requires Perl 5.006 or later and the CDB utility that comes
+  with TinyCDB.
+
   For this module to be effective for either Heimdal or MIT Kerberos, you
   will also need to construct a dictionary.  The mkdict and packer
   utilities to build a CrackLib dictionary from a word list are included
   in this toolkit but not installed by default.  You can run them out of
   the cracklib directory after building.  You can also use the utilities
   that come with the stock CrackLib package (often already packaged in a
-  Linux distribution); the database format is compatible.
+  Linux distribution); the database format is compatible.  For building a
+  CDB dictionary, use the provided cdbmake-wordlist program.  The CDB
+  utility must be on your PATH.
 
   For a word list to use as source for the dictionary, you can use
   /usr/share/dict/words if it's available on your system, but it would be
@@ -118,6 +126,11 @@ COMPILING AND INSTALLING
   configure.  You can optionally add a directory, giving the root
   directory where CrackLib was installed, or separately set the include
   and library path with --with-cracklib-include and --with-cracklib-lib.
+
+  krb5-strength will automatically build with TinyCDB if it is found.  To
+  specify the installation path of TinyCDB, use --with-tinycdb.  You can
+  also separately set the include and library path with
+  --with-tinycdb-include and --with-tinycdb-lib.
 
   Normally, configure will use krb5-config to determine the flags to use
   to compile with your Kerberos libraries.  If krb5-config isn't found, it
@@ -163,10 +176,13 @@ COMPILING AND INSTALLING
 
 CONFIGURATION
 
-  First, build and install a CrackLib dictionary as described above.  This
-  dictionary will consist of three files, one each ending in *.hwm, *.pwd,
-  and *.pwi.  Install those files somewhere on your system.  Then, follow
-  the relevant instructions below for either Heimdal or MIT Kerberos.
+  First, build and install either a CrackLib dictionary as described in
+  REQUIREMENTS above, or build a CDB dictionary with cdbmake-wordlist.
+  (Or both.)  The CrackLib dictionary will consist of three files, one
+  each ending in *.hwm, *.pwd, and *.pwi.  The CDB dictionary will consist
+  of a single file ending in *.cdb.  Install those files somewhere on your
+  system.  Then, follow the relevant instructions below for either Heimdal
+  or MIT Kerberos.
 
  Heimdal
 
@@ -180,11 +196,15 @@ CONFIGURATION
   file is located):
 
       krb5-strength = {
-          password_dictionary = /usr/local/lib/kadmind/dictionary
+          password_dictionary     = /path/to/cracklib/dictionary
+          password_dictionary_cdb = /path/to/cdb/dictionary.cdb
       }
 
-  The provided path should be the full path to the dictionary files,
-  omitting the trailing *.hwm, *.pwd, and *.pwi extensions.
+  The first setting configures a CrackLib dictionary and the second a CDB
+  dictionary.  The provided path should be the full path to the dictionary
+  files, omitting the trailing *.hwm, *.pwd, and *.pwi extensions for the
+  CrackLib dictionary.  You can use either or both settings.  If you use
+  both, CrackLib will be checked first, and then CDB.
 
   Then, for the external password checking program, add a new section (or
   modify the existing [password_quality] section) to look like the
@@ -234,8 +254,15 @@ CONFIGURATION
   [appdefaults] section:
 
       krb5-strength = {
-          password_dictionary = /path/to/cracklib/dictionary
+          password_dictionary     = /path/to/cracklib/dictionary
+          password_dictionary_cdb = /path/to/cdb/dictionary.cdb
       }
+
+  The first setting configures a CrackLib dictionary and the second a CDB
+  dictionary.  The provided path should be the full path to the dictionary
+  files, omitting the trailing *.hwm, *.pwd, and *.pwi extensions for the
+  CrackLib dictionary.  You can use either or both settings.  If you use
+  both, CrackLib will be checked first, and then CDB.
 
   The second option is to use the normal dict_path setting.  In the
   [realms] section of your krb5.conf kdc.conf, under the appropriate realm
@@ -243,13 +270,19 @@ CONFIGURATION
 
       dict_file = /path/to/cracklib/dictionary
 
-  The provided path should be the full path to the dictionary files,
-  omitting the trailing *.hwm, *.pwd, or *.pwi extension.  However, be
-  aware that, if you use this approach, you will probably want to disable
-  the built-in standard dict pwqual plugin by adding the line:
+  This will be taken as a CrackLib dictionary path, the same as the
+  setting for password_dictionary above.  The provided path should be the
+  full path to the dictionary files, omitting the trailing *.hwm, *.pwd,
+  or *.pwi extension.  However, be aware that, if you use this approach,
+  you will probably want to disable the built-in standard dict pwqual
+  plugin by adding the line:
 
       disable = dict
 
   to the pwqual block of the [plugins] section as shown above.  Otherwise,
   it will also try to load a dictionary at the same path to do simple
   dictionary matching.
+
+  You can also mix and match these settings, by using dict_path for the
+  CrackLib dictionary path and krb5.conf for the CDB dictionary path.
+  There is no way to specify a CDB dictionary via the dict_path setting.

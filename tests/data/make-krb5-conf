@@ -26,12 +26,19 @@ fi
 # Copy over the template.
 cp "$source" "$tmpdir"/krb5.conf
 
+# Figure out whether we're testing the cdb or cracklib dictionary.
+setting=
+case "$dict" in
+    *.cdb) setting=password_dictionary_cdb ;;
+    *)     setting=password_dictionary     ;;
+esac
+
 # Add the appdefaults section.
 cat <<EOF >>"$tmpdir"/krb5.conf
 
 [appdefaults]
     krb5-strength = {
-        password_dictionary = $dict
+        $setting = $dict
     }
 EOF
 

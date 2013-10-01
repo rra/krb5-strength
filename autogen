@@ -16,3 +16,7 @@ pod2man --release="$version" --center='krb5-strength' \
 
 # Generate the C version of our password test data.
 tests/data/make-c-data tests/data/cracklib.json > tests/data/cracklib.c
+tests/data/make-c-data tests/data/cdb.json > tests/data/cdb.c
+
+# Generate the CDB database from the test wordlist for plugin tests.
+tools/cdbmake-wordlist tests/data/wordlist

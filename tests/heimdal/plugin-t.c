@@ -49,9 +49,10 @@ struct kadm5_pw_policy_verifier {
 #endif /* !HAVE_KADM5_PWCHECK_H */
 
 /*
- * The password test data, generated from the JSON source.  Defines an array
- * named cracklib_tests.
+ * The password test data, generated from the JSON source.  Defines an arrays
+ * named cracklib_tests and CDB_tests.
  */
+#include <tests/data/cdb.c>
 #include <tests/data/cracklib.c>
 
 
@@ -164,7 +165,7 @@ main(void)
      * metadata, one more password test than the list of password tests we
      * have configured, and two tests per password test.
      */
-    plan(5 + (ARRAY_SIZE(cracklib_tests) + 1) * 2);
+    plan(5 + (ARRAY_SIZE(cracklib_tests) + ARRAY_SIZE(cdb_tests) + 1) * 2);
 
     /* Start with the krb5.conf that contains no dictionary configuration. */
     path = test_file_path("data/krb5.conf");
@@ -189,9 +190,6 @@ main(void)
     setup_argv[3] = tmpdir;
     setup_argv[4] = NULL;
     run_setup((const char **) setup_argv);
-    test_file_path_free(setup_argv[0]);
-    free(setup_argv[1]);
-    test_file_path_free(path);
 
     /* Point KRB5_CONFIG at the newly-generated krb5.conf file. */
     basprintf(&krb5_config, "KRB5_CONFIG=%s/krb5.conf", tmpdir);
@@ -201,6 +199,29 @@ main(void)
     /* Now, run all of the tests. */
     for (i = 0; i < ARRAY_SIZE(cracklib_tests); i++)
         is_password_test(verifier, &cracklib_tests[i]);
+
+#ifdef HAVE_CDB
+
+    /* If built with CDB, set up krb5.conf to use a CDB dictionary instead. */
+    free(setup_argv[1]);
+    setup_argv[1] = test_file_path("data/wordlist.cdb");
+    if (setup_argv[1] == NULL)
+        bail("cannot find data/wordlist.cdb in the test suite");
+    run_setup((const char **) setup_argv);
+    test_file_path_free(setup_argv[0]);
+    test_file_path_free(setup_argv[1]);
+    test_file_path_free(path);
+
+    /* Run the CDB tests. */
+    for (i = 0; i < ARRAY_SIZE(cdb_tests); i++)
+        is_password_test(verifier, &cdb_tests[i]);
+
+#else /* !HAVE_CDB */
+
+    /* Otherwise, mark the CDB tests as skipped. */
+    skip_block(ARRAY_SIZE(cdb_tests) * 2, "not built with CDB support");
+
+#endif /* !HAVE_CDB */
 
     /* Manually clean up after the results of make-krb5-conf. */
     basprintf(&path, "%s/krb5.conf", tmpdir);

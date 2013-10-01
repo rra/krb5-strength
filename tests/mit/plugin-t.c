@@ -26,9 +26,10 @@
 #include <util/macros.h>
 
 /*
- * The password test data, generated from the JSON source.  Defines an array
- * named cracklib_tests.
+ * The password test data, generated from the JSON source.  Defines an arrays
+ * named cracklib_tests and cdb_tests.
  */
+#include <tests/data/cdb.c>
 #include <tests/data/cracklib.c>
 
 
@@ -153,12 +154,12 @@ main(void)
 
     /*
      * Calculate how many tests we have.  There are two tests for the module
-     * metadata, three more tests for initializing the plugin, one test for
+     * metadata, four more tests for initializing the plugin, one test for
      * initialization without a valid dictionary, and two tests per password
      * test.  We run all the cracklib tests twice, once with an explicit
      * dictionary path and once from krb5.conf configuration.
      */
-    plan(2 + 3 + 2 * ARRAY_SIZE(cracklib_tests) * 2);
+    plan(2 + 4 + (2 * ARRAY_SIZE(cracklib_tests) + ARRAY_SIZE(cdb_tests)) * 2);
 
     /* Start with the krb5.conf that contains no dictionary configuration. */
     path = test_file_path("data/krb5.conf");
@@ -205,8 +206,6 @@ main(void)
     setup_argv[3] = tmpdir;
     setup_argv[4] = NULL;
     run_setup((const char **) setup_argv);
-    test_file_path_free(setup_argv[0]);
-    test_file_path_free(path);
 
     /* Point KRB5_CONFIG at the newly-generated krb5.conf file. */
     basprintf(&krb5_config, "KRB5_CONFIG=%s/krb5.conf", tmpdir);
@@ -214,16 +213,49 @@ main(void)
     free(krb5_config_empty);
 
     /* Obtain a new Kerberos context with that krb5.conf file. */
+    krb5_free_context(ctx);
     code = krb5_init_context(&ctx);
     if (code != 0)
         bail_krb5(ctx, code, "cannot initialize Kerberos context");
 
     /* Run all of the tests again. */
-    code = vtable->open(ctx, dictionary, &data);
+    code = vtable->open(ctx, NULL, &data);
     is_int(0, code, "Plugin initialization (krb5.conf dictionary)");
     for (i = 0; i < ARRAY_SIZE(cracklib_tests); i++)
         is_password_test(ctx, vtable, data, &cracklib_tests[i]);
     vtable->close(ctx, data);
+
+#ifdef HAVE_CDB
+
+    /* If built with CDB, set up krb5.conf to use a CDB dictionary instead. */
+    free(dictionary);
+    dictionary = test_file_path("data/wordlist.cdb");
+    if (dictionary == NULL)
+        bail("cannot find data/wordlist.cdb in the test suite");
+    setup_argv[1] = dictionary;
+    run_setup((const char **) setup_argv);
+    test_file_path_free(setup_argv[0]);
+    test_file_path_free(path);
+
+    /* Obtain a new Kerberos context with that krb5.conf file. */
+    krb5_free_context(ctx);
+    code = krb5_init_context(&ctx);
+    if (code != 0)
+        bail_krb5(ctx, code, "cannot initialize Kerberos context");
+
+    /* Run the CDB tests. */
+    code = vtable->open(ctx, NULL, &data);
+    is_int(0, code, "Plugin initialization (CDB dictionary)");
+    for (i = 0; i < ARRAY_SIZE(cdb_tests); i++)
+        is_password_test(ctx, vtable, data, &cdb_tests[i]);
+    vtable->close(ctx, data);
+
+#else /* !HAVE_CDB */
+
+    /* Otherwise, mark the CDB tests as skipped. */
+    skip_block(ARRAY_SIZE(cdb_tests) * 2 + 1, "not built with CDB support");
+
+#endif /* !HAVE_CDB */
 
     /* Manually clean up after the results of make-krb5-conf. */
     basprintf(&path, "%s/krb5.conf", tmpdir);
@@ -232,7 +264,7 @@ main(void)
     test_tmpdir_free(tmpdir);
 
     /* Keep valgrind clean by freeing all memory. */
-    free(dictionary);
+    test_file_path_free(dictionary);
     krb5_free_context(ctx);
     free(vtable);
     putenv((char *) "KRB5_CONFIG=");

@@ -11,6 +11,9 @@
  * See LICENSE for licensing terms.
  */
 
+#ifndef TESTS_DATA_PASSWORD_TESTS_H
+#define TESTS_DATA_PASSWORD_TESTS_H 1
+
 #include <config.h>
 #include <portable/kadmin.h>
 #include <portable/krb5.h>
@@ -22,3 +25,5 @@ struct password_test {
     krb5_error_code code;
     const char *error;
 };
+
+#endif /* !TESTS_DATA_PASSWORD_TESTS_H */

@@ -15,10 +15,10 @@ EXTRA_DIST = .gitignore LICENSE autogen cracklib/HISTORY cracklib/LICENCE \
 	tests/tap/libtap.sh tests/tools/cdbmake-wordlist
 
 # Do this globally.  Everything needs to find the Kerberos headers and
-# libraries, and if we're using the system CrackLib, add its location
-# unconditionally as well.
-AM_CPPFLAGS = $(CRACKLIB_CPPFLAGS) $(KRB5_CPPFLAGS)
-AM_LDFLAGS = $(CRACKLIB_LDFLAGS) $(KRB5_LDFLAGS)
+# libraries, and if we're using the system CrackLib or libcdb, add its
+# location unconditionally as well.
+AM_CPPFLAGS = $(CRACKLIB_CPPFLAGS) $(KRB5_CPPFLAGS) $(CDB_CPPFLAGS)
+AM_LDFLAGS = $(CRACKLIB_LDFLAGS) $(KRB5_LDFLAGS) $(CDB_LDFLAGS)
 
 # Put the module into /usr/local/lib/kadmind by default, relative to --libdir.
 moduledir = $(libdir)/kadmind
@@ -49,20 +49,21 @@ endif
 
 # Rules for building the password strength plugin.
 module_LTLIBRARIES = plugin/passwd_strength.la
-plugin_passwd_strength_la_SOURCES = plugin/api.c plugin/heimdal.c \
-	plugin/mit.c
+plugin_passwd_strength_la_SOURCES = plugin/api.c plugin/cdb.c \
+	plugin/heimdal.c plugin/mit.c
 plugin_passwd_strength_la_LDFLAGS = -module -avoid-version
 if EMBEDDED_CRACKLIB
     plugin_passwd_strength_la_LIBADD = cracklib/libcracklib.la
 else
     plugin_passwd_strength_la_LIBADD = $(CRACKLIB_LIBS)
 endif
-plugin_passwd_strength_la_LIBADD += portable/libportable.la $(KRB5_LIBS)
+plugin_passwd_strength_la_LIBADD += portable/libportable.la $(KRB5_LIBS) \
+	$(CDB_LIBS)
 
 # The Heimdal external-check program.
 bin_PROGRAMS = external/heimdal-strength
 external_heimdal_strength_CFLAGS = $(AM_CFLAGS)
-external_heimdal_strength_SOURCES = plugin/api.c plugin/api.h \
+external_heimdal_strength_SOURCES = plugin/api.c plugin/api.h plugin/cdb.c \
 	external/heimdal-strength.c
 if EMBEDDED_CRACKLIB
     external_heimdal_strength_LDADD = cracklib/libcracklib.la
@@ -70,7 +71,7 @@ else
     external_heimdal_strength_LDADD = $(CRACKLIB_LIBS)
 endif
 external_heimdal_strength_LDADD += util/libutil.a portable/libportable.la \
-	$(KRB5_LIBS)
+	$(KRB5_LIBS) $(CDB_LIBS)
 
 # Other tools.
 dist_bin_SCRIPTS = tools/cdbmake-wordlist
@@ -131,10 +132,10 @@ tests_tap_libtap_a_SOURCES = tests/tap/basic.c tests/tap/basic.h	\
 # The actual test programs.
 tests_heimdal_plugin_t_CPPFLAGS = $(KRB5_CPPFLAGS)
 tests_heimdal_plugin_t_LDADD = tests/tap/libtap.a portable/libportable.la \
-	$(KRB5_LIBS) $(DL_LIBS)
+	$(KRB5_LIBS) $(CDB_LIBS) $(DL_LIBS)
 tests_mit_plugin_t_CPPFLAGS = $(KRB5_CPPFLAGS)
 tests_mit_plugin_t_LDADD = tests/tap/libtap.a portable/libportable.la \
-	$(KRB5_LIBS) $(DL_LIBS)
+	$(KRB5_LIBS) $(CDB_LIBS) $(DL_LIBS)
 tests_portable_asprintf_t_SOURCES = tests/portable/asprintf-t.c \
 	tests/portable/asprintf.c
 tests_portable_asprintf_t_LDADD = tests/tap/libtap.a portable/libportable.la

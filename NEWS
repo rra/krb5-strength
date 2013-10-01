@@ -7,6 +7,17 @@ krb5-strength 2.0 (unreleased)
     and MIT.  Drop the patch for MIT Kerberos 1.4 (and hence support for
     versions of MIT Kerberos prior to 1.9).
 
+    Add support for building with TinyCDB and then checking passwords
+    against a CDB database.  There is a new password_dictionary_cdb
+    krb5.conf configuration setting that configures a CDB directory to
+    use.  The tests with a CDB dictionary are much simpler: passwords are
+    rejected if found in the dictionary either literally, with one or two
+    characters removed from the start or end, or with one character
+    removed from both the start and the end.  Both a CrackLib and a CDB
+    dictionary can be specified to check both dictionaries.  A new
+    cdbmake-wordlist utility (written in Perl) is included to ease the
+    process of creating a CDB database from a simple word list.
+
     The plugin now sets the Kerberos error message in the context to pass
     error information, resulting in higher-quality error reporting in the
     MIT Kerberos plugin.

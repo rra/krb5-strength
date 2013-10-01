@@ -23,6 +23,35 @@ use_prereq('IPC::Run', 'run');
 use_prereq('JSON');
 use_prereq('Test::More', '0.87_01');
 
+# Run the newly-built heimdal-strength command and return the status, output,
+# and error output as a list.
+#
+# $principal - Principal to pass to the command
+# $password  - Password to pass to the command
+#
+# Returns: The exit status, standard output, and standard error as a list
+#  Throws: Text exception on failure to run the test program
+sub run_heimdal_strength {
+    my ($principal, $password) = @_;
+
+    # Build the input to the strength checking program.
+    my $in = "principal: $principal\n";
+    $in .= "new-password: $password\n";
+    $in .= "end\n";
+
+    # Find the newly-built password checking program.
+    my $program = test_file_path('../external/heimdal-strength');
+
+    # Run the password strength checker.
+    my $out;
+    my $err;
+    run([$program, $principal], \$in, \$out, \$err);
+    my $status = ($? >> 8);
+
+    # Return the results.
+    return ($status, $out, $err);
+}
+
 # Run the newly-built heimdal-strength command to check a password and reports
 # the results using Test::More.  This uses the standard protocol for Heimdal
 # external password strength checking programs.
@@ -38,20 +67,11 @@ use_prereq('Test::More', '0.87_01');
 #  Throws: Text exception on failure to run the test program
 sub check_password {
     my ($test_ref) = @_;
+    my $principal = $test_ref->{principal};
+    my $password  = $test_ref->{password};
 
-    # Build the input to the strength checking program.
-    my $in = "principal: $test_ref->{principal}\n";
-    $in .= "new-password: $test_ref->{password}\n";
-    $in .= "end\n";
-
-    # Find the newly-built password checking program.
-    my $program = test_file_path('../external/heimdal-strength');
-
-    # Run the password strength checker.
-    my $out;
-    my $err;
-    run([$program, $test_ref->{principal}], \$in, \$out, \$err);
-    my $status = ($? >> 8);
+    # Run the heimdal-strength command.
+    my ($status, $out, $err) = run_heimdal_strength($principal, $password);
     chomp($out, $err);
 
     # Check the results.  If there is an error in the password, it should come
@@ -71,11 +91,15 @@ sub check_password {
 
 # Create a new krb5.conf file that includes password dictionary configuration
 # so that subsequent invocations of heimdal-strength can find the testing
-# dictionary.
+# dictionary.  Takes the setting and the value of the setting to write.
+#
+# $setting    - krb5.conf setting to add to [appdefaults]
+# $dictionary - The dictionary file name, relative to tests/data
 #
 # Returns: Path to the new krb5.conf file
 #  Throws: Text exception if the new krb5.conf file cannot be created
 sub create_krb5_conf {
+    my ($setting, $dictionary) = @_;
     my $old    = test_file_path('data/krb5.conf');
     my $tmpdir = $ENV{BUILD} ? "$ENV{BUILD}/tmp" : 'tests/tmp';
     my $new    = "$tmpdir/krb5.conf";
@@ -95,7 +119,7 @@ sub create_krb5_conf {
 
 [appdefaults]
     krb5-strength = {
-        password_dictionary = $datadir/dictionary
+        $setting = $datadir/$dictionary
     }
 __END__
       or die "Cannot append to $new: $!\n";
@@ -123,11 +147,12 @@ sub load_password_tests {
 }
 
 # Load the password tests from JSON.
-my $tests = load_password_tests(test_file_path('data/cracklib.json'));
+my $cracklib_tests = load_password_tests(test_file_path('data/cracklib.json'));
+my $cdb_tests      = load_password_tests(test_file_path('data/cdb.json'));
 
 # We can now calculate our plan: three tests for each password test, with an
 # extra set for testing behavior when password_dictionary is not configured.
-plan(tests => (scalar(@{$tests}) + 1) * 3);
+plan(tests => (scalar(@{$cracklib_tests}) + scalar(@{$cdb_tests}) + 1) * 3);
 
 # Find our initial test krb5.conf file.
 local $ENV{KRB5_CONFIG} = test_file_path('data/krb5.conf');
@@ -146,12 +171,30 @@ my $test = {
 check_password($test);
 
 # Install the krb5.conf file with a configuration pointing to the test
-# dictionary.
-local $ENV{KRB5_CONFIG} = create_krb5_conf();
+# CrackLib dictionary.
+my $krb5_conf = create_krb5_conf('password_dictionary', 'dictionary');
+local $ENV{KRB5_CONFIG} = $krb5_conf;
 
-# Run the password tests from JSON.
-for my $test (@{$tests}) {
+# Run the CrackLib password tests from JSON.
+for my $test (@{$cracklib_tests}) {
     check_password($test);
+}
+
+# Install the krb5.conf file with configuration pointing to the CDB
+# dictionary.
+$krb5_conf = create_krb5_conf('password_dictionary_cdb', 'wordlist.cdb');
+local $ENV{KRB5_CONFIG} = $krb5_conf;
+
+# Check whether we were built with CDB support.  If so, run those tests.
+my ($status, $output, $err) = run_heimdal_strength('test', 'password');
+SKIP: {
+    skip('not built with CDB support', scalar(@{$cdb_tests}) * 3)
+      if ($status == 1 && $err =~ m{ not [ ] built [ ] with [ ] CDB }xms);
+
+    # Run the CDB password tests from JSON.
+    for my $test (@{$cdb_tests}) {
+        check_password($test);
+    }
 }
 
 # Clean up our temporary krb5.conf file on any exit.

@@ -16,6 +16,10 @@
 #include <config.h>
 #include <portable/krb5.h>
 
+#ifdef HAVE_CDB_H
+# include <cdb.h>
+#endif
+
 #ifdef HAVE_KRB5_PWQUAL_PLUGIN_H
 # include <krb5/pwqual_plugin.h>
 #else
@@ -29,6 +33,11 @@ typedef struct krb5_pwqual_moddata_st *krb5_pwqual_moddata;
  */
 struct krb5_pwqual_moddata_st {
     char *dictionary;
+    bool have_cdb;
+    int cdb_fd;
+#ifdef HAVE_CDB_H
+    struct cdb cdb;
+#endif
 };
 
 /* Initialize the plugin and set up configuration. */
@@ -42,7 +51,14 @@ krb5_error_code pwcheck_init(krb5_context, const char *dictionary,
 krb5_error_code pwcheck_check(krb5_context, krb5_pwqual_moddata,
                               const char *password, const char *principal);
 
+/* Check a password (and some permutations) against a CDB database. */
+krb5_error_code pwcheck_check_cdb(krb5_context, krb5_pwqual_moddata,
+                                  const char *password);
+
 /* Finished checking passwords.  Free internal data. */
 void pwcheck_close(krb5_context, krb5_pwqual_moddata);
+
+/* Free the subset of internal data used by the CDB module. */
+void pwcheck_close_cdb(krb5_context, krb5_pwqual_moddata);
 
 #endif /* !PLUGIN_INTERNAL_H */
