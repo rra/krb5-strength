@@ -83,34 +83,6 @@
         "error": "it does not contain enough DIFFERENT characters"
     },
     {
-        "name": "based on principal",
-        "principal": "someuser@EXAMPLE.ORG",
-        "password": "someuser",
-        "code": "KADM5_PASS_Q_GENERIC",
-        "error": "password based on username"
-    },
-    {
-        "name": "based on principal (reversed)",
-        "principal": "someuser@EXAMPLE.ORG",
-        "password": "resuemos",
-        "code": "KADM5_PASS_Q_GENERIC",
-        "error": "password based on username"
-    },
-    {
-        "name": "based on principal with digits",
-        "principal": "someuser@EXAMPLE.ORG",
-        "password": "someuser123",
-        "code": "KADM5_PASS_Q_GENERIC",
-        "error": "password based on username"
-    },
-    {
-        "name": "is full principal",
-        "principal": "test@EXAMPLE.ORG",
-        "password": "test@EXAMPLE.ORG",
-        "code": "KADM5_PASS_Q_GENERIC",
-        "error": "password based on username"
-    },
-    {
         "name": "long password complexity",
         "principal": "test@EXAMPLE.ORG",
         "password": "OwenDericksegregationistshumiliatemeningitis'smainmast",

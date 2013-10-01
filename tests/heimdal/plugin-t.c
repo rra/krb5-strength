@@ -50,10 +50,11 @@ struct kadm5_pw_policy_verifier {
 
 /*
  * The password test data, generated from the JSON source.  Defines an arrays
- * named cracklib_tests and CDB_tests.
+ * named cdb_tests, cracklib_tests, and generic_tests.
  */
 #include <tests/data/passwords/cdb.c>
 #include <tests/data/passwords/cracklib.c>
+#include <tests/data/passwords/generic.c>
 
 
 /*
@@ -144,7 +145,7 @@ main(void)
 {
     char *path, *krb5_config, *krb5_config_empty, *tmpdir;
     char *setup_argv[5];
-    size_t i;
+    size_t i, count;
     struct kadm5_pw_policy_verifier *verifier;
     struct password_test no_dictionary_test = {
         "no dictionary configured",
@@ -163,9 +164,12 @@ main(void)
     /*
      * Calculate how many tests we have.  There are five tests for the module
      * metadata, one more password test than the list of password tests we
-     * have configured, and two tests per password test.
+     * have configured, and two tests per password test.  We run the generic
+     * tests twice, once with CrackLib and once with CDB.
      */
-    plan(5 + (ARRAY_SIZE(cracklib_tests) + ARRAY_SIZE(cdb_tests) + 1) * 2);
+    count = ARRAY_SIZE(cracklib_tests) + ARRAY_SIZE(cdb_tests) + 1;
+    count += ARRAY_SIZE(generic_tests) * 2;
+    plan(5 + count * 2);
 
     /* Start with the krb5.conf that contains no dictionary configuration. */
     path = test_file_path("data/krb5.conf");
@@ -199,6 +203,8 @@ main(void)
     /* Now, run all of the tests. */
     for (i = 0; i < ARRAY_SIZE(cracklib_tests); i++)
         is_password_test(verifier, &cracklib_tests[i]);
+    for (i = 0; i < ARRAY_SIZE(generic_tests); i++)
+        is_password_test(verifier, &generic_tests[i]);
 
 #ifdef HAVE_CDB
 
@@ -215,11 +221,14 @@ main(void)
     /* Run the CDB tests. */
     for (i = 0; i < ARRAY_SIZE(cdb_tests); i++)
         is_password_test(verifier, &cdb_tests[i]);
+    for (i = 0; i < ARRAY_SIZE(generic_tests); i++)
+        is_password_test(verifier, &generic_tests[i]);
 
 #else /* !HAVE_CDB */
 
     /* Otherwise, mark the CDB tests as skipped. */
-    skip_block(ARRAY_SIZE(cdb_tests) * 2, "not built with CDB support");
+    count = ARRAY_SIZE(cdb_tests) + ARRAY_SIZE(generic_tests);
+    skip_block(count * 2, "not built with CDB support");
 
 #endif /* !HAVE_CDB */
 

@@ -148,13 +148,22 @@ sub load_password_tests {
     return $json->decode($testdata);
 }
 
-# Load the password tests from JSON.
-my $cdb_tests      = load_password_tests('cdb.json');
-my $cracklib_tests = load_password_tests('cracklib.json');
+# Load the password tests from JSON.  Accumulate a total count of tests,
+# adding one at the start for testing behavior when no password dictionary is
+# configured.
+my %tests;
+my $count = 1;
+for my $type (qw(cdb cracklib generic)) {
+    my $tests = load_password_tests("$type.json");
+    $tests{$type} = $tests;
+    $count += scalar(@{$tests});
+}
 
-# We can now calculate our plan: three tests for each password test, with an
-# extra set for testing behavior when password_dictionary is not configured.
-plan(tests => (scalar(@{$cracklib_tests}) + scalar(@{$cdb_tests}) + 1) * 3);
+# We run the generic tests twice, once for CrackLib and once for CDB.
+$count += scalar(@{ $tests{generic} });
+
+# We can now calculate our plan based on three tests for each password test.
+plan(tests => $count * 3);
 
 # Find our initial test krb5.conf file.
 local $ENV{KRB5_CONFIG} = test_file_path('data/krb5.conf');
@@ -177,8 +186,13 @@ check_password($test);
 my $krb5_conf = create_krb5_conf('password_dictionary', 'dictionary');
 local $ENV{KRB5_CONFIG} = $krb5_conf;
 
-# Run the CrackLib password tests from JSON.
-for my $test (@{$cracklib_tests}) {
+# Run the CrackLib password tests and based-on-principal tests from JSON.
+note('CrackLib tests');
+for my $test (@{ $tests{cracklib} }) {
+    check_password($test);
+}
+note('Generic tests with CrackLib');
+for my $test (@{ $tests{generic} }) {
     check_password($test);
 }
 
@@ -191,11 +205,17 @@ local $ENV{KRB5_CONFIG} = $krb5_conf;
 my ($status, $output, $err) = run_heimdal_strength('test', 'password');
 SKIP: {
     if ($status == 1 && $err =~ m{ not [ ] built [ ] with [ ] CDB }xms) {
-        skip('not built with CDB support', scalar(@{$cdb_tests}) * 3);
+        my $total = scalar(@{ $tests{cdb} }) + scalar(@{ $tests{generic} });
+        skip('not built with CDB support', $total * 3);
     }
 
-    # Run the CDB password tests from JSON.
-    for my $test (@{$cdb_tests}) {
+    # Run the CDB and principal password tests from JSON.
+    note('CDB tests');
+    for my $test (@{ $tests{cdb} }) {
+        check_password($test);
+    }
+    note('Generic tests with CDB');
+    for my $test (@{ $tests{generic} }) {
         check_password($test);
     }
 }

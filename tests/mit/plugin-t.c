@@ -27,10 +27,11 @@
 
 /*
  * The password test data, generated from the JSON source.  Defines an arrays
- * named cracklib_tests and cdb_tests.
+ * named cdb_tests, cracklib_tests, and generic_tests.
  */
 #include <tests/data/passwords/cdb.c>
 #include <tests/data/passwords/cracklib.c>
+#include <tests/data/passwords/generic.c>
 
 
 #ifndef HAVE_KRB5_PWQUAL_PLUGIN_H
@@ -146,7 +147,7 @@ main(void)
     char *path, *dictionary, *krb5_config, *krb5_config_empty, *tmpdir;
     char *setup_argv[5];
     const char*build;
-    size_t i;
+    size_t i, count;
     krb5_context ctx;
     krb5_pwqual_vtable vtable;
     krb5_pwqual_moddata data;
@@ -156,10 +157,15 @@ main(void)
      * Calculate how many tests we have.  There are two tests for the module
      * metadata, four more tests for initializing the plugin, one test for
      * initialization without a valid dictionary, and two tests per password
-     * test.  We run all the cracklib tests twice, once with an explicit
-     * dictionary path and once from krb5.conf configuration.
+     * test.
+     *
+     * We run all the CrackLib and generic tests twice, once with an explicit
+     * dictionary path and once from krb5.conf configuration.  We run the
+     * generic tests with both CrackLib and CDB configurations.
      */
-    plan(2 + 4 + (2 * ARRAY_SIZE(cracklib_tests) + ARRAY_SIZE(cdb_tests)) * 2);
+    count = 2 * ARRAY_SIZE(cracklib_tests) + ARRAY_SIZE(cdb_tests);
+    count += 2 * ARRAY_SIZE(generic_tests);
+    plan(2 + 4 + count * 2);
 
     /* Start with the krb5.conf that contains no dictionary configuration. */
     path = test_file_path("data/krb5.conf");
@@ -187,9 +193,11 @@ main(void)
     code = vtable->open(ctx, dictionary, &data);
     is_int(0, code, "Plugin initialization (explicit dictionary)");
 
-    /* Now, run all of the tests. */
+    /* Now, run all of the tests, with generic tests. */
     for (i = 0; i < ARRAY_SIZE(cracklib_tests); i++)
         is_password_test(ctx, vtable, data, &cracklib_tests[i]);
+    for (i = 0; i < ARRAY_SIZE(generic_tests); i++)
+        is_password_test(ctx, vtable, data, &generic_tests[i]);
 
     /* Close that initialization of the plugin and destroy that context. */
     vtable->close(ctx, data);
@@ -218,7 +226,7 @@ main(void)
     if (code != 0)
         bail_krb5(ctx, code, "cannot initialize Kerberos context");
 
-    /* Run all of the tests again. */
+    /* Run all of the tests again.  No need to re-run generic tests. */
     code = vtable->open(ctx, NULL, &data);
     is_int(0, code, "Plugin initialization (krb5.conf dictionary)");
     for (i = 0; i < ARRAY_SIZE(cracklib_tests); i++)
@@ -243,17 +251,20 @@ main(void)
     if (code != 0)
         bail_krb5(ctx, code, "cannot initialize Kerberos context");
 
-    /* Run the CDB tests. */
+    /* Run the CDB and generic tests. */
     code = vtable->open(ctx, NULL, &data);
     is_int(0, code, "Plugin initialization (CDB dictionary)");
     for (i = 0; i < ARRAY_SIZE(cdb_tests); i++)
         is_password_test(ctx, vtable, data, &cdb_tests[i]);
+    for (i = 0; i < ARRAY_SIZE(generic_tests); i++)
+        is_password_test(ctx, vtable, data, &generic_tests[i]);
     vtable->close(ctx, data);
 
 #else /* !HAVE_CDB */
 
     /* Otherwise, mark the CDB tests as skipped. */
-    skip_block(ARRAY_SIZE(cdb_tests) * 2 + 1, "not built with CDB support");
+    count = ARRAY_SIZE(cdb_tests) + ARRAY_SIZE(generic_tests);
+    skip_block(count * 2 + 1, "not built with CDB support");
 
 #endif /* !HAVE_CDB */
 
