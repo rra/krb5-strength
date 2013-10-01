@@ -67,8 +67,8 @@ sub run_heimdal_strength {
 #  Throws: Text exception on failure to run the test program
 sub check_password {
     my ($test_ref) = @_;
-    my $principal = $test_ref->{principal};
-    my $password  = $test_ref->{password};
+    my $principal  = $test_ref->{principal};
+    my $password   = $test_ref->{password};
 
     # Run the heimdal-strength command.
     my ($status, $out, $err) = run_heimdal_strength($principal, $password);
@@ -84,7 +84,7 @@ sub check_password {
         is($out, q{}, '...no output');
     } else {
         is($err, q{},        '...no errors');
-        is($out, "APPROVED", '...approved');
+        is($out, 'APPROVED', '...approved');
     }
     return;
 }
@@ -115,13 +115,13 @@ sub create_krb5_conf {
     # Append the local configuration.
     my $datadir = $ENV{BUILD} ? "$ENV{BUILD}/data" : 'tests/data';
     open(my $config, '>>', $new) or die "Cannot append to $new: $!\n";
-    print {$config} <<"__END__"
+    print {$config} <<"END_OF_CONFIG"
 
 [appdefaults]
     krb5-strength = {
         $setting = $datadir/$dictionary
     }
-__END__
+END_OF_CONFIG
       or die "Cannot append to $new: $!\n";
     close($config) or die "Cannot append to $new: $!\n";
 
@@ -188,8 +188,9 @@ local $ENV{KRB5_CONFIG} = $krb5_conf;
 # Check whether we were built with CDB support.  If so, run those tests.
 my ($status, $output, $err) = run_heimdal_strength('test', 'password');
 SKIP: {
-    skip('not built with CDB support', scalar(@{$cdb_tests}) * 3)
-      if ($status == 1 && $err =~ m{ not [ ] built [ ] with [ ] CDB }xms);
+    if ($status == 1 && $err =~ m{ not [ ] built [ ] with [ ] CDB }xms) {
+        skip('not built with CDB support', scalar(@{$cdb_tests}) * 3);
+    }
 
     # Run the CDB password tests from JSON.
     for my $test (@{$cdb_tests}) {
