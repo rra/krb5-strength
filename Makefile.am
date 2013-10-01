@@ -8,11 +8,11 @@
 
 ACLOCAL_AMFLAGS = -I m4
 EXTRA_DIST = .gitignore LICENSE autogen cracklib/HISTORY cracklib/LICENCE \
-	cracklib/README cracklib/genrules.pl cracklib/mkdict		  \
-	external/heimdal-strength.pod tests/HOWTO tests/TESTS		  \
-	tests/data/wordlist tests/heimdal/external-t			  \
+	cracklib/README cracklib/genrules.pl cracklib/mkdict tests/HOWTO  \
+	tests/TESTS tests/data/wordlist tests/heimdal/external-t	  \
 	tests/heimdal/pod-spelling-t tests/heimdal/pod-t		  \
-	tests/tap/libtap.sh tests/tools/cdbmake-wordlist
+	tests/tap/libtap.sh tests/tools/cdbmake-wordlist		  \
+	tools/heimdal-strength.pod
 
 # Do this globally.  Everything needs to find the Kerberos headers and
 # libraries, and if we're using the system CrackLib or libcdb, add its
@@ -60,24 +60,24 @@ endif
 plugin_passwd_strength_la_LIBADD += portable/libportable.la $(KRB5_LIBS) \
 	$(CDB_LIBS)
 
-# The Heimdal external-check program.
-bin_PROGRAMS = external/heimdal-strength
-external_heimdal_strength_CFLAGS = $(AM_CFLAGS)
-external_heimdal_strength_SOURCES = plugin/api.c plugin/api.h plugin/cdb.c \
-	external/heimdal-strength.c
+# The Heimdal external check program.
+bin_PROGRAMS = tools/heimdal-strength
+tools_heimdal_strength_CFLAGS = $(AM_CFLAGS)
+tools_heimdal_strength_SOURCES = plugin/api.c plugin/api.h plugin/cdb.c \
+	tools/heimdal-strength.c
 if EMBEDDED_CRACKLIB
-    external_heimdal_strength_LDADD = cracklib/libcracklib.la
+    tools_heimdal_strength_LDADD = cracklib/libcracklib.la
 else
-    external_heimdal_strength_LDADD = $(CRACKLIB_LIBS)
+    tools_heimdal_strength_LDADD = $(CRACKLIB_LIBS)
 endif
-external_heimdal_strength_LDADD += util/libutil.a portable/libportable.la \
+tools_heimdal_strength_LDADD += util/libutil.a portable/libportable.la \
 	$(KRB5_LIBS) $(CDB_LIBS)
 
 # Other tools.
 dist_bin_SCRIPTS = tools/cdbmake-wordlist
 
 # Man pages for all tools.
-dist_man_MANS = external/heimdal-strength.1 tools/cdbmake-wordlist.1
+dist_man_MANS = tools/heimdal-strength.1 tools/cdbmake-wordlist.1
 
 # Handle the standard stuff that make maintainer-clean should probably remove
 # but doesn't.  This breaks the GNU coding standard, but in this area the GNU

@@ -40,7 +40,7 @@ sub run_heimdal_strength {
     $in .= "end\n";
 
     # Find the newly-built password checking program.
-    my $program = test_file_path('../external/heimdal-strength');
+    my $program = test_file_path('../tools/heimdal-strength');
 
     # Run the password strength checker.
     my $out;
