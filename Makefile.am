@@ -12,7 +12,7 @@ EXTRA_DIST = .gitignore LICENSE autogen cracklib/HISTORY cracklib/LICENCE \
 	external/heimdal-strength.pod tests/HOWTO tests/TESTS		  \
 	tests/data/wordlist tests/heimdal/external-t			  \
 	tests/heimdal/pod-spelling-t tests/heimdal/pod-t		  \
-	tests/tap/libtap.sh
+	tests/tap/libtap.sh tests/tools/cdbmake-wordlist
 
 # Do this globally.  Everything needs to find the Kerberos headers and
 # libraries, and if we're using the system CrackLib, add its location
