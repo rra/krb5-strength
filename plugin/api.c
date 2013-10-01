@@ -134,14 +134,15 @@ pwcheck_init(krb5_context ctx, const char *dictionary,
     /* Sanity-check the dictionary path. */
     if (asprintf(&file, "%s.pwd", path) < 0) {
         oerrno = errno;
-        krb5_set_error_message(ctx, oerrno, "cannot allocate memory");
+        krb5_set_error_message(ctx, oerrno, "cannot allocate memory: %s",
+                               strerror(oerrno));
         free(path);
         return oerrno;
     }
     if (access(file, R_OK) != 0) {
         oerrno = errno;
-        krb5_set_error_message(ctx, oerrno, "dictionary %s does not exist",
-                               file);
+        krb5_set_error_message(ctx, oerrno, "dictionary %s does not exist: %s",
+                               file, strerror(oerrno));
         free(path);
         free(file);
         return oerrno;
@@ -152,7 +153,8 @@ pwcheck_init(krb5_context ctx, const char *dictionary,
     *data = malloc(sizeof(**data));
     if (*data == NULL) {
         oerrno = errno;
-        krb5_set_error_message(ctx, oerrno, "cannot allocate memory");
+        krb5_set_error_message(ctx, oerrno, "cannot allocate memory: %s",
+                               strerror(oerrno));
         free(path);
         return oerrno;
     }
@@ -191,7 +193,8 @@ pwcheck_check(krb5_context ctx UNUSED, krb5_pwqual_moddata data,
     user = strdup(principal);
     if (user == NULL) {
         oerrno = errno;
-        krb5_set_error_message(ctx, oerrno, "cannot allocate memory");
+        krb5_set_error_message(ctx, oerrno, "cannot allocate memory: %s",
+                               strerror(oerrno));
         return oerrno;
     }
     for (p = user; p[0] != '\0'; p++) {
