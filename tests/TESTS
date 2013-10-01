@@ -9,4 +9,5 @@ portable/strlcat
 portable/strlcpy
 tools/cdbmake-wordlist
 util/messages
+util/messages-krb5
 util/xmalloc

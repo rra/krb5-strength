@@ -113,10 +113,10 @@ warnings:
 	$(MAKE) V=0 CFLAGS='$(WARNINGS)' $(check_PROGRAMS)
 
 # The bits below are for the test suite, not for the main package.
-check_PROGRAMS = tests/heimdal/plugin-t tests/mit/plugin-t		 \
-	tests/portable/asprintf-t tests/portable/snprintf-t		 \
-	tests/portable/strlcat-t tests/portable/strlcpy-t tests/runtests \
-	tests/util/messages-t tests/util/xmalloc
+check_PROGRAMS = tests/heimdal/plugin-t tests/mit/plugin-t		    \
+	tests/portable/asprintf-t tests/portable/snprintf-t		    \
+	tests/portable/strlcat-t tests/portable/strlcpy-t tests/runtests    \
+	tests/util/messages-krb5-t tests/util/messages-t tests/util/xmalloc
 if EMBEDDED_CRACKLIB
     check_PROGRAMS += cracklib/packer
 endif
@@ -150,6 +150,8 @@ tests_portable_strlcpy_t_SOURCES = tests/portable/strlcpy-t.c \
 tests_portable_strlcpy_t_LDADD = tests/tap/libtap.a portable/libportable.la
 tests_util_messages_t_LDADD = tests/tap/libtap.a util/libutil.a \
 	portable/libportable.la
+tests_util_messages_krb5_t_LDADD = tests/tap/libtap.a util/libutil.a \
+	portable/libportable.la $(KRB5_LIBS)
 tests_util_xmalloc_LDADD = util/libutil.a portable/libportable.la
 
 # The dictionary is used by the tests and needs to be built first.
