@@ -29,8 +29,8 @@
  * The password test data, generated from the JSON source.  Defines an arrays
  * named cracklib_tests and cdb_tests.
  */
-#include <tests/data/cdb.c>
-#include <tests/data/cracklib.c>
+#include <tests/data/passwords/cdb.c>
+#include <tests/data/passwords/cracklib.c>
 
 
 #ifndef HAVE_KRB5_PWQUAL_PLUGIN_H

@@ -15,8 +15,10 @@ pod2man --release="$version" --center='krb5-strength' \
     tools/heimdal-strength.pod > tools/heimdal-strength.1
 
 # Generate the C version of our password test data.
-tests/data/make-c-data tests/data/cracklib.json > tests/data/cracklib.c
-tests/data/make-c-data tests/data/cdb.json > tests/data/cdb.c
+for data in tests/data/passwords/*.json ; do
+    tests/data/passwords/make-c-data "$data" \
+        > $(echo "$data" | sed 's/\.json$/.c/')
+done
 
 # Generate the CDB database from the test wordlist for plugin tests.
 tools/cdbmake-wordlist tests/data/wordlist

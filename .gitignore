@@ -18,9 +18,8 @@
 /m4/lt~obsolete.m4
 /stamp-h1
 /tests/data/.placeholder
-/tests/data/cdb.c
-/tests/data/cracklib.c
 /tests/data/dictionary.*
+/tests/data/passwords/*.c
 /tests/data/wordlist.cdb
 /tests/heimdal/plugin-t
 /tests/mit/plugin-t

@@ -9,10 +9,10 @@
 ACLOCAL_AMFLAGS = -I m4
 EXTRA_DIST = .gitignore LICENSE autogen cracklib/HISTORY cracklib/LICENCE \
 	cracklib/README cracklib/genrules.pl cracklib/mkdict tests/HOWTO  \
-	tests/TESTS tests/data/wordlist tests/heimdal/external-t	  \
-	tests/heimdal/pod-spelling-t tests/heimdal/pod-t		  \
-	tests/tap/libtap.sh tests/tools/cdbmake-wordlist		  \
-	tools/heimdal-strength.pod
+	tests/TESTS tests/data/passwords tests/data/wordlist		  \
+	tests/heimdal/external-t tests/heimdal/pod-spelling-t		  \
+	tests/heimdal/pod-t tests/tap/libtap.sh				  \
+	tests/tools/cdbmake-wordlist tools/heimdal-strength.pod
 
 # Do this globally.  Everything needs to find the Kerberos headers and
 # libraries, and if we're using the system CrackLib or libcdb, add its

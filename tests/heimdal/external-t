@@ -129,17 +129,19 @@ END_OF_CONFIG
     return $new;
 }
 
-# Load a password test cases and return them as a list.
+# Load a set of password test cases and return them as a list.  The given file
+# name is relative to data/passwords in the test suite.
 #
-# $file - The path to the file containing the test data in JSON
+# $file - The file name containing the test data in JSON
 #
 # Returns: List of anonymous hashes representing password test cases
 #  Throws: Text exception on failure to load the test data
 sub load_password_tests {
     my ($file) = @_;
+    my $path = test_file_path("data/passwords/$file");
 
     # Load the test file data into memory.
-    my $testdata = read_file($file);
+    my $testdata = read_file($path);
 
     # Decode the JSON into Perl objects and return them.
     my $json = JSON->new->utf8;
@@ -147,8 +149,8 @@ sub load_password_tests {
 }
 
 # Load the password tests from JSON.
-my $cracklib_tests = load_password_tests(test_file_path('data/cracklib.json'));
-my $cdb_tests      = load_password_tests(test_file_path('data/cdb.json'));
+my $cdb_tests      = load_password_tests('cdb.json');
+my $cracklib_tests = load_password_tests('cracklib.json');
 
 # We can now calculate our plan: three tests for each password test, with an
 # extra set for testing behavior when password_dictionary is not configured.

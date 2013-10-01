@@ -36,7 +36,7 @@ Readonly my $HEADER => <<'END_HEADER';
  * See LICENSE for licensing terms.
  */
 
-#include <tests/data/password-tests.h>
+#include <tests/data/passwords/tests.h>
 
 END_HEADER
 
@@ -184,9 +184,9 @@ struct element names.  All of them are written as C strings except for
 code, where the value from JSON is written as a literal.  It should
 therefore be either a number or a symbolic constant.
 
-The written file will also include C<tests/data/password-tests.h>, which
-should define the above struct and any constants that will be used for
-the code field.
+The written file will also include C<tests/data/passwords/tests.h>, which
+should define the above struct and any constants that will be used for the
+code field.
 
 =head1 AUTHOR
 
