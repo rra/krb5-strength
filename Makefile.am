@@ -71,7 +71,12 @@ else
 endif
 external_heimdal_strength_LDADD += util/libutil.a portable/libportable.la \
 	$(KRB5_LIBS)
-dist_man_MANS = external/heimdal-strength.1
+
+# Other tools.
+dist_bin_SCRIPTS = tools/cdbmake-wordlist
+
+# Man pages for all tools.
+dist_man_MANS = external/heimdal-strength.1 tools/cdbmake-wordlist.1
 
 # Handle the standard stuff that make maintainer-clean should probably remove
 # but doesn't.  This breaks the GNU coding standard, but in this area the GNU
