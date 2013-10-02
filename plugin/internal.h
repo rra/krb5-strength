@@ -49,25 +49,25 @@ BEGIN_DECLS
 #pragma GCC visibility push(hidden)
 
 /* Initialize the plugin and set up configuration. */
-krb5_error_code pwcheck_init(krb5_context, const char *dictionary,
-                             krb5_pwqual_moddata *);
+krb5_error_code strength_init(krb5_context, const char *dictionary,
+                              krb5_pwqual_moddata *);
 
 /*
  * Check a password.  Returns 0 if okay.  On error, sets the Kerberos error
  * message and returns a Kerberos status code.
  */
-krb5_error_code pwcheck_check(krb5_context, krb5_pwqual_moddata,
-                              const char *password, const char *principal);
+krb5_error_code strength_check(krb5_context, krb5_pwqual_moddata,
+                               const char *password, const char *principal);
 
 /* Check a password (and some permutations) against a CDB database. */
-krb5_error_code pwcheck_check_cdb(krb5_context, krb5_pwqual_moddata,
-                                  const char *password);
+krb5_error_code strength_check_cdb(krb5_context, krb5_pwqual_moddata,
+                                   const char *password);
 
 /* Finished checking passwords.  Free internal data. */
-void pwcheck_close(krb5_context, krb5_pwqual_moddata);
+void strength_close(krb5_context, krb5_pwqual_moddata);
 
 /* Free the subset of internal data used by the CDB module. */
-void pwcheck_close_cdb(krb5_context, krb5_pwqual_moddata);
+void strength_close_cdb(krb5_context, krb5_pwqual_moddata);
 
 /* Undo default visibility change. */
 #pragma GCC visibility pop

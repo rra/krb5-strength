@@ -1,8 +1,8 @@
 /*
  * The public APIs of the password strength checking kadmind plugin.
  *
- * Provides the public pwcheck_init, pwcheck_check, and pwcheck_close APIs for
- * the kadmind plugin.
+ * Provides the public strength_init, strength_check, and strength_close APIs
+ * for the password strength plugin.
  *
  * Developed by Derrick Brashear and Ken Hornstein of Sine Nomine Associates,
  *     on behalf of Stanford University.
@@ -36,8 +36,8 @@
 
 /* If not built with CDB support, provide some stubs. */
 #ifndef HAVE_CDB
-# define pwcheck_check_cdb(c, d, p) 0
-# define pwcheck_close_cdb(c, d)    /* empty */
+# define strength_check_cdb(c, d, p) 0
+# define strength_close_cdb(c, d)    /* empty */
 #endif
 
 /* The public function exported by the cracklib library. */
@@ -306,8 +306,8 @@ init_cdb(krb5_context ctx, krb5_pwqual_moddata data UNUSED,
  * Currently, we don't cope with a NULL dictionary path.
  */
 krb5_error_code
-pwcheck_init(krb5_context ctx, const char *dictionary,
-             krb5_pwqual_moddata *moddata)
+strength_init(krb5_context ctx, const char *dictionary,
+              krb5_pwqual_moddata *moddata)
 {
     krb5_pwqual_moddata data = NULL;
     char *cdb_path = NULL;
@@ -376,7 +376,7 @@ pwcheck_init(krb5_context ctx, const char *dictionary,
 
 fail:
     if (data != NULL)
-        pwcheck_close(ctx, data);
+        strength_close(ctx, data);
     free(cdb_path);
     *moddata = NULL;
     return code;
@@ -389,8 +389,8 @@ fail:
  * into which to put any failure message.
  */
 krb5_error_code
-pwcheck_check(krb5_context ctx UNUSED, krb5_pwqual_moddata data,
-              const char *password, const char *principal)
+strength_check(krb5_context ctx UNUSED, krb5_pwqual_moddata data,
+               const char *password, const char *principal)
 {
     char *user, *p;
     const char *q;
@@ -515,7 +515,7 @@ pwcheck_check(krb5_context ctx UNUSED, krb5_pwqual_moddata data,
 
     /* Check the password against CDB if it is configured. */
     if (data->have_cdb) {
-        code = pwcheck_check_cdb(ctx, data, password);
+        code = strength_check_cdb(ctx, data, password);
         if (code != 0)
             return code;
     }
@@ -528,10 +528,10 @@ pwcheck_check(krb5_context ctx UNUSED, krb5_pwqual_moddata data,
  * do is free the memory allocated for our internal data.
  */
 void
-pwcheck_close(krb5_context ctx UNUSED, krb5_pwqual_moddata data)
+strength_close(krb5_context ctx UNUSED, krb5_pwqual_moddata data)
 {
     if (data != NULL) {
-        pwcheck_close_cdb(ctx, data);
+        strength_close_cdb(ctx, data);
         free(data->dictionary);
         free(data);
     }

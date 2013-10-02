@@ -77,8 +77,8 @@ in_cdb_dictionary(krb5_context ctx, krb5_pwqual_moddata data,
  * dictionary.
  */
 krb5_error_code
-pwcheck_check_cdb(krb5_context ctx, krb5_pwqual_moddata data,
-                  const char *password)
+strength_check_cdb(krb5_context ctx, krb5_pwqual_moddata data,
+                   const char *password)
 {
     krb5_error_code code;
     bool found;
@@ -143,7 +143,7 @@ fail:
  * Free internal TinyCDB state and close the CDB dictionary.
  */
 void
-pwcheck_close_cdb(krb5_context ctx UNUSED, krb5_pwqual_moddata data)
+strength_close_cdb(krb5_context ctx UNUSED, krb5_pwqual_moddata data)
 {
     if (data->have_cdb)
         cdb_free(&data->cdb);

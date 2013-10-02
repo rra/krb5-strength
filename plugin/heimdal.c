@@ -41,8 +41,8 @@
  */
 static int
 heimdal_pwcheck(krb5_context ctx, krb5_principal principal,
-                krb5_data *password, const char *tuning UNUSED, char *message,
-                size_t length)
+                krb5_data *password, const char *tuning UNUSED,
+                char *message, size_t length)
 {
     krb5_pwqual_moddata data;
     char *pastring;
@@ -58,7 +58,7 @@ heimdal_pwcheck(krb5_context ctx, krb5_principal principal,
     }
     memcpy(pastring, password->data, password->length);
     pastring[password->length] = '\0';
-    code = pwcheck_init(ctx, NULL, &data);
+    code = strength_init(ctx, NULL, &data);
     if (code != 0) {
         error = krb5_get_error_message(ctx, code);
         snprintf(message, length, "cannot initialize strength checking: %s",
@@ -73,10 +73,10 @@ heimdal_pwcheck(krb5_context ctx, krb5_principal principal,
         snprintf(message, length, "cannot unparse principal name: %s", error);
         krb5_free_error_message(ctx, error);
         free(pastring);
-        pwcheck_close(ctx, data);
+        strength_close(ctx, data);
         return 1;
     }
-    code = pwcheck_check(ctx, data, pastring, name);
+    code = strength_check(ctx, data, pastring, name);
     if (code != 0) {
         error = krb5_get_error_message(ctx, code);
         snprintf(message, length, "%s", error);
@@ -84,7 +84,7 @@ heimdal_pwcheck(krb5_context ctx, krb5_principal principal,
     }
     krb5_free_unparsed_name(ctx, name);
     free(pastring);
-    pwcheck_close(ctx, data);
+    strength_close(ctx, data);
     return (code == 0) ? 0 : 1;
 }
 

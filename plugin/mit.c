@@ -41,7 +41,7 @@ krb5_error_code pwqual_strength_initvt(krb5_context, int, int,
 static krb5_error_code
 init(krb5_context ctx, const char *dictionary, krb5_pwqual_moddata *data)
 {
-    return pwcheck_init(ctx, dictionary, data);
+    return strength_init(ctx, dictionary, data);
 }
 
 
@@ -60,7 +60,7 @@ check(krb5_context ctx, krb5_pwqual_moddata data, const char *password,
     code = krb5_unparse_name(ctx, princ, &name);
     if (code != 0)
         return code;
-    code = pwcheck_check(ctx, data, password, name);
+    code = strength_check(ctx, data, password, name);
     krb5_free_unparsed_name(ctx, name);
     return code;
 }
@@ -72,7 +72,7 @@ check(krb5_context ctx, krb5_pwqual_moddata data, const char *password,
 static void
 fini(krb5_context ctx, krb5_pwqual_moddata data)
 {
-    pwcheck_close(ctx, data);
+    strength_close(ctx, data);
 }
 
 

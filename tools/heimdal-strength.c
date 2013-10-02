@@ -70,7 +70,7 @@ check_password(krb5_context ctx, krb5_pwqual_moddata data)
         sysdie("Cannot read end of entry");
     if (strcmp(end, "end\n") != 0)
         die("Malformed end line");
-    code = pwcheck_check(ctx, data, password, principal);
+    code = strength_check(ctx, data, password, principal);
     if (code == 0)
         printf("APPROVED\n");
     else {
@@ -103,7 +103,7 @@ main(int argc, char *argv[] UNUSED)
     code = krb5_init_context(&ctx);
     if (code != 0)
         die_krb5(ctx, code, "Cannot create Kerberos context");
-    code = pwcheck_init(ctx, NULL, &data);
+    code = strength_init(ctx, NULL, &data);
     if (code != 0)
         die_krb5(ctx, code, "Cannot initialize strength checking");
 
@@ -111,7 +111,7 @@ main(int argc, char *argv[] UNUSED)
     check_password(ctx, data);
 
     /* Close and free resources. */
-    pwcheck_close(ctx, data);
+    strength_close(ctx, data);
     krb5_free_context(ctx);
     exit(0);
 }
