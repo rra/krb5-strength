@@ -60,6 +60,10 @@ BEGIN_DECLS
 krb5_error_code strength_init(krb5_context, const char *dictionary,
                               krb5_pwqual_moddata *);
 
+/* Initialize the internal data used by the CDB dictionary checks. */
+krb5_error_code strength_init_cdb(krb5_context, krb5_pwqual_moddata,
+                                  const char *dictionary);
+
 /*
  * Check a password.  Returns 0 if okay.  On error, sets the Kerberos error
  * message and returns a Kerberos status code.
@@ -74,7 +78,7 @@ krb5_error_code strength_check_cdb(krb5_context, krb5_pwqual_moddata,
 /* Finished checking passwords.  Free internal data. */
 void strength_close(krb5_context, krb5_pwqual_moddata);
 
-/* Free the subset of internal data used by the CDB module. */
+/* Free the subset of internal data used by the CDB dictionary checks. */
 void strength_close_cdb(krb5_context, krb5_pwqual_moddata);
 
 /*

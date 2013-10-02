@@ -23,8 +23,6 @@
 #endif
 #include <ctype.h>
 #include <errno.h>
-#include <fcntl.h>
-#include <sys/stat.h>
 
 #include <plugin/internal.h>
 #include <util/macros.h>
@@ -233,48 +231,6 @@ init_cracklib(krb5_context ctx, krb5_pwqual_moddata data)
 }
 
 
-#ifdef HAVE_CDB
-/*
- * Initialize the CDB dictionary.  Opens the dictionary and sets up the
- * TinyCDB state.  Returns 0 on success, non-zero on failure (and sets the
- * error in the Kerberos context).  If not built with CDB support, always
- * returns an error.
- */
-static krb5_error_code
-init_cdb(krb5_context ctx, krb5_pwqual_moddata data, const char *path)
-{
-    krb5_error_code code;
-
-    data->cdb_fd = open(path, O_RDONLY);
-    if (data->cdb_fd < 0)
-        return strength_error_system(ctx, "cannot open dictionary %s", path);
-    if (cdb_init(&data->cdb, data->cdb_fd) < 0) {
-        code = strength_error_system(ctx, "cannot init dictionary %s", path);
-        close(data->cdb_fd);
-        data->cdb_fd = -1;
-        return code;
-    }
-    data->have_cdb = true;
-    return 0;
-}
-
-#else
-
-/*
- * Stub for init_cdb if not built with CDB support.
- */
-static krb5_error_code
-init_cdb(krb5_context ctx, krb5_pwqual_moddata data UNUSED,
-         const char *database UNUSED)
-{
-    krb5_set_error_message(ctx, KADM5_BAD_SERVER_PARAMS, "CDB dictionary"
-                           " requested but not built with CDB support");
-    return KADM5_BAD_SERVER_PARAMS;
-}
-
-#endif
-
-
 /*
  * Initialize the module.  Ensure that the dictionary file exists and is
  * readable and store the path in the module context.  Returns 0 on success,
@@ -339,7 +295,7 @@ strength_init(krb5_context ctx, const char *dictionary,
 
     /* If there is a CDB dictionary, initialize TinyCDB. */
     if (cdb_path != NULL) {
-        code = init_cdb(ctx, data, cdb_path);
+        code = strength_init_cdb(ctx, data, cdb_path);
         if (code != 0)
             goto fail;
     }

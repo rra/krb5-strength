@@ -24,9 +24,27 @@
 # include <cdb.h>
 #endif
 #include <errno.h>
+#include <fcntl.h>
+#include <sys/stat.h>
 
 #include <plugin/internal.h>
 #include <util/macros.h>
+
+
+/*
+ * Stub for strength_init_cdb if not built with CDB support.
+ */
+#ifndef HAVE_CDB
+static krb5_error_code
+strength_init_cdb(krb5_context ctx, krb5_pwqual_moddata data UNUSED,
+                  const char *database UNUSED)
+{
+    krb5_set_error_message(ctx, KADM5_BAD_SERVER_PARAMS, "CDB dictionary"
+                           " requested but not built with CDB support");
+    return KADM5_BAD_SERVER_PARAMS;
+}
+#endif
+
 
 /* Skip the rest of this file if CDB is not available. */
 #ifdef HAVE_CDB
@@ -64,6 +82,32 @@ in_cdb_dictionary(krb5_context ctx, krb5_pwqual_moddata data,
         *found = (status == 1);
         return 0;
     }
+}
+
+
+/*
+ * Initialize the CDB dictionary.  Opens the dictionary and sets up the
+ * TinyCDB state.  Returns 0 on success, non-zero on failure (and sets the
+ * error in the Kerberos context).  If not built with CDB support, always
+ * returns an error.
+ */
+krb5_error_code
+strength_init_cdb(krb5_context ctx, krb5_pwqual_moddata data,
+                  const char *path)
+{
+    krb5_error_code code;
+
+    data->cdb_fd = open(path, O_RDONLY);
+    if (data->cdb_fd < 0)
+        return strength_error_system(ctx, "cannot open dictionary %s", path);
+    if (cdb_init(&data->cdb, data->cdb_fd) < 0) {
+        code = strength_error_system(ctx, "cannot init dictionary %s", path);
+        close(data->cdb_fd);
+        data->cdb_fd = -1;
+        return code;
+    }
+    data->have_cdb = true;
+    return 0;
 }
 
 
