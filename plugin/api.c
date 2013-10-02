@@ -145,7 +145,7 @@ default_number(krb5_context ctx, const char *section, const char *opt,
             *result = value;
     }
     if (tmp != NULL)
-        free(tmp);
+        krb5_free_string(ctx, tmp);
 }
 
 
