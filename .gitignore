@@ -21,8 +21,8 @@
 /tests/data/dictionary.*
 /tests/data/passwords/*.c
 /tests/data/wordlist.cdb
-/tests/heimdal/plugin-t
-/tests/mit/plugin-t
+/tests/plugin/heimdal-t
+/tests/plugin/mit-t
 /tests/portable/asprintf-t
 /tests/portable/snprintf-t
 /tests/portable/strlcat-t

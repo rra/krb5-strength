@@ -117,9 +117,9 @@ warnings:
 	$(MAKE) V=0 CFLAGS='$(WARNINGS)' $(check_PROGRAMS)
 
 # The bits below are for the test suite, not for the main package.
-check_PROGRAMS = tests/heimdal/plugin-t tests/mit/plugin-t		    \
+check_PROGRAMS = tests/runtests tests/plugin/heimdal-t tests/plugin/mit-t   \
 	tests/portable/asprintf-t tests/portable/snprintf-t		    \
-	tests/portable/strlcat-t tests/portable/strlcpy-t tests/runtests    \
+	tests/portable/strlcat-t tests/portable/strlcpy-t		    \
 	tests/util/messages-krb5-t tests/util/messages-t tests/util/xmalloc
 if EMBEDDED_CRACKLIB
     check_PROGRAMS += cracklib/packer
@@ -134,11 +134,11 @@ tests_tap_libtap_a_SOURCES = tests/tap/basic.c tests/tap/basic.h	\
 	tests/tap/string.h
 
 # The actual test programs.
-tests_heimdal_plugin_t_CPPFLAGS = $(KRB5_CPPFLAGS)
-tests_heimdal_plugin_t_LDADD = tests/tap/libtap.a portable/libportable.la \
+tests_plugin_heimdal_t_CPPFLAGS = $(KRB5_CPPFLAGS)
+tests_plugin_heimdal_t_LDADD = tests/tap/libtap.a portable/libportable.la \
 	$(KRB5_LIBS) $(CDB_LIBS) $(DL_LIBS)
-tests_mit_plugin_t_CPPFLAGS = $(KRB5_CPPFLAGS)
-tests_mit_plugin_t_LDADD = tests/tap/libtap.a portable/libportable.la \
+tests_plugin_mit_t_CPPFLAGS = $(KRB5_CPPFLAGS)
+tests_plugin_mit_t_LDADD = tests/tap/libtap.a portable/libportable.la \
 	$(KRB5_LIBS) $(CDB_LIBS) $(DL_LIBS)
 tests_portable_asprintf_t_SOURCES = tests/portable/asprintf-t.c \
 	tests/portable/asprintf.c
