@@ -184,6 +184,11 @@ CONFIGURATION
   system.  Then, follow the relevant instructions below for either Heimdal
   or MIT Kerberos.
 
+  For both MIT Kerberos and Heimdal, you can also add a minimum_length
+  setting to the krb5-strength section in [appdefaults], similar to the
+  other settings described below.  If set, passwords with fewer than that
+  number of characters will be rejected.
+
  Heimdal
 
   There are two options: using an external password check program, or

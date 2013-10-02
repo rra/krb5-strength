@@ -18,6 +18,11 @@ krb5-strength 2.0 (unreleased)
     cdbmake-wordlist utility (written in Perl) is included to ease the
     process of creating a CDB database from a simple word list.
 
+    A minimum password length can now be enforced directly via the plugin
+    or external check program without relying on CrackLib.  To set a
+    minimum password length, add a minimum_length setting to the
+    krb5-strength section of [appdefaults] in krb5.conf.
+
     The plugin now sets the Kerberos error message in the context to pass
     error information, resulting in higher-quality error reporting in the
     MIT Kerberos plugin.

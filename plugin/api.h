@@ -32,11 +32,12 @@ typedef struct krb5_pwqual_moddata_st *krb5_pwqual_moddata;
  * checking for at least the MIT plugin.
  */
 struct krb5_pwqual_moddata_st {
-    char *dictionary;
-    bool have_cdb;
-    int cdb_fd;
+    char *dictionary;           /* Base path to CrackLib dictionary */
+    long min_length;            /* Minimum password length */
+    bool have_cdb;              /* Whether we have a CDB dictionary */
+    int cdb_fd;                 /* File descriptor of CDB dictionary */
 #ifdef HAVE_CDB_H
-    struct cdb cdb;
+    struct cdb cdb;             /* Open CDB dictionary data */
 #endif
 };
 

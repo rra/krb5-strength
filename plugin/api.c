@@ -45,6 +45,63 @@ extern char *FascistCheck(const char *password, const char *dict);
 
 
 /*
+ * Load a number option from Kerberos appdefaults.  Takes the PAM argument
+ * struct, the section name, the realm, the option, and the result location.
+ * The native interface doesn't support numbers, so we actually read a string
+ * and then convert.
+ */
+static void
+default_number(krb5_context ctx, const char *section, const char *opt,
+               long *result)
+{
+    char *tmp = NULL;
+    char *realm = NULL;
+    char *end;
+    long value;
+    krb5_error_code code;
+#ifdef HAVE_KRB5_REALM
+    krb5_const_realm rdata = realm;
+#else
+    krb5_data realm_struct;
+    const krb5_data *rdata;
+#endif
+
+    /* Get the default realm.  This is annoying for MIT Kerberos. */
+    code = krb5_get_default_realm(ctx, &realm);
+    if (code != 0)
+        realm = NULL;
+#ifdef HAVE_KRB5_REALM
+    rdata = realm;
+#else
+    if (realm == NULL)
+        rdata = NULL;
+    else {
+        rdata = &realm_struct;
+        realm_struct.magic = KV5M_DATA;
+        realm_struct.data = (void *) realm;
+        realm_struct.length = strlen(realm);
+    }
+#endif
+
+    /* Obtain the string from [appdefaults]. */
+    krb5_appdefault_string(ctx, section, rdata, opt, "", &tmp);
+
+    /*
+     * If we found anything, convert it to a number.  Currently, we ignore
+     * errors here.
+     */
+    if (tmp != NULL && tmp[0] != '\0') {
+        errno = 0;
+        value = strtol(tmp, &end, 10);
+        if (errno == 0 && *end == '\0')
+            *result = value;
+    }
+    if (tmp != NULL)
+        free(tmp);
+}
+
+
+/*
  * Load a string option from Kerberos appdefaults.  Takes the Kerberos
  * context, the section name, the realm, the option, and the result location.
  *
@@ -218,6 +275,9 @@ pwcheck_init(krb5_context ctx, const char *dictionary,
     }
     data->cdb_fd = -1;
 
+    /* Get minimum length information from krb5.conf. */
+    default_number(ctx, "krb5-strength", "minimum_length", &data->min_length);
+
     /* Use dictionary if given, otherwise get from krb5.conf. */
     if (dictionary == NULL)
         default_string(ctx, "krb5-strength", "password_dictionary",
@@ -286,6 +346,13 @@ pwcheck_check(krb5_context ctx UNUSED, krb5_pwqual_moddata data,
     const char *result;
     krb5_error_code code;
 
+    /* Check minimum length first, since that's easy. */
+    if ((long) strlen(password) < data->min_length) {
+        code = KADM5_PASS_Q_TOOSHORT;
+        krb5_set_error_message(ctx, code, "password is too short");
+        return code;
+    }
+
     /*
      * We get the principal (in krb5_unparse_name format) from kadmind and we
      * want to be sure that the password doesn't match the username, the
@@ -293,9 +360,9 @@ pwcheck_check(krb5_context ctx UNUSED, krb5_pwqual_moddata data,
      * have to copy the string so that we can manipulate it a bit.
      */
     if (strcasecmp(password, principal) == 0) {
-        krb5_set_error_message(ctx, KADM5_PASS_Q_GENERIC,
-                               "password based on username");
-        return KADM5_PASS_Q_GENERIC;
+        code = KADM5_PASS_Q_GENERIC;
+        krb5_set_error_message(ctx, code, "password based on username");
+        return code;
     }
     user = strdup(principal);
     if (user == NULL) {

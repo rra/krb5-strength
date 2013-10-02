@@ -55,6 +55,7 @@ struct kadm5_pw_policy_verifier {
 #include <tests/data/passwords/cdb.c>
 #include <tests/data/passwords/cracklib.c>
 #include <tests/data/passwords/generic.c>
+#include <tests/data/passwords/length.c>
 
 
 /*
@@ -144,7 +145,7 @@ int
 main(void)
 {
     char *path, *krb5_config, *krb5_config_empty, *tmpdir;
-    char *setup_argv[5];
+    char *setup_argv[8];
     size_t i, count;
     struct kadm5_pw_policy_verifier *verifier;
     struct password_test no_dictionary_test = {
@@ -167,7 +168,9 @@ main(void)
      * have configured, and two tests per password test.  We run the generic
      * tests twice, once with CrackLib and once with CDB.
      */
-    count = ARRAY_SIZE(cracklib_tests) + ARRAY_SIZE(cdb_tests) + 1;
+    count = ARRAY_SIZE(cracklib_tests) + 1;
+    count += ARRAY_SIZE(cdb_tests);
+    count += ARRAY_SIZE(length_tests);
     count += ARRAY_SIZE(generic_tests) * 2;
     plan(5 + count * 2);
 
@@ -188,11 +191,12 @@ main(void)
     setup_argv[0] = test_file_path("data/make-krb5-conf");
     if (setup_argv[0] == NULL)
         bail("cannot find data/make-krb5-conf in the test suite");
-    basprintf(&setup_argv[1], "%s/data/dictionary", getenv("BUILD"));
     tmpdir = test_tmpdir();
-    setup_argv[2] = path;
-    setup_argv[3] = tmpdir;
-    setup_argv[4] = NULL;
+    setup_argv[1] = path;
+    setup_argv[2] = tmpdir;
+    setup_argv[3] = (char *) "password_dictionary";
+    basprintf(&setup_argv[4], "%s/data/dictionary", getenv("BUILD"));
+    setup_argv[5] = NULL;
     run_setup((const char **) setup_argv);
 
     /* Point KRB5_CONFIG at the newly-generated krb5.conf file. */
@@ -206,16 +210,28 @@ main(void)
     for (i = 0; i < ARRAY_SIZE(generic_tests); i++)
         is_password_test(verifier, &generic_tests[i]);
 
+    /* Add length restrictions. */
+    setup_argv[5] = (char *) "minimum_length";
+    setup_argv[6] = (char *) "12";
+    setup_argv[7] = NULL;
+    run_setup((const char **) setup_argv);
+
+    /* Run the length tests. */
+    for (i = 0; i < ARRAY_SIZE(length_tests); i++)
+        is_password_test(verifier, &length_tests[i]);
+
 #ifdef HAVE_CDB
 
     /* If built with CDB, set up krb5.conf to use a CDB dictionary instead. */
-    free(setup_argv[1]);
-    setup_argv[1] = test_file_path("data/wordlist.cdb");
-    if (setup_argv[1] == NULL)
+    free(setup_argv[4]);
+    setup_argv[3] = (char *) "password_dictionary_cdb";
+    setup_argv[4] = test_file_path("data/wordlist.cdb");
+    if (setup_argv[4] == NULL)
         bail("cannot find data/wordlist.cdb in the test suite");
+    setup_argv[5] = NULL;
     run_setup((const char **) setup_argv);
     test_file_path_free(setup_argv[0]);
-    test_file_path_free(setup_argv[1]);
+    test_file_path_free(setup_argv[4]);
     test_file_path_free(path);
 
     /* Run the CDB tests. */

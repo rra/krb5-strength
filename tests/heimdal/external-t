@@ -89,17 +89,17 @@ sub check_password {
     return;
 }
 
-# Create a new krb5.conf file that includes password dictionary configuration
-# so that subsequent invocations of heimdal-strength can find the testing
-# dictionary.  Takes the setting and the value of the setting to write.
+# Create a new krb5.conf file that includes arbitrary settings passed in via
+# a hash reference.
 #
-# $setting    - krb5.conf setting to add to [appdefaults]
-# $dictionary - The dictionary file name, relative to tests/data
+# $settings_ref - Hash of keys and values to put into [appdefaults]
 #
 # Returns: Path to the new krb5.conf file
 #  Throws: Text exception if the new krb5.conf file cannot be created
 sub create_krb5_conf {
-    my ($setting, $dictionary) = @_;
+    my ($settings_ref) = @_;
+
+    # Paths for krb5.conf creation.
     my $old    = test_file_path('data/krb5.conf');
     my $tmpdir = $ENV{BUILD} ? "$ENV{BUILD}/tmp" : 'tests/tmp';
     my $new    = "$tmpdir/krb5.conf";
@@ -113,15 +113,14 @@ sub create_krb5_conf {
     copy($old, $new) or die "Cannot copy $old to $new: $!\n";
 
     # Append the local configuration.
-    my $datadir = $ENV{BUILD} ? "$ENV{BUILD}/data" : 'tests/data';
     open(my $config, '>>', $new) or die "Cannot append to $new: $!\n";
-    print {$config} <<"END_OF_CONFIG"
-
-[appdefaults]
-    krb5-strength = {
-        $setting = $datadir/$dictionary
+    print {$config} "\n[appdefaults]\n    krb5-strength = {\n"
+      or die "Cannot append to $new: $!\n";
+    for my $key (keys %{$settings_ref}) {
+        print {$config} q{ } x 8, $key, ' = ', $settings_ref->{$key}, "\n"
+          or die "Cannot append to $new: $!\n";
     }
-END_OF_CONFIG
+    print {$config} "    }\n"
       or die "Cannot append to $new: $!\n";
     close($config) or die "Cannot append to $new: $!\n";
 
@@ -149,11 +148,11 @@ sub load_password_tests {
 }
 
 # Load the password tests from JSON.  Accumulate a total count of tests,
-# adding one at the start for testing behavior when no password dictionary is
+# adding one test for testing behavior when no password dictionary is
 # configured.
 my %tests;
 my $count = 1;
-for my $type (qw(cdb cracklib generic)) {
+for my $type (qw(cdb cracklib generic length)) {
     my $tests = load_password_tests("$type.json");
     $tests{$type} = $tests;
     $count += scalar(@{$tests});
@@ -183,7 +182,9 @@ check_password($test);
 
 # Install the krb5.conf file with a configuration pointing to the test
 # CrackLib dictionary.
-my $krb5_conf = create_krb5_conf('password_dictionary', 'dictionary');
+my $datadir = $ENV{BUILD} ? "$ENV{BUILD}/data" : 'tests/data';
+my $krb5_conf
+  = create_krb5_conf({ password_dictionary => "$datadir/dictionary" });
 local $ENV{KRB5_CONFIG} = $krb5_conf;
 
 # Run the CrackLib password tests and based-on-principal tests from JSON.
@@ -196,9 +197,25 @@ for my $test (@{ $tests{generic} }) {
     check_password($test);
 }
 
+# Install the krb5.conf file with a length restriction.
+$krb5_conf = create_krb5_conf(
+    {
+        minimum_length      => 12,
+        password_dictionary => "$datadir/dictionary",
+    }
+);
+local $ENV{KRB5_CONFIG} = $krb5_conf;
+
+# Run the password length checks.
+note('Password length checks');
+for my $test (@{ $tests{length} }) {
+    check_password($test);
+}
+
 # Install the krb5.conf file with configuration pointing to the CDB
 # dictionary.
-$krb5_conf = create_krb5_conf('password_dictionary_cdb', 'wordlist.cdb');
+$krb5_conf
+  = create_krb5_conf({ password_dictionary_cdb => "$datadir/wordlist.cdb" });
 local $ENV{KRB5_CONFIG} = $krb5_conf;
 
 # Check whether we were built with CDB support.  If so, run those tests.

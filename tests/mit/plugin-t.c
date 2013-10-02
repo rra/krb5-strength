@@ -32,6 +32,7 @@
 #include <tests/data/passwords/cdb.c>
 #include <tests/data/passwords/cracklib.c>
 #include <tests/data/passwords/generic.c>
+#include <tests/data/passwords/length.c>
 
 
 #ifndef HAVE_KRB5_PWQUAL_PLUGIN_H
@@ -145,7 +146,7 @@ int
 main(void)
 {
     char *path, *dictionary, *krb5_config, *krb5_config_empty, *tmpdir;
-    char *setup_argv[5];
+    char *setup_argv[8];
     const char*build;
     size_t i, count;
     krb5_context ctx;
@@ -155,7 +156,7 @@ main(void)
 
     /*
      * Calculate how many tests we have.  There are two tests for the module
-     * metadata, four more tests for initializing the plugin, one test for
+     * metadata, five more tests for initializing the plugin, one test for
      * initialization without a valid dictionary, and two tests per password
      * test.
      *
@@ -163,9 +164,11 @@ main(void)
      * dictionary path and once from krb5.conf configuration.  We run the
      * generic tests with both CrackLib and CDB configurations.
      */
-    count = 2 * ARRAY_SIZE(cracklib_tests) + ARRAY_SIZE(cdb_tests);
+    count = 2 * ARRAY_SIZE(cracklib_tests);
+    count += ARRAY_SIZE(cdb_tests);
+    count += ARRAY_SIZE(length_tests);
     count += 2 * ARRAY_SIZE(generic_tests);
-    plan(2 + 4 + count * 2);
+    plan(2 + 5 + count * 2);
 
     /* Start with the krb5.conf that contains no dictionary configuration. */
     path = test_file_path("data/krb5.conf");
@@ -192,6 +195,8 @@ main(void)
     basprintf(&dictionary, "%s/data/dictionary", build);
     code = vtable->open(ctx, dictionary, &data);
     is_int(0, code, "Plugin initialization (explicit dictionary)");
+    if (code != 0)
+        bail("cannot continue after plugin initialization failure");
 
     /* Now, run all of the tests, with generic tests. */
     for (i = 0; i < ARRAY_SIZE(cracklib_tests); i++)
@@ -209,10 +214,11 @@ main(void)
     setup_argv[0] = test_file_path("data/make-krb5-conf");
     if (setup_argv[0] == NULL)
         bail("cannot find data/make-krb5-conf in the test suite");
-    setup_argv[1] = dictionary;
-    setup_argv[2] = path;
-    setup_argv[3] = tmpdir;
-    setup_argv[4] = NULL;
+    setup_argv[1] = path;
+    setup_argv[2] = tmpdir;
+    setup_argv[3] = (char *) "password_dictionary";
+    setup_argv[4] = dictionary;
+    setup_argv[5] = NULL;
     run_setup((const char **) setup_argv);
 
     /* Point KRB5_CONFIG at the newly-generated krb5.conf file. */
@@ -229,8 +235,31 @@ main(void)
     /* Run all of the tests again.  No need to re-run generic tests. */
     code = vtable->open(ctx, NULL, &data);
     is_int(0, code, "Plugin initialization (krb5.conf dictionary)");
+    if (code != 0)
+        bail("cannot continue after plugin initialization failure");
     for (i = 0; i < ARRAY_SIZE(cracklib_tests); i++)
         is_password_test(ctx, vtable, data, &cracklib_tests[i]);
+    vtable->close(ctx, data);
+
+    /* Add minimum length configuration to krb5.conf. */
+    setup_argv[5] = (char *) "minimum_length";
+    setup_argv[6] = (char *) "12";
+    setup_argv[7] = NULL;
+    run_setup((const char **) setup_argv);
+
+    /* Obtain a new Kerberos context with that krb5.conf file. */
+    krb5_free_context(ctx);
+    code = krb5_init_context(&ctx);
+    if (code != 0)
+        bail_krb5(ctx, code, "cannot initialize Kerberos context");
+
+    /* Run all of the length tests. */
+    code = vtable->open(ctx, NULL, &data);
+    is_int(0, code, "Plugin initialization (krb5.conf dictionary)");
+    if (code != 0)
+        bail("cannot continue after plugin initialization failure");
+    for (i = 0; i < ARRAY_SIZE(length_tests); i++)
+        is_password_test(ctx, vtable, data, &length_tests[i]);
     vtable->close(ctx, data);
 
 #ifdef HAVE_CDB
@@ -240,7 +269,9 @@ main(void)
     dictionary = test_file_path("data/wordlist.cdb");
     if (dictionary == NULL)
         bail("cannot find data/wordlist.cdb in the test suite");
-    setup_argv[1] = dictionary;
+    setup_argv[3] = (char *) "password_dictionary_cdb";
+    setup_argv[4] = dictionary;
+    setup_argv[5] = NULL;
     run_setup((const char **) setup_argv);
     test_file_path_free(setup_argv[0]);
     test_file_path_free(path);
@@ -254,6 +285,8 @@ main(void)
     /* Run the CDB and generic tests. */
     code = vtable->open(ctx, NULL, &data);
     is_int(0, code, "Plugin initialization (CDB dictionary)");
+    if (code != 0)
+        bail("cannot continue after plugin initialization failure");
     for (i = 0; i < ARRAY_SIZE(cdb_tests); i++)
         is_password_test(ctx, vtable, data, &cdb_tests[i]);
     for (i = 0; i < ARRAY_SIZE(generic_tests); i++)

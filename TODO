@@ -1,9 +1,12 @@
                          krb5-strength To-Do List
 
- * Update to CrackLib 2, which is currently shipped in Debian.  This
+ * Update to CrackLib 2.9, which is currently shipped in Debian.  This
    requires testing to confirm that the on-disk data format is still the
    same.
 
- * Feed back modifications to CrackLib 2 to allow a program to use a
-   custom set of rules, which would allow us to stop embedding our own
-   copy of CrackLib customized to add additional rules.
+ * Feed back modifications to CrackLib to allow a program to use a custom
+   set of rules, which would allow us to stop embedding our own copy of
+   CrackLib customized to add additional rules.
+
+ * Do something useful with errors when parsing numeric arguments from
+   krb5.conf configuration.
