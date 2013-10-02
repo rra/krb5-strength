@@ -1,0 +1,47 @@
+[
+    {
+        "name": "non-ASCII characters",
+        "principal": "test@EXAMPLE.ORG",
+        "password": "عربى",
+        "code": "KADM5_PASS_Q_GENERIC",
+        "error": "password contains non-ASCII or control characters"
+    },
+    {
+        "name": "control character",
+        "principal": "test@EXAMPLE.ORG",
+        "password": "ouchD\u0001artetch",
+        "code": "KADM5_PASS_Q_GENERIC",
+        "error": "password contains non-ASCII or control characters"
+    },
+    {
+        "name": "tab",
+        "principal": "test@EXAMPLE.ORG",
+        "password": "\touchDartetch",
+        "code": "KADM5_PASS_Q_GENERIC",
+        "error": "password contains non-ASCII or control characters"
+    },
+    {
+        "name": "all alphabetic",
+        "principal": "test@EXAMPLE.ORG",
+        "password": "ouchDartetch",
+        "code": "KADM5_PASS_Q_CLASS",
+        "error": "password is only letters and spaces"
+    },
+    {
+        "name": "all alphabetic with spaces",
+        "principal": "test@EXAMPLE.ORG",
+        "password": "the perils of all good dogs",
+        "code": "KADM5_PASS_Q_CLASS",
+        "error": "password is only letters and spaces"
+    },
+    {
+        "name": "punctuation",
+        "principal": "test@EXAMPLE.ORG",
+        "password": "the perils of all good dogs!"
+    },
+    {
+        "name": "digits",
+        "principal": "test@EXAMPLE.ORG",
+        "password": "the perils 0of all good dogs"
+    }
+]

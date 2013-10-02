@@ -53,6 +53,7 @@ struct kadm5_pw_policy_verifier {
  * named cdb_tests, cracklib_tests, and generic_tests.
  */
 #include <tests/data/passwords/cdb.c>
+#include <tests/data/passwords/class.c>
 #include <tests/data/passwords/cracklib.c>
 #include <tests/data/passwords/generic.c>
 #include <tests/data/passwords/length.c>
@@ -145,7 +146,7 @@ int
 main(void)
 {
     char *path, *krb5_config, *krb5_config_empty, *tmpdir;
-    char *setup_argv[8];
+    char *setup_argv[10];
     size_t i, count;
     struct kadm5_pw_policy_verifier *verifier;
     struct password_test no_dictionary_test = {
@@ -170,6 +171,7 @@ main(void)
      */
     count = ARRAY_SIZE(cracklib_tests) + 1;
     count += ARRAY_SIZE(cdb_tests);
+    count += ARRAY_SIZE(class_tests);
     count += ARRAY_SIZE(length_tests);
     count += ARRAY_SIZE(generic_tests) * 2;
     plan(5 + count * 2);
@@ -209,6 +211,18 @@ main(void)
         is_password_test(verifier, &cracklib_tests[i]);
     for (i = 0; i < ARRAY_SIZE(generic_tests); i++)
         is_password_test(verifier, &generic_tests[i]);
+
+    /* Add character class restrictions. */
+    setup_argv[5] = (char *) "require_ascii_printable";
+    setup_argv[6] = (char *) "true";
+    setup_argv[7] = (char *) "require_non_letter";
+    setup_argv[8] = (char *) "true";
+    setup_argv[9] = NULL;
+    run_setup((const char **) setup_argv);
+
+    /* Run the character class tests. */
+    for (i = 0; i < ARRAY_SIZE(class_tests); i++)
+        is_password_test(verifier, &class_tests[i]);
 
     /* Add length restrictions. */
     setup_argv[5] = (char *) "minimum_length";

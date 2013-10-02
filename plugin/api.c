@@ -45,10 +45,58 @@ extern char *FascistCheck(const char *password, const char *dict);
 
 
 /*
- * Load a number option from Kerberos appdefaults.  Takes the PAM argument
- * struct, the section name, the realm, the option, and the result location.
- * The native interface doesn't support numbers, so we actually read a string
- * and then convert.
+ * Load a boolean option from Kerberos appdefaults.  Takes the Kerberos
+ * context, the section name, the option, and the result location.
+ *
+ * The stupidity of rewriting the realm argument into a krb5_data is required
+ * by MIT Kerberos.
+ */
+static void
+default_boolean(krb5_context ctx, const char *section, const char *opt,
+                bool *result)
+{
+    int tmp;
+    char *realm = NULL;
+    krb5_error_code code;
+#ifdef HAVE_KRB5_REALM
+    krb5_const_realm rdata = realm;
+#else
+    krb5_data realm_struct;
+    const krb5_data *rdata;
+#endif
+
+    /* Get the default realm.  This is annoying for MIT Kerberos. */
+    code = krb5_get_default_realm(ctx, &realm);
+    if (code != 0)
+        realm = NULL;
+#ifdef HAVE_KRB5_REALM
+    rdata = realm;
+#else
+    if (realm == NULL)
+        rdata = NULL;
+    else {
+        rdata = &realm_struct;
+        realm_struct.magic = KV5M_DATA;
+        realm_struct.data = (void *) realm;
+        realm_struct.length = strlen(realm);
+    }
+#endif
+
+    /*
+     * The MIT version of krb5_appdefault_boolean takes an int * and the
+     * Heimdal version takes a krb5_boolean *, so hope that Heimdal always
+     * defines krb5_boolean to int or this will require more portability work.
+     */
+    krb5_appdefault_boolean(ctx, section, rdata, opt, *result, &tmp);
+    *result = tmp;
+}
+
+
+/*
+ * Load a number option from Kerberos appdefaults.  Takes the Kerberos
+ * context, the section name, the option, and the result location.  The native
+ * interface doesn't support numbers, so we actually read a string and then
+ * convert.
  */
 static void
 default_number(krb5_context ctx, const char *section, const char *opt,
@@ -278,6 +326,12 @@ pwcheck_init(krb5_context ctx, const char *dictionary,
     /* Get minimum length information from krb5.conf. */
     default_number(ctx, "krb5-strength", "minimum_length", &data->min_length);
 
+    /* Get character class restrictions from krb5.conf. */
+    default_boolean(ctx, "krb5-strength", "require_ascii_printable",
+                    &data->ascii);
+    default_boolean(ctx, "krb5-strength", "require_non_letter",
+                    &data->nonletter);
+
     /* Use dictionary if given, otherwise get from krb5.conf. */
     if (dictionary == NULL)
         default_string(ctx, "krb5-strength", "password_dictionary",
@@ -340,6 +394,7 @@ pwcheck_check(krb5_context ctx UNUSED, krb5_pwqual_moddata data,
 {
     char *user, *p;
     const char *q;
+    bool okay;
     size_t i, j;
     char c;
     int oerrno;
@@ -351,6 +406,39 @@ pwcheck_check(krb5_context ctx UNUSED, krb5_pwqual_moddata data,
         code = KADM5_PASS_Q_TOOSHORT;
         krb5_set_error_message(ctx, code, "password is too short");
         return code;
+    }
+
+    /*
+     * If desired, check whether the password contains non-ASCII or
+     * non-printable ASCII characters.
+     */
+    if (data->ascii) {
+        for (q = password; *q != '\0'; q++)
+            if (!isascii((unsigned char) *q) || !isprint((unsigned char) *q)) {
+                code = KADM5_PASS_Q_GENERIC;
+                krb5_set_error_message(ctx, code,
+                    "password contains non-ASCII or control characters");
+                return code;
+            }
+    }
+
+    /*
+     * If desired, ensure the password has a non-letter (and non-space)
+     * character.  This requires that people using phrases at least include a
+     * digit or punctuation to make phrase dictionary attacks or dictionary
+     * attacks via combinations of words harder.
+     */
+    if (data->nonletter) {
+        okay = false;
+        for (q = password; *q != '\0'; q++)
+            if (!isalpha((unsigned char) *q) && *q != ' ')
+                okay = true;
+        if (!okay) {
+            code = KADM5_PASS_Q_CLASS;
+            krb5_set_error_message(ctx, code,
+                                   "password is only letters and spaces");
+            return code;
+        }
     }
 
     /*

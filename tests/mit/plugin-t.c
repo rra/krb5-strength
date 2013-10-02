@@ -30,6 +30,7 @@
  * named cdb_tests, cracklib_tests, and generic_tests.
  */
 #include <tests/data/passwords/cdb.c>
+#include <tests/data/passwords/class.c>
 #include <tests/data/passwords/cracklib.c>
 #include <tests/data/passwords/generic.c>
 #include <tests/data/passwords/length.c>
@@ -146,7 +147,7 @@ int
 main(void)
 {
     char *path, *dictionary, *krb5_config, *krb5_config_empty, *tmpdir;
-    char *setup_argv[8];
+    char *setup_argv[10];
     const char*build;
     size_t i, count;
     krb5_context ctx;
@@ -156,7 +157,7 @@ main(void)
 
     /*
      * Calculate how many tests we have.  There are two tests for the module
-     * metadata, five more tests for initializing the plugin, one test for
+     * metadata, six more tests for initializing the plugin, one test for
      * initialization without a valid dictionary, and two tests per password
      * test.
      *
@@ -166,9 +167,10 @@ main(void)
      */
     count = 2 * ARRAY_SIZE(cracklib_tests);
     count += ARRAY_SIZE(cdb_tests);
+    count += ARRAY_SIZE(class_tests);
     count += ARRAY_SIZE(length_tests);
     count += 2 * ARRAY_SIZE(generic_tests);
-    plan(2 + 5 + count * 2);
+    plan(2 + 6 + count * 2);
 
     /* Start with the krb5.conf that contains no dictionary configuration. */
     path = test_file_path("data/krb5.conf");
@@ -241,6 +243,29 @@ main(void)
         is_password_test(ctx, vtable, data, &cracklib_tests[i]);
     vtable->close(ctx, data);
 
+    /* Add character class configuration to krb5.conf. */
+    setup_argv[5] = (char *) "require_ascii_printable";
+    setup_argv[6] = (char *) "true";
+    setup_argv[7] = (char *) "require_non_letter";
+    setup_argv[8] = (char *) "true";
+    setup_argv[9] = NULL;
+    run_setup((const char **) setup_argv);
+
+    /* Obtain a new Kerberos context with that krb5.conf file. */
+    krb5_free_context(ctx);
+    code = krb5_init_context(&ctx);
+    if (code != 0)
+        bail_krb5(ctx, code, "cannot initialize Kerberos context");
+
+    /* Run all the character class tests. */
+    code = vtable->open(ctx, NULL, &data);
+    is_int(0, code, "Plugin initialization (character class)");
+    if (code != 0)
+        bail("cannot continue after plugin initialization failure");
+    for (i = 0; i < ARRAY_SIZE(class_tests); i++)
+        is_password_test(ctx, vtable, data, &class_tests[i]);
+    vtable->close(ctx, data);
+
     /* Add minimum length configuration to krb5.conf. */
     setup_argv[5] = (char *) "minimum_length";
     setup_argv[6] = (char *) "12";
@@ -255,7 +280,7 @@ main(void)
 
     /* Run all of the length tests. */
     code = vtable->open(ctx, NULL, &data);
-    is_int(0, code, "Plugin initialization (krb5.conf dictionary)");
+    is_int(0, code, "Plugin initialization (length)");
     if (code != 0)
         bail("cannot continue after plugin initialization failure");
     for (i = 0; i < ARRAY_SIZE(length_tests); i++)

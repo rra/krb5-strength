@@ -184,10 +184,8 @@ CONFIGURATION
   system.  Then, follow the relevant instructions below for either Heimdal
   or MIT Kerberos.
 
-  For both MIT Kerberos and Heimdal, you can also add a minimum_length
-  setting to the krb5-strength section in [appdefaults], similar to the
-  other settings described below.  If set, passwords with fewer than that
-  number of characters will be rejected.
+  See "Other Settings" below for additional krb5.conf setting supported by
+  both Heimdal and MIT Kerberos.
 
  Heimdal
 
@@ -291,3 +289,34 @@ CONFIGURATION
   You can also mix and match these settings, by using dict_path for the
   CrackLib dictionary path and krb5.conf for the CDB dictionary path.
   There is no way to specify a CDB dictionary via the dict_path setting.
+
+ Other Settings
+
+  The following additional settings are supported in the [appdefaults]
+  section of krb5.conf when running under either Heimdal or MIT Kerberos.
+
+  minimum_length
+
+      If set to a numeric value, passwords with fewer than that number of
+      characters will be rejected, independent of any length restrictions
+      in CrackLib.  Note that this setting does not bypass the minimum
+      length requirements in CrackLib itself (which, for the version
+      embedded in this package, is eight characters).
+
+  require_ascii_printable
+
+      If set to a true boolean value, rejects any password that contains
+      non-ASCII characters or ASCII control characters.  Spaces are
+      allowed; tabs are not (at least assuming the POSIX C locale).  No
+      canonicalization or character set is defined for Kerberos passwords
+      in general, so you may want to reject non-ASCII characters to avoid
+      interoperability problems with computers with different default
+      character sets or Unicode normalization forms.
+
+  require_non_letter
+
+      If set to a true boolean value, the password must contain at least
+      one character that is not a letter (uppercase or lowercase) or a
+      space.  This may be helpful in combination with passphrases; users
+      may choose a stock English phrase, and this will force at least some
+      additional complexity.

@@ -23,6 +23,13 @@ krb5-strength 2.0 (unreleased)
     minimum password length, add a minimum_length setting to the
     krb5-strength section of [appdefaults] in krb5.conf.
 
+    New boolean settings require_ascii_printable and require_non_letter
+    are supported in the krb5-strength setting of [appdefaults] in
+    krb5.conf.  The former rejects passwords containing characters other
+    than printable ASCII characters (including space), and the latter
+    requires that passwords contain at least one character that is not a
+    letter (upper or lower case) or a space.
+
     The plugin now sets the Kerberos error message in the context to pass
     error information, resulting in higher-quality error reporting in the
     MIT Kerberos plugin.

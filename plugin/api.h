@@ -32,8 +32,10 @@ typedef struct krb5_pwqual_moddata_st *krb5_pwqual_moddata;
  * checking for at least the MIT plugin.
  */
 struct krb5_pwqual_moddata_st {
-    char *dictionary;           /* Base path to CrackLib dictionary */
     long min_length;            /* Minimum password length */
+    bool ascii;                 /* Whether to require printable ASCII */
+    bool nonletter;             /* Whether to require a non-letter */
+    char *dictionary;           /* Base path to CrackLib dictionary */
     bool have_cdb;              /* Whether we have a CDB dictionary */
     int cdb_fd;                 /* File descriptor of CDB dictionary */
 #ifdef HAVE_CDB_H
