@@ -23,6 +23,9 @@
 #include <portable/system.h>
 
 #include <errno.h>
+#ifdef HAVE_KADM5_KADM5_PWCHECK_H
+# include <kadm5/kadm5-pwcheck.h>
+#endif
 
 #include <plugin/internal.h>
 #include <util/macros.h>
@@ -30,32 +33,6 @@
 /* Skip this entire file if not building with Heimdal. */
 #ifdef HAVE_KRB5_REALM
 
-/* kadm5/kadm5-pwcheck.h isn't always installed by Heimdal. */
-# ifdef HAVE_KADM5_KADM5_PWCHECK_H
-#  include <kadm5/kadm5-pwcheck.h>
-# else
-#  define KADM5_PASSWD_VERSION_V1 1
-
-typedef int
-(*kadm5_passwd_quality_check_func)(krb5_context context,
-                                   krb5_principal principal,
-                                   krb5_data *password,
-                                   const char *tuning,
-                                   char *message,
-                                   size_t length);
-
-struct kadm5_pw_policy_check_func {
-    const char *name;
-    kadm5_passwd_quality_check_func func;
-};
-
-struct kadm5_pw_policy_verifier {
-    const char *name;
-    int version;
-    const char *vendor;
-    const struct kadm5_pw_policy_check_func *funcs;
-};
-# endif /* !HAVE_KADM5_PWCHECK_H */
 
 /*
  * This is the single check function that we provide.  It does the glue

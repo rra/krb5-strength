@@ -46,7 +46,8 @@ krb5-strength 2.0 (unreleased)
 
     Expect the Heimdal password strength checking plugin header in
     kadm5/kadm5-pwcheck.h instead of outside of the kadm5 directory.  This
-    is the path used by current versions of Heimdal.
+    is the path used by current versions of Heimdal.  Drop support for
+    older versions of Heimdal that don't install this header file.
 
     Update to rra-c-util 4.9:
 

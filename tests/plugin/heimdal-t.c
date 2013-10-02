@@ -14,39 +14,15 @@
 
 #include <dlfcn.h>
 #include <errno.h>
+#ifdef HAVE_KADM5_KADM5_PWCHECK_H
+# include <kadm5/kadm5-pwcheck.h>
+#endif
 
 #include <tests/tap/basic.h>
 #include <tests/tap/kerberos.h>
 #include <tests/tap/process.h>
 #include <tests/tap/string.h>
 #include <util/macros.h>
-
-/* kadm5-pwcheck.h isn't always installed by Heimdal. */
-#ifdef HAVE_KADM5_PWCHECK_H
-# include <kadm5-pwcheck.h>
-#else
-# define KADM5_PASSWD_VERSION_V1 1
-
-typedef int
-(*kadm5_passwd_quality_check_func)(krb5_context context,
-                                   krb5_principal principal,
-                                   krb5_data *password,
-                                   const char *tuning,
-                                   char *message,
-                                   size_t length);
-
-struct kadm5_pw_policy_check_func {
-    const char *name;
-    kadm5_passwd_quality_check_func func;
-};
-
-struct kadm5_pw_policy_verifier {
-    const char *name;
-    int version;
-    const char *vendor;
-    const struct kadm5_pw_policy_check_func *funcs;
-};
-#endif /* !HAVE_KADM5_PWCHECK_H */
 
 /*
  * The password test data, generated from the JSON source.  Defines an arrays
@@ -58,6 +34,21 @@ struct kadm5_pw_policy_verifier {
 #include <tests/data/passwords/generic.c>
 #include <tests/data/passwords/length.c>
 
+
+#ifndef HAVE_KADM5_KADM5_PWCHECK_H
+/*
+ * If we're not building with Heimdal, we can't run this test and much of the
+ * test won't even compile.  Replace this test with a small program that just
+ * calls skip_all.
+ */
+int
+main(void)
+{
+    skip_all("not built against Heimdal libraries");
+    return 0;
+}
+
+#else
 
 /*
  * Loads the Heimdal password change plugin and tests that its metadata is
@@ -157,11 +148,6 @@ main(void)
         "cannot initialize strength checking: password_dictionary not"
         " configured in krb5.conf",
     };
-
-    /* If we're not building with Heimdal, we can't run this test. */
-#ifndef HAVE_KRB5_REALM
-    skip_all("not built against Heimdal libraries");
-#endif
 
     /*
      * Calculate how many tests we have.  There are five tests for the module
@@ -273,3 +259,5 @@ main(void)
     free(krb5_config);
     return 0;
 }
+
+#endif /* HAVE_KADM5_KADM5_PWCHECK_H */

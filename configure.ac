@@ -32,7 +32,7 @@ RRA_LIB_CRACKLIB
 RRA_LIB_KRB5
 RRA_LIB_KRB5_SWITCH
 AC_CHECK_HEADERS([kadm5/kadm5-pwcheck.h kadm5/kadm5_err.h], [], [],
-    [RRA_INCLUDE_KRB5])
+    [RRA_INCLUDES_KRB5])
 AC_CHECK_HEADERS([krb5/pwqual_plugin.h], [], [], [RRA_INCLUDES_KRB5])
 AC_CHECK_TYPES([krb5_realm], [], [], [RRA_INCLUDES_KRB5])
 AC_CHECK_FUNCS([krb5_free_default_realm \
