@@ -1,6 +1,5 @@
 docs/pod
 docs/pod-spelling
-heimdal/external
 heimdal/plugin
 mit/plugin
 perl/critic
@@ -11,6 +10,7 @@ portable/snprintf
 portable/strlcat
 portable/strlcpy
 tools/cdbmake-wordlist
+tools/heimdal-strength
 util/messages
 util/messages-krb5
 util/xmalloc
