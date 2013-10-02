@@ -19,6 +19,7 @@ following modifications have been made:
  * Changed error for very short passwords to match current CrackLib.
  * Remove last block optimization in GetPW and start fresh each time.
  * Close the dictionary after each password lookup.
+ * Set hidden visibility on all CrackLib symbols.
 
 Below is the original changelog for CrackLib:
 

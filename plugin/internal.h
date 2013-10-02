@@ -43,6 +43,11 @@ struct krb5_pwqual_moddata_st {
 #endif
 };
 
+BEGIN_DECLS
+
+/* Default to a hidden visibility for all internal functions. */
+#pragma GCC visibility push(hidden)
+
 /* Initialize the plugin and set up configuration. */
 krb5_error_code pwcheck_init(krb5_context, const char *dictionary,
                              krb5_pwqual_moddata *);
@@ -63,5 +68,10 @@ void pwcheck_close(krb5_context, krb5_pwqual_moddata);
 
 /* Free the subset of internal data used by the CDB module. */
 void pwcheck_close_cdb(krb5_context, krb5_pwqual_moddata);
+
+/* Undo default visibility change. */
+#pragma GCC visibility pop
+
+END_DECLS
 
 #endif /* !PLUGIN_INTERNAL_H */

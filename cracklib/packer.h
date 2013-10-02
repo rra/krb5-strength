@@ -15,6 +15,8 @@
  *   - Prototype changes for const cleanliness.
  * 2010-03-14  Russ Allbery <rra@stanford.edu>
  *   - Fix int8, int16, and int32 definitions.
+ * 2013-10-01  Russ Allbery <rra@stanford.edu>
+ *   - Set hidden visibility on all symbols by default.
  */
 
 #include <config.h>
@@ -64,6 +66,9 @@ typedef struct
 #define PW_WORDS(x) ((x)->header.pih_numwords)
 #define PIH_MAGIC 0x70775631
 
+/* Default to a hidden visibility for all CrackLib functions. */
+#pragma GCC visibility push(hidden)
+
 extern PWDICT *PWOpen(const char *, const char *);
 extern int32 FindPW(PWDICT *, const char *);
 extern int PutPW(PWDICT *, const char *);
@@ -75,6 +80,9 @@ extern char *Trim(char *);
 extern int PMatch(const char *, const char *);
 extern char *Reverse(const char *);
 extern char *Lowercase(const char *);
+
+/* Undo default visibility change. */
+#pragma GCC visibility pop
 
 #define CRACK_TOLOWER(a) 	(isupper(a)?tolower(a):(a)) 
 #define CRACK_TOUPPER(a) 	(islower(a)?toupper(a):(a)) 
