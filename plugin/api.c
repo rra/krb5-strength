@@ -26,7 +26,7 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 
-#include <plugin/api.h>
+#include <plugin/internal.h>
 #include <util/macros.h>
 
 /* Heimdal doesn't define KADM5_PASS_Q_GENERIC. */

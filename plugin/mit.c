@@ -22,7 +22,7 @@
 # include <krb5/pwqual_plugin.h>
 #endif
 
-#include <plugin/api.h>
+#include <plugin/internal.h>
 #include <util/macros.h>
 
 /* Skip this entire file if building with Heimdal or pre-1.9 MIT. */

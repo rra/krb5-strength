@@ -25,7 +25,7 @@
 #endif
 #include <errno.h>
 
-#include <plugin/api.h>
+#include <plugin/internal.h>
 #include <util/macros.h>
 
 /* Skip the rest of this file if CDB is not available. */

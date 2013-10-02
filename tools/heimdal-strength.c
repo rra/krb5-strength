@@ -19,7 +19,7 @@
 
 #include <errno.h>
 
-#include <plugin/api.h>
+#include <plugin/internal.h>
 #include <util/macros.h>
 #include <util/messages.h>
 #include <util/messages-krb5.h>

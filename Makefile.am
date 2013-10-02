@@ -50,7 +50,7 @@ endif
 # Rules for building the password strength plugin.
 module_LTLIBRARIES = plugin/passwd_strength.la
 plugin_passwd_strength_la_SOURCES = plugin/api.c plugin/cdb.c \
-	plugin/heimdal.c plugin/mit.c
+	plugin/heimdal.c plugin/internal.h plugin/mit.c
 plugin_passwd_strength_la_LDFLAGS = -module -avoid-version
 if EMBEDDED_CRACKLIB
     plugin_passwd_strength_la_LIBADD = cracklib/libcracklib.la
@@ -63,8 +63,8 @@ plugin_passwd_strength_la_LIBADD += portable/libportable.la $(KRB5_LIBS) \
 # The Heimdal external check program.
 bin_PROGRAMS = tools/heimdal-strength
 tools_heimdal_strength_CFLAGS = $(AM_CFLAGS)
-tools_heimdal_strength_SOURCES = plugin/api.c plugin/api.h plugin/cdb.c \
-	tools/heimdal-strength.c
+tools_heimdal_strength_SOURCES = plugin/api.c plugin/cdb.c \
+	plugin/internal.h tools/heimdal-strength.c
 if EMBEDDED_CRACKLIB
     tools_heimdal_strength_LDADD = cracklib/libcracklib.la
 else

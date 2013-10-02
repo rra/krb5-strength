@@ -24,7 +24,7 @@
 
 #include <errno.h>
 
-#include <plugin/api.h>
+#include <plugin/internal.h>
 #include <util/macros.h>
 
 /* Skip this entire file if not building with Heimdal. */
