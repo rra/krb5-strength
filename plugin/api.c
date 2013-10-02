@@ -29,11 +29,6 @@
 #include <plugin/internal.h>
 #include <util/macros.h>
 
-/* Heimdal doesn't define KADM5_PASS_Q_GENERIC. */
-#ifndef KADM5_PASS_Q_GENERIC
-# define KADM5_PASS_Q_GENERIC KADM5_PASS_Q_DICT
-#endif
-
 /* If not built with CDB support, provide some stubs. */
 #ifndef HAVE_CDB
 # define strength_check_cdb(c, d, p) 0
