@@ -15,6 +15,7 @@
 
 #include <config.h>
 #include <portable/krb5.h>
+#include <portable/macros.h>
 
 #ifdef HAVE_CDB_H
 # include <cdb.h>
@@ -25,6 +26,13 @@
 #else
 typedef struct krb5_pwqual_moddata_st *krb5_pwqual_moddata;
 #endif
+
+/* Error strings returned (and displayed to the user) for various failures. */
+#define ERROR_ASCII    "password contains non-ASCII or control characters"
+#define ERROR_DICT     "password is based on a dictionary word"
+#define ERROR_LETTER   "password is only letters and spaces"
+#define ERROR_SHORT    "password is too short"
+#define ERROR_USERNAME "password based on username"
 
 /*
  * MIT Kerberos uses this type as an abstract data type for any data that a
@@ -68,6 +76,22 @@ void strength_close(krb5_context, krb5_pwqual_moddata);
 
 /* Free the subset of internal data used by the CDB module. */
 void strength_close_cdb(krb5_context, krb5_pwqual_moddata);
+
+/*
+ * Store a particular password quality error in the Kerberos context.  The
+ * _system variant uses errno for the error code and appends the strerror
+ * results to the message.  All versions return the error code set.
+ */
+krb5_error_code strength_error_class(krb5_context, const char *format, ...)
+    __attribute__((__nonnull__, __format__(printf, 2, 3)));
+krb5_error_code strength_error_dict(krb5_context, const char *format, ...)
+    __attribute__((__nonnull__, __format__(printf, 2, 3)));
+krb5_error_code strength_error_generic(krb5_context, const char *format, ...)
+    __attribute__((__nonnull__, __format__(printf, 2, 3)));
+krb5_error_code strength_error_system(krb5_context, const char *format, ...)
+    __attribute__((__nonnull__, __format__(printf, 2, 3)));
+krb5_error_code strength_error_tooshort(krb5_context, const char *format, ...)
+    __attribute__((__nonnull__, __format__(printf, 2, 3)));
 
 /* Undo default visibility change. */
 #pragma GCC visibility pop

@@ -223,21 +223,15 @@ static krb5_error_code
 init_cracklib(krb5_context ctx, krb5_pwqual_moddata data)
 {
     char *file;
-    int oerrno;
+    krb5_error_code code;
 
     /* Sanity-check the dictionary path. */
-    if (asprintf(&file, "%s.pwd", data->dictionary) < 0) {
-        oerrno = errno;
-        krb5_set_error_message(ctx, oerrno, "cannot allocate memory: %s",
-                               strerror(oerrno));
-        return oerrno;
-    }
+    if (asprintf(&file, "%s.pwd", data->dictionary) < 0)
+        return strength_error_system(ctx, "cannot allocate memory");
     if (access(file, R_OK) != 0) {
-        oerrno = errno;
-        krb5_set_error_message(ctx, oerrno, "dictionary %s does not exist: %s",
-                               file, strerror(oerrno));
+        code = strength_error_system(ctx, "cannot read dictionary %s", file);
         free(file);
-        return oerrno;
+        return code;
     }
     free(file);
     return 0;
@@ -252,22 +246,15 @@ init_cracklib(krb5_context ctx, krb5_pwqual_moddata data)
  * returns an error.
  */
 static krb5_error_code
-init_cdb(krb5_context ctx, krb5_pwqual_moddata data, const char *database)
+init_cdb(krb5_context ctx, krb5_pwqual_moddata data, const char *path)
 {
     krb5_error_code code;
 
-    data->cdb_fd = open(database, O_RDONLY);
-    if (data->cdb_fd < 0) {
-        code = errno;
-        krb5_set_error_message(ctx, code, "cannot open dictionary %s: %s",
-                               database, strerror(errno));
-        return code;
-    }
+    data->cdb_fd = open(path, O_RDONLY);
+    if (data->cdb_fd < 0)
+        return strength_error_system(ctx, "cannot open dictionary %s", path);
     if (cdb_init(&data->cdb, data->cdb_fd) < 0) {
-        code = errno;
-        krb5_set_error_message(ctx, code,
-                               "cannot initialize dictionary %s: %s",
-                               database, strerror(errno));
+        code = strength_error_system(ctx, "cannot init dictionary %s", path);
         close(data->cdb_fd);
         data->cdb_fd = -1;
         return code;
@@ -285,12 +272,9 @@ static krb5_error_code
 init_cdb(krb5_context ctx, krb5_pwqual_moddata data UNUSED,
          const char *database UNUSED)
 {
-    krb5_error_code code;
-
-    code = KADM5_BAD_SERVER_PARAMS;
-    krb5_set_error_message(ctx, code,
-        "CDB dictionary requested but not built with CDB support");
-    return code;
+    krb5_set_error_message(ctx, KADM5_BAD_SERVER_PARAMS, "CDB dictionary"
+                           " requested but not built with CDB support");
+    return KADM5_BAD_SERVER_PARAMS;
 }
 
 #endif
@@ -315,12 +299,8 @@ strength_init(krb5_context ctx, const char *dictionary,
 
     /* Allocate our internal data. */
     data = calloc(1, sizeof(*data));
-    if (data == NULL) {
-        code = errno;
-        krb5_set_error_message(ctx, code, "cannot allocate memory: %s",
-                               strerror(code));
-        return code;
-    }
+    if (data == NULL)
+        return strength_error_system(ctx, "cannot allocate memory");
     data->cdb_fd = -1;
 
     /* Get minimum length information from krb5.conf. */
@@ -339,8 +319,7 @@ strength_init(krb5_context ctx, const char *dictionary,
     else {
         data->dictionary = strdup(dictionary);
         if (data->dictionary == NULL) {
-            code = errno;
-            krb5_set_error_message(ctx, code, "cannot allocate memory");
+            code = strength_error_system(ctx, "cannot allocate memory");
             goto fail;
         }
     }
@@ -351,8 +330,8 @@ strength_init(krb5_context ctx, const char *dictionary,
     /* If there is no dictionary, abort our setup with an error. */
     if (data->dictionary == NULL && cdb_path == NULL) {
         code = KADM5_MISSING_CONF_PARAMS;
-        krb5_set_error_message(ctx, code,
-            "password_dictionary not configured in krb5.conf");
+        krb5_set_error_message(ctx, code, "password_dictionary not configured"
+                               " in krb5.conf");
         goto fail;
     }
 
@@ -384,6 +363,36 @@ fail:
 
 
 /*
+ * Check if a password contains only printable ASCII characters.
+ */
+static bool
+only_printable_ascii(const char *password)
+{
+    const char *p;
+
+    for (p = password; *p != '\0'; p++)
+        if (!isascii((unsigned char) *p) || !isprint((unsigned char) *p))
+            return false;
+    return true;
+}
+
+
+/*
+ * Check if a password contains only letters and spaces.
+ */
+static bool
+only_alpha_space(const char *password)
+{
+    const char *p;
+
+    for (p = password; *p != '\0'; p++)
+        if (!isalpha((unsigned char) *p) && *p != ' ')
+            return false;
+    return true;
+}
+
+
+/*
  * Check a given password.  Takes a Kerberos context, our module data, the
  * password, the principal the password is for, and a buffer and buffer length
  * into which to put any failure message.
@@ -394,33 +403,21 @@ strength_check(krb5_context ctx UNUSED, krb5_pwqual_moddata data,
 {
     char *user, *p;
     const char *q;
-    bool okay;
     size_t i, j;
     char c;
-    int oerrno;
     const char *result;
     krb5_error_code code;
 
     /* Check minimum length first, since that's easy. */
-    if ((long) strlen(password) < data->min_length) {
-        code = KADM5_PASS_Q_TOOSHORT;
-        krb5_set_error_message(ctx, code, "password is too short");
-        return code;
-    }
+    if ((long) strlen(password) < data->min_length)
+        return strength_error_tooshort(ctx, ERROR_SHORT);
 
     /*
      * If desired, check whether the password contains non-ASCII or
      * non-printable ASCII characters.
      */
-    if (data->ascii) {
-        for (q = password; *q != '\0'; q++)
-            if (!isascii((unsigned char) *q) || !isprint((unsigned char) *q)) {
-                code = KADM5_PASS_Q_GENERIC;
-                krb5_set_error_message(ctx, code,
-                    "password contains non-ASCII or control characters");
-                return code;
-            }
-    }
+    if (data->ascii && !only_printable_ascii(password))
+        return strength_error_generic(ctx, ERROR_ASCII);
 
     /*
      * If desired, ensure the password has a non-letter (and non-space)
@@ -428,37 +425,22 @@ strength_check(krb5_context ctx UNUSED, krb5_pwqual_moddata data,
      * digit or punctuation to make phrase dictionary attacks or dictionary
      * attacks via combinations of words harder.
      */
-    if (data->nonletter) {
-        okay = false;
-        for (q = password; *q != '\0'; q++)
-            if (!isalpha((unsigned char) *q) && *q != ' ')
-                okay = true;
-        if (!okay) {
-            code = KADM5_PASS_Q_CLASS;
-            krb5_set_error_message(ctx, code,
-                                   "password is only letters and spaces");
-            return code;
-        }
-    }
+    if (data->nonletter && only_alpha_space(password))
+        return strength_error_class(ctx, ERROR_LETTER);
 
     /*
-     * We get the principal (in krb5_unparse_name format) from kadmind and we
-     * want to be sure that the password doesn't match the username, the
-     * username reversed, or the username with trailing digits.  We therefore
-     * have to copy the string so that we can manipulate it a bit.
+     * We get the principal (in krb5_unparse_name format) and we want to be
+     * sure that the password doesn't match the username, the username
+     * reversed, or the username with trailing digits.  We therefore have to
+     * copy the string so that we can manipulate it a bit.
      */
-    if (strcasecmp(password, principal) == 0) {
-        code = KADM5_PASS_Q_GENERIC;
-        krb5_set_error_message(ctx, code, "password based on username");
-        return code;
-    }
+    if (strcasecmp(password, principal) == 0)
+        return strength_error_generic(ctx, ERROR_USERNAME);
     user = strdup(principal);
-    if (user == NULL) {
-        oerrno = errno;
-        krb5_set_error_message(ctx, oerrno, "cannot allocate memory: %s",
-                               strerror(oerrno));
-        return oerrno;
-    }
+    if (user == NULL)
+        return strength_error_system(ctx, "cannot allocate memory");
+
+    /* Strip the realm off of the principal. */
     for (p = user; p[0] != '\0'; p++) {
         if (p[0] == '\\' && p[1] != '\0') {
             p++;
@@ -469,12 +451,15 @@ strength_check(krb5_context ctx UNUSED, krb5_pwqual_moddata data,
             break;
         }
     }
+
+    /*
+     * If the length of the password matches the length of the local portion
+     * of the principal, check for exact matches or reversed matches.
+     */
     if (strlen(password) == strlen(user)) {
         if (strcasecmp(password, user) == 0) {
             free(user);
-            krb5_set_error_message(ctx, KADM5_PASS_Q_GENERIC,
-                                   "password based on username");
-            return KADM5_PASS_Q_GENERIC;
+            return strength_error_generic(ctx, ERROR_USERNAME);
         }
 
         /* Check against the reversed username. */
@@ -485,21 +470,22 @@ strength_check(krb5_context ctx UNUSED, krb5_pwqual_moddata data,
         }
         if (strcasecmp(password, user) == 0) {
             free(user);
-            krb5_set_error_message(ctx, KADM5_PASS_Q_GENERIC,
-                                   "password based on username");
-            return KADM5_PASS_Q_GENERIC;
+            return strength_error_generic(ctx, ERROR_USERNAME);
         }
     }
+
+    /*
+     * If the length is greater, check whether the user just added trailing
+     * digits to the local portion of the principal to form the password.
+     */
     if (strlen(password) > strlen(user))
         if (strncasecmp(password, user, strlen(user)) == 0) {
             q = password + strlen(user);
-            while (isdigit((int) *q))
+            while (isdigit((unsigned char) *q))
                 q++;
             if (*q == '\0') {
                 free(user);
-                krb5_set_error_message(ctx, KADM5_PASS_Q_GENERIC,
-                                       "password based on username");
-                return KADM5_PASS_Q_GENERIC;
+                return strength_error_generic(ctx, ERROR_USERNAME);
             }
         }
     free(user);
@@ -507,10 +493,8 @@ strength_check(krb5_context ctx UNUSED, krb5_pwqual_moddata data,
     /* Check the password against CrackLib if it is configured. */
     if (data->dictionary != NULL) {
         result = FascistCheck(password, data->dictionary);
-        if (result != NULL) {
-            krb5_set_error_message(ctx, KADM5_PASS_Q_GENERIC, "%s", result);
-            return KADM5_PASS_Q_GENERIC;
-        }
+        if (result != NULL)
+            return strength_error_generic(ctx, "%s", result);
     }
 
     /* Check the password against CDB if it is configured. */

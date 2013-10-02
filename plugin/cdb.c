@@ -55,15 +55,12 @@ static krb5_error_code
 in_cdb_dictionary(krb5_context ctx, krb5_pwqual_moddata data,
                   const char *password, bool *found)
 {
-    int status, oerrno;
+    int status;
 
     status = cdb_find(&data->cdb, password, strlen(password));
-    if (status < 0) {
-        oerrno = errno;
-        krb5_set_error_message(ctx, oerrno, "cannot query CDB database: %s",
-                               strerror(oerrno));
-        return oerrno;
-    } else {
+    if (status < 0)
+        return strength_error_system(ctx, "cannot query CDB database");
+    else {
         *found = (status == 1);
         return 0;
     }
@@ -83,7 +80,6 @@ strength_check_cdb(krb5_context ctx, krb5_pwqual_moddata data,
     krb5_error_code code;
     bool found;
     char *variant = NULL;
-    int oerrno;
 
     /* Check the basic password. */
     CHECK_PASSWORD(ctx, data, password);
@@ -101,12 +97,8 @@ strength_check_cdb(krb5_context ctx, krb5_pwqual_moddata data,
      */
     if (strlen(password) > 0) {
         variant = strdup(password);
-        if (variant == NULL) {
-            oerrno = errno;
-            krb5_set_error_message(ctx, oerrno, "cannot allocate memory: %s",
-                                   strerror(oerrno));
-            return oerrno;
-        }
+        if (variant == NULL)
+            return strength_error_system(ctx, "cannot allocate memory");
         variant[strlen(variant) - 1] = '\0';
         CHECK_PASSWORD(ctx, data, variant);
         if (variant[0] != '\0')
@@ -117,24 +109,20 @@ strength_check_cdb(krb5_context ctx, krb5_pwqual_moddata data,
             variant[strlen(variant) - 1] = '\0';
             CHECK_PASSWORD(ctx, data, variant);
         }
-        free(variant);
     }
 
     /* Password not found. */
+    free(variant);
     return 0;
 
 found:
     /* We found the password or a variant in the dictionary. */
-    if (variant != NULL)
-        free(variant);
-    krb5_set_error_message(ctx, KADM5_PASS_Q_DICT,
-                           "it is based on a dictionary word");
-    return KADM5_PASS_Q_DICT;
+    free(variant);
+    return strength_error_dict(ctx, ERROR_DICT);
 
 fail:
     /* Some sort of failure during CDB lookup. */
-    if (variant != NULL)
-        free(variant);
+    free(variant);
     return code;
 }
 
