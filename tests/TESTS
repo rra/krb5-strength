@@ -7,8 +7,6 @@ perl/minimum-version
 perl/strict
 portable/asprintf
 portable/snprintf
-portable/strlcat
-portable/strlcpy
 tools/cdbmake-wordlist
 tools/heimdal-strength
 util/messages

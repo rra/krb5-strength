@@ -119,7 +119,6 @@ warnings:
 # The bits below are for the test suite, not for the main package.
 check_PROGRAMS = tests/runtests tests/plugin/heimdal-t tests/plugin/mit-t   \
 	tests/portable/asprintf-t tests/portable/snprintf-t		    \
-	tests/portable/strlcat-t tests/portable/strlcpy-t		    \
 	tests/util/messages-krb5-t tests/util/messages-t tests/util/xmalloc
 if EMBEDDED_CRACKLIB
     check_PROGRAMS += cracklib/packer
@@ -146,12 +145,6 @@ tests_portable_asprintf_t_LDADD = tests/tap/libtap.a portable/libportable.la
 tests_portable_snprintf_t_SOURCES = tests/portable/snprintf-t.c \
 	tests/portable/snprintf.c
 tests_portable_snprintf_t_LDADD = tests/tap/libtap.a portable/libportable.la
-tests_portable_strlcat_t_SOURCES = tests/portable/strlcat-t.c \
-	tests/portable/strlcat.c
-tests_portable_strlcat_t_LDADD = tests/tap/libtap.a portable/libportable.la
-tests_portable_strlcpy_t_SOURCES = tests/portable/strlcpy-t.c \
-	tests/portable/strlcpy.c
-tests_portable_strlcpy_t_LDADD = tests/tap/libtap.a portable/libportable.la
 tests_util_messages_t_LDADD = tests/tap/libtap.a util/libutil.a \
 	portable/libportable.la
 tests_util_messages_krb5_t_LDADD = tests/tap/libtap.a util/libutil.a \
