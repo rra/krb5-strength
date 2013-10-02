@@ -35,6 +35,25 @@
 
 
 /*
+ * Write a Kerberos error string to a message buffer, with an optional
+ * prefix.
+ */
+static void
+convert_error(krb5_context ctx, krb5_error_code code, const char *prefix,
+              char *message, size_t length)
+{
+    const char *error;
+
+    error = krb5_get_error_message(ctx, code);
+    if (prefix == NULL)
+        snprintf(message, length, "%s", error);
+    else
+        snprintf(message, length, "%s: %s", prefix, error);
+    krb5_free_error_message(ctx, error);
+}
+
+
+/*
  * This is the single check function that we provide.  It does the glue
  * required to initialize our checks, convert the Heimdal arguments to the
  * strings we expect, and return the result.
@@ -44,12 +63,12 @@ heimdal_pwcheck(krb5_context ctx, krb5_principal principal,
                 krb5_data *password, const char *tuning UNUSED,
                 char *message, size_t length)
 {
-    krb5_pwqual_moddata data;
-    char *pastring;
+    krb5_pwqual_moddata data = NULL;
+    char *pastring = NULL;
     char *name = NULL;
     krb5_error_code code;
-    const char *error;
 
+    /* Convert the password to a C string. */
     pastring = malloc(password->length + 1);
     if (pastring == NULL) {
         snprintf(message, length, "cannot allocate memory: %s",
@@ -58,33 +77,32 @@ heimdal_pwcheck(krb5_context ctx, krb5_principal principal,
     }
     memcpy(pastring, password->data, password->length);
     pastring[password->length] = '\0';
+
+    /* Initialize strength checking. */
     code = strength_init(ctx, NULL, &data);
     if (code != 0) {
-        error = krb5_get_error_message(ctx, code);
-        snprintf(message, length, "cannot initialize strength checking: %s",
-                 error);
-        krb5_free_error_message(ctx, error);
-        free(pastring);
-        return 1;
+        convert_error(ctx, code, NULL, message, length);
+        goto done;
     }
+
+    /* Convert the principal to a string. */
     code = krb5_unparse_name(ctx, principal, &name);
     if (code != 0) {
-        error = krb5_get_error_message(ctx, code);
-        snprintf(message, length, "cannot unparse principal name: %s", error);
-        krb5_free_error_message(ctx, error);
-        free(pastring);
-        strength_close(ctx, data);
-        return 1;
+        convert_error(ctx, code, "cannot unparse principal", message, length);
+        goto done;
     }
+
+    /* Do the password strength check. */
     code = strength_check(ctx, data, pastring, name);
-    if (code != 0) {
-        error = krb5_get_error_message(ctx, code);
-        snprintf(message, length, "%s", error);
-        krb5_free_error_message(ctx, error);
-    }
-    krb5_free_unparsed_name(ctx, name);
+    if (code != 0)
+        convert_error(ctx, code, NULL, message, length);
+
+done:
     free(pastring);
-    strength_close(ctx, data);
+    if (name != NULL)
+        krb5_free_unparsed_name(ctx, name);
+    if (data != NULL)
+        strength_close(ctx, data);
     return (code == 0) ? 0 : 1;
 }
 

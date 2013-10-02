@@ -145,8 +145,7 @@ main(void)
         "test@EXAMPLE.ORG",
         "password",
         1,
-        "cannot initialize strength checking: password_dictionary not"
-        " configured in krb5.conf",
+        "password_dictionary not configured in krb5.conf",
     };
 
     /*
