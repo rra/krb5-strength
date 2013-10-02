@@ -7,6 +7,12 @@ krb5-strength 2.0 (unreleased)
     and MIT.  Drop the patch for MIT Kerberos 1.4 (and hence support for
     versions of MIT Kerberos prior to 1.9).
 
+    The default installation path for this plugin is now
+    /usr/local/lib/krb5/plugins/pwqual/strength.so (for both MIT and
+    Heimdal), assuming a --libdir setting of /usr/local/lib.  This may
+    require updates to the Kerberos KDC configuration or moving the plugin
+    when upgrading from earlier versions.
+
     Add support for building with TinyCDB and then checking passwords
     against a CDB database.  There is a new password_dictionary_cdb
     krb5.conf configuration setting that configures a CDB directory to

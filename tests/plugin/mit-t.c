@@ -71,7 +71,7 @@ load_plugin(krb5_context ctx)
     krb5_error_code (*init)(krb5_context, int, int, krb5_plugin_vtable);
 
     /* Load the module. */
-    path = test_file_path("../plugin/.libs/passwd_strength.so");
+    path = test_file_path("../plugin/.libs/strength.so");
     if (path == NULL)
         bail("cannot find plugin");
     handle = dlopen(path, RTLD_NOW);

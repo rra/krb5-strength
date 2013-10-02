@@ -24,9 +24,6 @@ EXTRA_DIST = .gitignore LICENSE autogen cracklib/HISTORY cracklib/LICENCE   \
 AM_CPPFLAGS = $(CRACKLIB_CPPFLAGS) $(KRB5_CPPFLAGS) $(CDB_CPPFLAGS)
 AM_LDFLAGS = $(CRACKLIB_LDFLAGS) $(KRB5_LDFLAGS) $(CDB_LDFLAGS)
 
-# Put the module into /usr/local/lib/kadmind by default, relative to --libdir.
-moduledir = $(libdir)/kadmind
-
 # Build our portability library.
 noinst_LTLIBRARIES = portable/libportable.la
 portable_libportable_la_SOURCES = portable/dummy.c portable/kadmin.h	\
@@ -51,18 +48,20 @@ if EMBEDDED_CRACKLIB
     noinst_LTLIBRARIES += cracklib/libcracklib.la
 endif
 
+# Put the plugin into $(libdir)/krb5/plugins/pwqual by default,
+moduledir = $(libdir)/krb5/plugins/pwqual
+
 # Rules for building the password strength plugin.
-module_LTLIBRARIES = plugin/passwd_strength.la
-plugin_passwd_strength_la_SOURCES = plugin/api.c plugin/cdb.c \
-	plugin/heimdal.c plugin/internal.h plugin/mit.c
-plugin_passwd_strength_la_LDFLAGS = -module -avoid-version
+module_LTLIBRARIES = plugin/strength.la
+plugin_strength_la_SOURCES = plugin/api.c plugin/cdb.c plugin/heimdal.c \
+	plugin/internal.h plugin/mit.c
+plugin_strength_la_LDFLAGS = -module -avoid-version
 if EMBEDDED_CRACKLIB
-    plugin_passwd_strength_la_LIBADD = cracklib/libcracklib.la
+    plugin_strength_la_LIBADD = cracklib/libcracklib.la
 else
-    plugin_passwd_strength_la_LIBADD = $(CRACKLIB_LIBS)
+    plugin_strength_la_LIBADD = $(CRACKLIB_LIBS)
 endif
-plugin_passwd_strength_la_LIBADD += portable/libportable.la $(KRB5_LIBS) \
-	$(CDB_LIBS)
+plugin_strength_la_LIBADD += portable/libportable.la $(KRB5_LIBS) $(CDB_LIBS)
 
 # The Heimdal external check program.
 bin_PROGRAMS = tools/heimdal-strength

@@ -117,8 +117,8 @@ COMPILING AND INSTALLING
   GCC compiler warnings (requires a relatively current version of GCC).
 
   The last step will probably have to be done as root.  By default, the
-  plugin is installed as /usr/local/lib/kadmind/passwd_strength.so and the
-  Heimdal external password check function is installed as
+  plugin is installed as /usr/local/lib/krb5/plugins/pwqual/strength.so
+  and the Heimdal external password check function is installed as
   /usr/local/bin/heimdal-strength.  You can change these paths with the
   --prefix, --libdir, and --bindir options to configure.
 
@@ -227,7 +227,7 @@ CONFIGURATION
 
       [password_quality]
           policies         = krb5-strength
-          policy_libraries = /usr/local/lib/kadmind/passwd_strength.so
+          policy_libraries = /usr/local/lib/krb5/plugins/pwqual/strength.so
 
   in either krb5.conf or kdc.conf.  Note that some older versions of
   Heimdal have a bug in the support for loading modules when
@@ -246,7 +246,7 @@ CONFIGURATION
 
       [plugins]
           pwqual = {
-              module = strength:/usr/local/lib/kadmind/passwd_strength.so
+              module = strength:/usr/local/lib/krb5/plugins/pwqual/strength.so
           }
 
   to register the plugin.

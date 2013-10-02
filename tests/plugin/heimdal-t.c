@@ -63,7 +63,7 @@ load_plugin(void)
     struct kadm5_pw_policy_verifier *verifier;
 
     /* Load the module. */
-    path = test_file_path("../plugin/.libs/passwd_strength.so");
+    path = test_file_path("../plugin/.libs/strength.so");
     if (path == NULL)
         bail("cannot find plugin");
     handle = dlopen(path, RTLD_NOW);
