@@ -84,6 +84,7 @@ in_cdb_dictionary(krb5_context ctx, krb5_pwqual_moddata data,
 {
     int status;
 
+    *found = false;
     status = cdb_find(&data->cdb, password, strlen(password));
     if (status < 0)
         return strength_error_system(ctx, "cannot query CDB database");
