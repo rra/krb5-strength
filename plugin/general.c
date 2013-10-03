@@ -29,12 +29,6 @@
 #include <plugin/internal.h>
 #include <util/macros.h>
 
-/* If not built with CDB support, provide some stubs. */
-#ifndef HAVE_CDB
-# define strength_check_cdb(c, d, p) 0
-# define strength_close_cdb(c, d)    /* empty */
-#endif
-
 
 /*
  * Initialize the module.  Ensure that the dictionary file exists and is
@@ -50,7 +44,6 @@ strength_init(krb5_context ctx, const char *dictionary,
               krb5_pwqual_moddata *moddata)
 {
     krb5_pwqual_moddata data = NULL;
-    char *cdb_path = NULL;
     krb5_error_code code;
 
     /* Allocate our internal data. */
@@ -60,47 +53,23 @@ strength_init(krb5_context ctx, const char *dictionary,
     data->cdb_fd = -1;
 
     /* Get minimum length information from krb5.conf. */
-    strength_config_number(ctx, "minimum_length", &data->min_length);
+    strength_config_number(ctx, "minimum_length", &data->minimum_length);
 
     /* Get character class restrictions from krb5.conf. */
     strength_config_boolean(ctx, "require_ascii_printable", &data->ascii);
     strength_config_boolean(ctx, "require_non_letter", &data->nonletter);
 
-    /* Use dictionary if given, otherwise get from krb5.conf. */
-    if (dictionary == NULL)
-        strength_config_string(ctx, "password_dictionary", &data->dictionary);
-    else {
-        data->dictionary = strdup(dictionary);
-        if (data->dictionary == NULL) {
-            code = strength_error_system(ctx, "cannot allocate memory");
-            goto fail;
-        }
-    }
-
-    /* Get CDB dictionary path from krb5.conf. */
-    strength_config_string(ctx, "password_dictionary_cdb", &cdb_path);
-
-    /* If there is no dictionary, abort our setup with an error. */
-    if (data->dictionary == NULL && cdb_path == NULL) {
-        code = KADM5_MISSING_CONF_PARAMS;
-        krb5_set_error_message(ctx, code, "password_dictionary not configured"
-                               " in krb5.conf");
+    /*
+     * Try to initialize CDB and CrackLib dictionaries.  Both functions handle
+     * their own configuration parsing and will do nothing if the
+     * corresponding dictionary is not configured.
+     */
+    code = strength_init_cracklib(ctx, data, dictionary);
+    if (code != 0)
         goto fail;
-    }
-
-    /* If there is a CrackLib dictionary, initialize CrackLib. */
-    if (data->dictionary != NULL) {
-        code = strength_init_cracklib(ctx, data);
-        if (code != 0)
-            goto fail;
-    }
-
-    /* If there is a CDB dictionary, initialize TinyCDB. */
-    if (cdb_path != NULL) {
-        code = strength_init_cdb(ctx, data, cdb_path);
-        if (code != 0)
-            goto fail;
-    }
+    code = strength_init_cdb(ctx, data);
+    if (code != 0)
+        goto fail;
 
     /* Initialized.  Set moddata and return. */
     *moddata = data;
@@ -109,7 +78,6 @@ strength_init(krb5_context ctx, const char *dictionary,
 fail:
     if (data != NULL)
         strength_close(ctx, data);
-    free(cdb_path);
     *moddata = NULL;
     return code;
 }
@@ -161,7 +129,7 @@ strength_check(krb5_context ctx UNUSED, krb5_pwqual_moddata data,
     krb5_error_code code;
 
     /* Check minimum length first, since that's easy. */
-    if ((long) strlen(password) < data->min_length)
+    if ((long) strlen(password) < data->minimum_length)
         return strength_error_tooshort(ctx, ERROR_SHORT);
 
     /*
@@ -242,19 +210,15 @@ strength_check(krb5_context ctx UNUSED, krb5_pwqual_moddata data,
         }
     free(user);
 
-    /* Check the password against CrackLib if it is configured. */
-    if (data->dictionary != NULL) {
-        code = strength_check_cracklib(ctx, data, password);
-        if (code != 0)
-            return code;
-    }
+    /* Check the password against CDB and CrackLib if configured. */
+    code = strength_check_cracklib(ctx, data, password);
+    if (code != 0)
+        return code;
+    code = strength_check_cdb(ctx, data, password);
+    if (code != 0)
+        return code;
 
-    /* Check the password against CDB if it is configured. */
-    if (data->have_cdb) {
-        code = strength_check_cdb(ctx, data, password);
-        if (code != 0)
-            return code;
-    }
+    /* Success.  Password accepted. */
     return 0;
 }
 

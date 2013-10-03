@@ -5,7 +5,11 @@ krb5-strength 2.0 (unreleased)
     Add support for the MIT Kerberos password quality plugin interface,
     available in MIT Kerberos 1.9 and later, contributed by Greg Hudson
     and MIT.  Drop the patch for MIT Kerberos 1.4 (and hence support for
-    versions of MIT Kerberos prior to 1.9).
+    versions of MIT Kerberos prior to 1.9).  A dictionary path set in
+    krb5.conf takes precedence over the dictionary path provided by MIT
+    Kerberos when the plugin is initialized, if both are set, to allow the
+    dict_path configuration setting to be used for other plugins while
+    using a separate dictionary for krb5-strength.
 
     The default installation path for this plugin is now
     /usr/local/lib/krb5/plugins/pwqual/strength.so (for both MIT and
@@ -35,6 +39,12 @@ krb5-strength 2.0 (unreleased)
     than printable ASCII characters (including space), and the latter
     requires that passwords contain at least one character that is not a
     letter (upper or lower case) or a space.
+
+    The plugin can now be configured without a dictionary, in which case
+    only the simpler checks available through the new configuration
+    variables are done.  This mode is mostly useful for testing, since
+    such simple checking can more easily be done via less complex password
+    strength configurations.
 
     The plugin now sets the Kerberos error message in the context to pass
     error information, resulting in higher-quality error reporting in the

@@ -287,8 +287,10 @@ CONFIGURATION
   dictionary matching.
 
   You can also mix and match these settings, by using dict_path for the
-  CrackLib dictionary path and krb5.conf for the CDB dictionary path.
-  There is no way to specify a CDB dictionary via the dict_path setting.
+  CrackLib dictionary path and krb5.conf for the CDB dictionary path.  If
+  both settings are used, krb5.conf overrides the dict_path setting (so
+  that dict_path can be used for other password quality modules).  There
+  is no way to specify a CDB dictionary via the dict_path setting.
 
  Other Settings
 
@@ -320,3 +322,8 @@ CONFIGURATION
       space.  This may be helpful in combination with passphrases; users
       may choose a stock English phrase, and this will force at least some
       additional complexity.
+
+  You can omit any dictionary setting and only use the above settings, in
+  which case only the above checks and no dictionary checks will be
+  performed.  (But for that simple style of password strength checking,
+  there are probably better strength checking plugins already available.)

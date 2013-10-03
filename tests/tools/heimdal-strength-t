@@ -147,11 +147,9 @@ sub load_password_tests {
     return $json->decode($testdata);
 }
 
-# Load the password tests from JSON.  Accumulate a total count of tests,
-# adding one test for testing behavior when no password dictionary is
-# configured.
-my %tests;
-my $count = 1;
+# Load the password tests from JSON.  Accumulate a total count of tests for
+# the testing plan.
+my (%tests, $count);
 for my $type (qw(cdb class cracklib generic length)) {
     my $tests = load_password_tests("$type.json");
     $tests{$type} = $tests;
@@ -163,22 +161,6 @@ $count += scalar(@{ $tests{generic} });
 
 # We can now calculate our plan based on three tests for each password test.
 plan(tests => $count * 3);
-
-# Find our initial test krb5.conf file.
-local $ENV{KRB5_CONFIG} = test_file_path('data/krb5.conf');
-
-# Run a test with no Kerberos password dictionary configuration and check that
-# we get the correct error message.
-my $error = 'Cannot initialize strength checking: password_dictionary not'
-  . ' configured in krb5.conf';
-my $test = {
-    name      => 'no dictionary configured',
-    principal => 'test@EXAMPLE.COM',
-    password  => 'password',
-    status    => 1,
-    error     => $error,
-};
-check_password($test);
 
 # Install the krb5.conf file with a configuration pointing to the test
 # CrackLib dictionary.
@@ -198,12 +180,7 @@ for my $test (@{ $tests{generic} }) {
 }
 
 # Install the krb5.conf file with a length restriction.
-$krb5_conf = create_krb5_conf(
-    {
-        minimum_length      => 12,
-        password_dictionary => "$datadir/dictionary",
-    }
-);
+$krb5_conf = create_krb5_conf({ minimum_length => 12 });
 local $ENV{KRB5_CONFIG} = $krb5_conf;
 
 # Run the password length checks.
@@ -217,7 +194,6 @@ $krb5_conf = create_krb5_conf(
     {
         require_ascii_printable => 'true',
         require_non_letter      => 'true',
-        password_dictionary     => "$datadir/dictionary",
     }
 );
 local $ENV{KRB5_CONFIG} = $krb5_conf;

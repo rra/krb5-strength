@@ -40,7 +40,7 @@ typedef struct krb5_pwqual_moddata_st *krb5_pwqual_moddata;
  * checking for at least the MIT plugin.
  */
 struct krb5_pwqual_moddata_st {
-    long min_length;            /* Minimum password length */
+    long minimum_length;        /* Minimum password length */
     bool ascii;                 /* Whether to require printable ASCII */
     bool nonletter;             /* Whether to require a non-letter */
     char *dictionary;           /* Base path to CrackLib dictionary */
@@ -60,13 +60,6 @@ BEGIN_DECLS
 krb5_error_code strength_init(krb5_context, const char *dictionary,
                               krb5_pwqual_moddata *);
 
-/* Initialize the internal data used by the CDB dictionary checks. */
-krb5_error_code strength_init_cdb(krb5_context, krb5_pwqual_moddata,
-                                  const char *dictionary);
-
-/* Initialize the internal data used by the CrackLib dictionary checks. */
-krb5_error_code strength_init_cracklib(krb5_context, krb5_pwqual_moddata);
-
 /*
  * Check a password.  Returns 0 if okay.  On error, sets the Kerberos error
  * message and returns a Kerberos status code.
@@ -74,19 +67,37 @@ krb5_error_code strength_init_cracklib(krb5_context, krb5_pwqual_moddata);
 krb5_error_code strength_check(krb5_context, krb5_pwqual_moddata,
                                const char *password, const char *principal);
 
-/* Check a password (and some permutations) against a CDB database. */
-krb5_error_code strength_check_cdb(krb5_context, krb5_pwqual_moddata,
-                                   const char *password);
-
-/* Check a password using CrackLib. */
-krb5_error_code strength_check_cracklib(krb5_context, krb5_pwqual_moddata,
-                                        const char *password);
-
-/* Finished checking passwords.  Free internal data. */
-void strength_close(krb5_context, krb5_pwqual_moddata);
-
 /* Free the subset of internal data used by the CDB dictionary checks. */
 void strength_close_cdb(krb5_context, krb5_pwqual_moddata);
+
+/*
+ * CDB handling.  strength_init_cdb gets the dictionary configuration and sets
+ * up the CDB database, strength_check_cdb checks it, and strength_close_cdb
+ * handles freeing resources.
+ *
+ * If not built with CDB support, provide some stubs for check and close.
+ * init is always a real function, which reports an error if CDB is
+ * requested.
+ */
+krb5_error_code strength_init_cdb(krb5_context, krb5_pwqual_moddata);
+#ifdef HAVE_CDB
+krb5_error_code strength_check_cdb(krb5_context, krb5_pwqual_moddata,
+                                   const char *password);
+void strength_close(krb5_context, krb5_pwqual_moddata);
+#else
+# define strength_check_cdb(c, d, p) 0
+# define strength_close_cdb(c, d)    /* empty */
+#endif
+
+/*
+ * CrackLib handling.  strength_init_cracklib gets the dictionary
+ * configuration does some sanity checks on it, and strength_check_cracklib
+ * checks the password against CrackLib.
+ */
+krb5_error_code strength_init_cracklib(krb5_context, krb5_pwqual_moddata,
+                                       const char *dictionary);
+krb5_error_code strength_check_cracklib(krb5_context, krb5_pwqual_moddata,
+                                        const char *password);
 
 /*
  * Obtain configuration settings from krb5.conf.  These are wrappers around

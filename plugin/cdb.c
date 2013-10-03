@@ -39,6 +39,15 @@ static krb5_error_code
 strength_init_cdb(krb5_context ctx, krb5_pwqual_moddata data UNUSED,
                   const char *database UNUSED)
 {
+    char *path = NULL;
+
+    /* Get CDB dictionary path from krb5.conf. */
+    strength_config_string(ctx, "password_dictionary_cdb", &path);
+
+    /* If it was set, report an error, since we don't have CDB support. */
+    if (path == NULL)
+        return 0;
+    free(path);
     krb5_set_error_message(ctx, KADM5_BAD_SERVER_PARAMS, "CDB dictionary"
                            " requested but not built with CDB support");
     return KADM5_BAD_SERVER_PARAMS;
@@ -92,20 +101,30 @@ in_cdb_dictionary(krb5_context ctx, krb5_pwqual_moddata data,
  * returns an error.
  */
 krb5_error_code
-strength_init_cdb(krb5_context ctx, krb5_pwqual_moddata data,
-                  const char *path)
+strength_init_cdb(krb5_context ctx, krb5_pwqual_moddata data)
 {
     krb5_error_code code;
+    char *path = NULL;
 
+    /* Get CDB dictionary path from krb5.conf. */
+    strength_config_string(ctx, "password_dictionary_cdb", &path);
+
+    /* If there is no configured dictionary, nothing to do. */
+    if (path == NULL)
+        return 0;
+
+    /* Open the dictionary and initialize the CDB data. */
     data->cdb_fd = open(path, O_RDONLY);
     if (data->cdb_fd < 0)
         return strength_error_system(ctx, "cannot open dictionary %s", path);
     if (cdb_init(&data->cdb, data->cdb_fd) < 0) {
         code = strength_error_system(ctx, "cannot init dictionary %s", path);
+        free(path);
         close(data->cdb_fd);
         data->cdb_fd = -1;
         return code;
     }
+    free(path);
     data->have_cdb = true;
     return 0;
 }
@@ -124,6 +143,10 @@ strength_check_cdb(krb5_context ctx, krb5_pwqual_moddata data,
     krb5_error_code code;
     bool found;
     char *variant = NULL;
+
+    /* If we have no dictionary, there is nothing to do. */
+    if (!data->have_cdb)
+        return 0;
 
     /* Check the basic password. */
     CHECK_PASSWORD(ctx, data, password);

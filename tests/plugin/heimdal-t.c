@@ -140,21 +140,13 @@ main(void)
     char *setup_argv[10];
     size_t i, count;
     struct kadm5_pw_policy_verifier *verifier;
-    struct password_test no_dictionary_test = {
-        "no dictionary configured",
-        "test@EXAMPLE.ORG",
-        "password",
-        1,
-        "password_dictionary not configured in krb5.conf",
-    };
 
     /*
      * Calculate how many tests we have.  There are five tests for the module
-     * metadata, one more password test than the list of password tests we
-     * have configured, and two tests per password test.  We run the generic
-     * tests twice, once with CrackLib and once with CDB.
+     * metadata and two tests per password test.  We run the generic tests
+     * twice, once with CrackLib and once with CDB.
      */
-    count = ARRAY_SIZE(cracklib_tests) + 1;
+    count = ARRAY_SIZE(cracklib_tests);
     count += ARRAY_SIZE(cdb_tests);
     count += ARRAY_SIZE(class_tests);
     count += ARRAY_SIZE(length_tests);
@@ -170,9 +162,6 @@ main(void)
 
     /* Load the plugin. */
     verifier = load_plugin();
-
-    /* Try an initial password verification with no dictionary configured. */
-    is_password_test(verifier, &no_dictionary_test);
 
     /* Set up our krb5.conf with the dictionary configuration. */
     setup_argv[0] = test_file_path("data/make-krb5-conf");
@@ -209,10 +198,14 @@ main(void)
     for (i = 0; i < ARRAY_SIZE(class_tests); i++)
         is_password_test(verifier, &class_tests[i]);
 
-    /* Add length restrictions. */
-    setup_argv[5] = (char *) "minimum_length";
-    setup_argv[6] = (char *) "12";
-    setup_argv[7] = NULL;
+    /*
+     * Add length restrictions and remove the dictionary.  This should only do
+     * length checks without any dictionary checks.
+     */
+    free(setup_argv[4]);
+    setup_argv[3] = (char *) "minimum_length";
+    setup_argv[4] = (char *) "12";
+    setup_argv[5] = NULL;
     run_setup((const char **) setup_argv);
 
     /* Run the length tests. */
@@ -222,7 +215,6 @@ main(void)
 #ifdef HAVE_CDB
 
     /* If built with CDB, set up krb5.conf to use a CDB dictionary instead. */
-    free(setup_argv[4]);
     setup_argv[3] = (char *) "password_dictionary_cdb";
     setup_argv[4] = test_file_path("data/wordlist.cdb");
     if (setup_argv[4] == NULL)

@@ -157,9 +157,8 @@ main(void)
 
     /*
      * Calculate how many tests we have.  There are two tests for the module
-     * metadata, six more tests for initializing the plugin, one test for
-     * initialization without a valid dictionary, and two tests per password
-     * test.
+     * metadata, five more tests for initializing the plugin, and two tests per
+     * password test.
      *
      * We run all the CrackLib and generic tests twice, once with an explicit
      * dictionary path and once from krb5.conf configuration.  We run the
@@ -170,7 +169,7 @@ main(void)
     count += ARRAY_SIZE(class_tests);
     count += ARRAY_SIZE(length_tests);
     count += 2 * ARRAY_SIZE(generic_tests);
-    plan(2 + 6 + count * 2);
+    plan(2 + 5 + count * 2);
 
     /* Start with the krb5.conf that contains no dictionary configuration. */
     path = test_file_path("data/krb5.conf");
@@ -184,13 +183,10 @@ main(void)
     if (code != 0)
         bail_krb5(ctx, code, "cannot initialize Kerberos context");
 
-    /* Load and initialize the plugin without a dictionary. */
+    /* Load the plugin. */
     vtable = load_plugin(ctx);
-    code = vtable->open(ctx, NULL, &data);
-    is_int(KADM5_MISSING_CONF_PARAMS, code,
-           "Plugin initialization (no dictionary)");
 
-    /* Initialize the plugin again with the correct dictionary. */
+    /* Initialize the plugin with a CrackLib dictionary. */
     build = getenv("BUILD");
     if (build == NULL)
         bail("BUILD not set in the environment");
@@ -266,10 +262,13 @@ main(void)
         is_password_test(ctx, vtable, data, &class_tests[i]);
     vtable->close(ctx, data);
 
-    /* Add minimum length configuration to krb5.conf. */
-    setup_argv[5] = (char *) "minimum_length";
-    setup_argv[6] = (char *) "12";
-    setup_argv[7] = NULL;
+    /*
+     * Add length restrictions and remove the dictionary.  This should only do
+     * length checks without any dictionary checks.
+     */
+    setup_argv[3] = (char *) "minimum_length";
+    setup_argv[4] = (char *) "12";
+    setup_argv[5] = NULL;
     run_setup((const char **) setup_argv);
 
     /* Obtain a new Kerberos context with that krb5.conf file. */

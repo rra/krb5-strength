@@ -10,5 +10,10 @@
         "name": "sufficiently long password",
         "principal": "test@EXAMPLE.COM",
         "password": "vUCZ2aX$Y.e1"
+    },
+    {
+        "name": "password in (unchecked) dictionary",
+        "principal": "test@EXAMPLE.COM",
+        "password": "happenstance"
     }
 ]
