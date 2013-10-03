@@ -9,10 +9,6 @@
 # file with the words as keys and the constant "1" as a value.  The resulting
 # database is suitable for fast existence lookups in the wordlist, such as for
 # password dictionary checks.
-#
-# Written by Russ Allbery <rra@stanford.edu>
-# Copyright 2013
-#     The Board of Trustees of the Leland Stanford Junior University
 
 require 5.006;
 use strict;
