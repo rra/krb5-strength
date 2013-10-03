@@ -41,10 +41,10 @@ krb5-strength 2.0 (unreleased)
     letter (upper or lower case) or a space.
 
     The plugin can now be configured without a dictionary, in which case
-    only the simpler checks available through the new configuration
-    variables are done.  This mode is mostly useful for testing, since
-    such simple checking can more easily be done via less complex password
-    strength configurations.
+    only checks for a password based on the principal and the simpler
+    checks available through the new configuration variables are done.
+    This mode is mostly useful for testing, since such simple checking can
+    more easily be done via less complex password strength configurations.
 
     The plugin now sets the Kerberos error message in the context to pass
     error information, resulting in higher-quality error reporting in the
