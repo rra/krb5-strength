@@ -60,7 +60,7 @@ check(krb5_context ctx, krb5_pwqual_moddata data, const char *password,
     code = krb5_unparse_name(ctx, princ, &name);
     if (code != 0)
         return code;
-    code = strength_check(ctx, data, password, name);
+    code = strength_check(ctx, data, name, password);
     krb5_free_unparsed_name(ctx, name);
     return code;
 }

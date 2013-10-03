@@ -93,7 +93,7 @@ heimdal_pwcheck(krb5_context ctx, krb5_principal principal,
     }
 
     /* Do the password strength check. */
-    code = strength_check(ctx, data, pastring, name);
+    code = strength_check(ctx, data, name, pastring);
     if (code != 0)
         convert_error(ctx, code, NULL, message, length);
 

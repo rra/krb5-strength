@@ -70,7 +70,7 @@ check_password(krb5_context ctx, krb5_pwqual_moddata data)
         sysdie("Cannot read end of entry");
     if (strcmp(end, "end\n") != 0)
         die("Malformed end line");
-    code = strength_check(ctx, data, password, principal);
+    code = strength_check(ctx, data, principal, password);
     if (code == 0)
         printf("APPROVED\n");
     else {

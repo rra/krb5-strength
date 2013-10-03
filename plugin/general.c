@@ -115,7 +115,7 @@ only_alpha_space(const char *password)
  */
 krb5_error_code
 strength_check(krb5_context ctx UNUSED, krb5_pwqual_moddata data,
-               const char *password, const char *principal)
+               const char *principal, const char *password)
 {
     krb5_error_code code;
 

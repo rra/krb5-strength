@@ -65,7 +65,7 @@ krb5_error_code strength_init(krb5_context, const char *dictionary,
  * message and returns a Kerberos status code.
  */
 krb5_error_code strength_check(krb5_context, krb5_pwqual_moddata,
-                               const char *password, const char *principal);
+                               const char *principal, const char *password);
 
 /* Free the subset of internal data used by the CDB dictionary checks. */
 void strength_close_cdb(krb5_context, krb5_pwqual_moddata);
