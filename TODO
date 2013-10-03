@@ -9,4 +9,8 @@
    CrackLib customized to add additional rules.
 
  * Do something useful with errors when parsing numeric arguments from
-   krb5.conf configuration.
+   krb5.conf configuration or failing to allocate memory when getting
+   string arguments.
+
+ * Use the realm of the principal changing its password to determine the
+   krb5.conf configuration rather than always using the default realm.

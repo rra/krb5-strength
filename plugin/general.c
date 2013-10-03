@@ -37,173 +37,6 @@
 
 
 /*
- * Load a boolean option from Kerberos appdefaults.  Takes the Kerberos
- * context, the section name, the option, and the result location.
- *
- * The stupidity of rewriting the realm argument into a krb5_data is required
- * by MIT Kerberos.
- */
-static void
-default_boolean(krb5_context ctx, const char *section, const char *opt,
-                bool *result)
-{
-    int tmp;
-    char *realm = NULL;
-    krb5_error_code code;
-#ifdef HAVE_KRB5_REALM
-    krb5_const_realm rdata = realm;
-#else
-    krb5_data realm_struct;
-    const krb5_data *rdata;
-#endif
-
-    /* Get the default realm.  This is annoying for MIT Kerberos. */
-    code = krb5_get_default_realm(ctx, &realm);
-    if (code != 0)
-        realm = NULL;
-#ifdef HAVE_KRB5_REALM
-    rdata = realm;
-#else
-    if (realm == NULL)
-        rdata = NULL;
-    else {
-        rdata = &realm_struct;
-        realm_struct.magic = KV5M_DATA;
-        realm_struct.data = (void *) realm;
-        realm_struct.length = strlen(realm);
-    }
-#endif
-
-    /*
-     * The MIT version of krb5_appdefault_boolean takes an int * and the
-     * Heimdal version takes a krb5_boolean *, so hope that Heimdal always
-     * defines krb5_boolean to int or this will require more portability work.
-     */
-    krb5_appdefault_boolean(ctx, section, rdata, opt, *result, &tmp);
-    *result = tmp;
-}
-
-
-/*
- * Load a number option from Kerberos appdefaults.  Takes the Kerberos
- * context, the section name, the option, and the result location.  The native
- * interface doesn't support numbers, so we actually read a string and then
- * convert.
- */
-static void
-default_number(krb5_context ctx, const char *section, const char *opt,
-               long *result)
-{
-    char *tmp = NULL;
-    char *realm = NULL;
-    char *end;
-    long value;
-    krb5_error_code code;
-#ifdef HAVE_KRB5_REALM
-    krb5_const_realm rdata = realm;
-#else
-    krb5_data realm_struct;
-    const krb5_data *rdata;
-#endif
-
-    /* Get the default realm.  This is annoying for MIT Kerberos. */
-    code = krb5_get_default_realm(ctx, &realm);
-    if (code != 0)
-        realm = NULL;
-#ifdef HAVE_KRB5_REALM
-    rdata = realm;
-#else
-    if (realm == NULL)
-        rdata = NULL;
-    else {
-        rdata = &realm_struct;
-        realm_struct.magic = KV5M_DATA;
-        realm_struct.data = (void *) realm;
-        realm_struct.length = strlen(realm);
-    }
-#endif
-
-    /* Obtain the string from [appdefaults]. */
-    krb5_appdefault_string(ctx, section, rdata, opt, "", &tmp);
-
-    /*
-     * If we found anything, convert it to a number.  Currently, we ignore
-     * errors here.
-     */
-    if (tmp != NULL && tmp[0] != '\0') {
-        errno = 0;
-        value = strtol(tmp, &end, 10);
-        if (errno == 0 && *end == '\0')
-            *result = value;
-    }
-    if (tmp != NULL)
-        krb5_free_string(ctx, tmp);
-}
-
-
-/*
- * Load a string option from Kerberos appdefaults.  Takes the Kerberos
- * context, the section name, the realm, the option, and the result location.
- *
- * This requires an annoying workaround because one cannot specify a default
- * value of NULL with MIT Kerberos, since MIT Kerberos unconditionally calls
- * strdup on the default value.  There's also no way to determine if memory
- * allocation failed while parsing or while setting the default value, so we
- * don't return an error code.
- */
-static void
-default_string(krb5_context ctx, const char *section, const char *opt,
-               char **result)
-{
-    char *value = NULL;
-    char *realm = NULL;
-    krb5_error_code code;
-#ifdef HAVE_KRB5_REALM
-    krb5_const_realm rdata;
-#else
-    krb5_data realm_struct;
-    const krb5_data *rdata;
-#endif
-
-    /* Get the default realm.  This is annoying for MIT Kerberos. */
-    code = krb5_get_default_realm(ctx, &realm);
-    if (code != 0)
-        realm = NULL;
-#ifdef HAVE_KRB5_REALM
-    rdata = realm;
-#else
-    if (realm == NULL)
-        rdata = NULL;
-    else {
-        rdata = &realm_struct;
-        realm_struct.magic = KV5M_DATA;
-        realm_struct.data = (void *) realm;
-        realm_struct.length = strlen(realm);
-    }
-#endif
-
-    /* Obtain the string from [appdefaults]. */
-    krb5_appdefault_string(ctx, section, rdata, opt, "", &value);
-
-    /* If we got something back, store it in result. */
-    if (value != NULL) {
-        if (value[0] == '\0')
-            free(value);
-        else {
-            if (*result != NULL)
-                free(*result);
-            *result = strdup(value);
-            krb5_free_string(ctx, value);
-        }
-    }
-
-    /* Free the realm if we got one. */
-    if (realm != NULL)
-        krb5_free_default_realm(ctx, realm);
-}
-
-
-/*
  * Initialize the module.  Ensure that the dictionary file exists and is
  * readable and store the path in the module context.  Returns 0 on success,
  * non-zero on failure.  This function returns failure only if it could not
@@ -227,18 +60,15 @@ strength_init(krb5_context ctx, const char *dictionary,
     data->cdb_fd = -1;
 
     /* Get minimum length information from krb5.conf. */
-    default_number(ctx, "krb5-strength", "minimum_length", &data->min_length);
+    strength_config_number(ctx, "minimum_length", &data->min_length);
 
     /* Get character class restrictions from krb5.conf. */
-    default_boolean(ctx, "krb5-strength", "require_ascii_printable",
-                    &data->ascii);
-    default_boolean(ctx, "krb5-strength", "require_non_letter",
-                    &data->nonletter);
+    strength_config_boolean(ctx, "require_ascii_printable", &data->ascii);
+    strength_config_boolean(ctx, "require_non_letter", &data->nonletter);
 
     /* Use dictionary if given, otherwise get from krb5.conf. */
     if (dictionary == NULL)
-        default_string(ctx, "krb5-strength", "password_dictionary",
-                       &data->dictionary);
+        strength_config_string(ctx, "password_dictionary", &data->dictionary);
     else {
         data->dictionary = strdup(dictionary);
         if (data->dictionary == NULL) {
@@ -248,7 +78,7 @@ strength_init(krb5_context ctx, const char *dictionary,
     }
 
     /* Get CDB dictionary path from krb5.conf. */
-    default_string(ctx, "krb5-strength", "password_dictionary_cdb", &cdb_path);
+    strength_config_string(ctx, "password_dictionary_cdb", &cdb_path);
 
     /* If there is no dictionary, abort our setup with an error. */
     if (data->dictionary == NULL && cdb_path == NULL) {

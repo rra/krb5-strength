@@ -89,6 +89,19 @@ void strength_close(krb5_context, krb5_pwqual_moddata);
 void strength_close_cdb(krb5_context, krb5_pwqual_moddata);
 
 /*
+ * Obtain configuration settings from krb5.conf.  These are wrappers around
+ * the krb5_appdefault_* APIs that handle setting the section name, obtaining
+ * the local default realm and using it to find settings, and doing any
+ * necessary conversion.
+ */
+void strength_config_boolean(krb5_context, const char *, bool *)
+    __attribute__((__nonnull__));
+void strength_config_number(krb5_context, const char *, long *)
+    __attribute__((__nonnull__));
+void strength_config_string(krb5_context, const char *, char **)
+    __attribute__((__nonnull__));
+
+/*
  * Store a particular password quality error in the Kerberos context.  The
  * _system variant uses errno for the error code and appends the strerror
  * results to the message.  All versions return the error code set.
