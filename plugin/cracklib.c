@@ -15,8 +15,6 @@
  */
 
 #include <config.h>
-#include <portable/kadmin.h>
-#include <portable/krb5.h>
 #include <portable/system.h>
 
 #include <plugin/internal.h>
