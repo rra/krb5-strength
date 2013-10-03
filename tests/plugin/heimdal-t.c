@@ -26,13 +26,13 @@
 
 /*
  * The password test data, generated from the JSON source.  Defines an arrays
- * named cdb_tests, cracklib_tests, and generic_tests.
+ * named cdb_tests, cracklib_tests, and principal_tests.
  */
 #include <tests/data/passwords/cdb.c>
 #include <tests/data/passwords/class.c>
 #include <tests/data/passwords/cracklib.c>
-#include <tests/data/passwords/generic.c>
 #include <tests/data/passwords/length.c>
+#include <tests/data/passwords/principal.c>
 
 
 #ifndef HAVE_KADM5_KADM5_PWCHECK_H
@@ -143,14 +143,14 @@ main(void)
 
     /*
      * Calculate how many tests we have.  There are five tests for the module
-     * metadata and two tests per password test.  We run the generic tests
+     * metadata and two tests per password test.  We run the principal tests
      * twice, once with CrackLib and once with CDB.
      */
     count = ARRAY_SIZE(cracklib_tests);
     count += ARRAY_SIZE(cdb_tests);
     count += ARRAY_SIZE(class_tests);
     count += ARRAY_SIZE(length_tests);
-    count += ARRAY_SIZE(generic_tests) * 2;
+    count += ARRAY_SIZE(principal_tests) * 2;
     plan(5 + count * 2);
 
     /* Start with the krb5.conf that contains no dictionary configuration. */
@@ -183,8 +183,8 @@ main(void)
     /* Now, run all of the tests. */
     for (i = 0; i < ARRAY_SIZE(cracklib_tests); i++)
         is_password_test(verifier, &cracklib_tests[i]);
-    for (i = 0; i < ARRAY_SIZE(generic_tests); i++)
-        is_password_test(verifier, &generic_tests[i]);
+    for (i = 0; i < ARRAY_SIZE(principal_tests); i++)
+        is_password_test(verifier, &principal_tests[i]);
 
     /* Add character class restrictions. */
     setup_argv[5] = (char *) "require_ascii_printable";
@@ -228,13 +228,13 @@ main(void)
     /* Run the CDB tests. */
     for (i = 0; i < ARRAY_SIZE(cdb_tests); i++)
         is_password_test(verifier, &cdb_tests[i]);
-    for (i = 0; i < ARRAY_SIZE(generic_tests); i++)
-        is_password_test(verifier, &generic_tests[i]);
+    for (i = 0; i < ARRAY_SIZE(principal_tests); i++)
+        is_password_test(verifier, &principal_tests[i]);
 
 #else /* !HAVE_CDB */
 
     /* Otherwise, mark the CDB tests as skipped. */
-    count = ARRAY_SIZE(cdb_tests) + ARRAY_SIZE(generic_tests);
+    count = ARRAY_SIZE(cdb_tests) + ARRAY_SIZE(principal_tests);
     skip_block(count * 2, "not built with CDB support");
 
 #endif /* !HAVE_CDB */
