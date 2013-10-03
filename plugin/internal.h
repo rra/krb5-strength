@@ -64,6 +64,9 @@ krb5_error_code strength_init(krb5_context, const char *dictionary,
 krb5_error_code strength_init_cdb(krb5_context, krb5_pwqual_moddata,
                                   const char *dictionary);
 
+/* Initialize the internal data used by the CrackLib dictionary checks. */
+krb5_error_code strength_init_cracklib(krb5_context, krb5_pwqual_moddata);
+
 /*
  * Check a password.  Returns 0 if okay.  On error, sets the Kerberos error
  * message and returns a Kerberos status code.
@@ -74,6 +77,10 @@ krb5_error_code strength_check(krb5_context, krb5_pwqual_moddata,
 /* Check a password (and some permutations) against a CDB database. */
 krb5_error_code strength_check_cdb(krb5_context, krb5_pwqual_moddata,
                                    const char *password);
+
+/* Check a password using CrackLib. */
+krb5_error_code strength_check_cracklib(krb5_context, krb5_pwqual_moddata,
+                                        const char *password);
 
 /* Finished checking passwords.  Free internal data. */
 void strength_close(krb5_context, krb5_pwqual_moddata);

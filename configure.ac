@@ -29,6 +29,10 @@ AC_PROG_LIBTOOL
 dnl External libraries.
 RRA_LIB_CDB_OPTIONAL
 RRA_LIB_CRACKLIB
+AS_IF([test x"$rra_system_cracklib" = xyes],
+    [RRA_LIB_CRACKLIB_SWITCH
+     AC_CHECK_HEADERS([crack.h])
+     RRA_LIB_CRACKLIB_RESTORE])
 RRA_LIB_KRB5
 RRA_LIB_KRB5_SWITCH
 AC_CHECK_HEADERS([kadm5/kadm5-pwcheck.h kadm5/kadm5_err.h], [], [],

@@ -1,8 +1,10 @@
 /*
- * The public APIs of the password strength checking kadmind plugin.
+ * The general entry points for password strength checking.
  *
- * Provides the public strength_init, strength_check, and strength_close APIs
- * for the password strength plugin.
+ * Provides the strength_init, strength_check, and strength_close entry points
+ * for doing password strength checking.  These are the only interfaces that
+ * are called by the implementation-specific code, and all other checks are
+ * wrapped up in those interfaces.
  *
  * Developed by Derrick Brashear and Ken Hornstein of Sine Nomine Associates,
  *     on behalf of Stanford University.
@@ -32,9 +34,6 @@
 # define strength_check_cdb(c, d, p) 0
 # define strength_close_cdb(c, d)    /* empty */
 #endif
-
-/* The public function exported by the cracklib library. */
-extern char *FascistCheck(const char *password, const char *dict);
 
 
 /*
@@ -205,33 +204,6 @@ default_string(krb5_context ctx, const char *section, const char *opt,
 
 
 /*
- * Initialize the CrackLib dictionary.  Ensure that the dictionary file exists
- * and is readable and store the path in the module context.  Returns 0 on
- * success, non-zero on failure.
- *
- * The dictionary file should not include the trailing .pwd extension.
- * Currently, we don't cope with a NULL dictionary path.
- */
-static krb5_error_code
-init_cracklib(krb5_context ctx, krb5_pwqual_moddata data)
-{
-    char *file;
-    krb5_error_code code;
-
-    /* Sanity-check the dictionary path. */
-    if (asprintf(&file, "%s.pwd", data->dictionary) < 0)
-        return strength_error_system(ctx, "cannot allocate memory");
-    if (access(file, R_OK) != 0) {
-        code = strength_error_system(ctx, "cannot read dictionary %s", file);
-        free(file);
-        return code;
-    }
-    free(file);
-    return 0;
-}
-
-
-/*
  * Initialize the module.  Ensure that the dictionary file exists and is
  * readable and store the path in the module context.  Returns 0 on success,
  * non-zero on failure.  This function returns failure only if it could not
@@ -288,7 +260,7 @@ strength_init(krb5_context ctx, const char *dictionary,
 
     /* If there is a CrackLib dictionary, initialize CrackLib. */
     if (data->dictionary != NULL) {
-        code = init_cracklib(ctx, data);
+        code = strength_init_cracklib(ctx, data);
         if (code != 0)
             goto fail;
     }
@@ -356,7 +328,6 @@ strength_check(krb5_context ctx UNUSED, krb5_pwqual_moddata data,
     const char *q;
     size_t i, j;
     char c;
-    const char *result;
     krb5_error_code code;
 
     /* Check minimum length first, since that's easy. */
@@ -443,9 +414,9 @@ strength_check(krb5_context ctx UNUSED, krb5_pwqual_moddata data,
 
     /* Check the password against CrackLib if it is configured. */
     if (data->dictionary != NULL) {
-        result = FascistCheck(password, data->dictionary);
-        if (result != NULL)
-            return strength_error_generic(ctx, "%s", result);
+        code = strength_check_cracklib(ctx, data, password);
+        if (code != 0)
+            return code;
     }
 
     /* Check the password against CDB if it is configured. */
