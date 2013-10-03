@@ -16,15 +16,10 @@
  */
 
 #include <config.h>
-#include <portable/kadmin.h>
 #include <portable/krb5.h>
 #include <portable/system.h>
 
-#ifdef HAVE_CDB_H
-# include <cdb.h>
-#endif
 #include <ctype.h>
-#include <errno.h>
 
 #include <plugin/internal.h>
 #include <util/macros.h>
@@ -122,10 +117,6 @@ krb5_error_code
 strength_check(krb5_context ctx UNUSED, krb5_pwqual_moddata data,
                const char *password, const char *principal)
 {
-    char *user, *p;
-    const char *q;
-    size_t i, j;
-    char c;
     krb5_error_code code;
 
     /* Check minimum length first, since that's easy. */
@@ -148,67 +139,10 @@ strength_check(krb5_context ctx UNUSED, krb5_pwqual_moddata data,
     if (data->nonletter && only_alpha_space(password))
         return strength_error_class(ctx, ERROR_LETTER);
 
-    /*
-     * We get the principal (in krb5_unparse_name format) and we want to be
-     * sure that the password doesn't match the username, the username
-     * reversed, or the username with trailing digits.  We therefore have to
-     * copy the string so that we can manipulate it a bit.
-     */
-    if (strcasecmp(password, principal) == 0)
-        return strength_error_generic(ctx, ERROR_USERNAME);
-    user = strdup(principal);
-    if (user == NULL)
-        return strength_error_system(ctx, "cannot allocate memory");
-
-    /* Strip the realm off of the principal. */
-    for (p = user; p[0] != '\0'; p++) {
-        if (p[0] == '\\' && p[1] != '\0') {
-            p++;
-            continue;
-        }
-        if (p[0] == '@') {
-            p[0] = '\0';
-            break;
-        }
-    }
-
-    /*
-     * If the length of the password matches the length of the local portion
-     * of the principal, check for exact matches or reversed matches.
-     */
-    if (strlen(password) == strlen(user)) {
-        if (strcasecmp(password, user) == 0) {
-            free(user);
-            return strength_error_generic(ctx, ERROR_USERNAME);
-        }
-
-        /* Check against the reversed username. */
-        for (i = 0, j = strlen(user) - 1; i < j; i++, j--) {
-            c = user[i];
-            user[i] = user[j];
-            user[j] = c;
-        }
-        if (strcasecmp(password, user) == 0) {
-            free(user);
-            return strength_error_generic(ctx, ERROR_USERNAME);
-        }
-    }
-
-    /*
-     * If the length is greater, check whether the user just added trailing
-     * digits to the local portion of the principal to form the password.
-     */
-    if (strlen(password) > strlen(user))
-        if (strncasecmp(password, user, strlen(user)) == 0) {
-            q = password + strlen(user);
-            while (isdigit((unsigned char) *q))
-                q++;
-            if (*q == '\0') {
-                free(user);
-                return strength_error_generic(ctx, ERROR_USERNAME);
-            }
-        }
-    free(user);
+    /* Check if the password is based on the principal in some way. */
+    code = strength_check_principal(ctx, data, principal, password);
+    if (code != 0)
+        return code;
 
     /* Check the password against CDB and CrackLib if configured. */
     code = strength_check_cracklib(ctx, data, password);

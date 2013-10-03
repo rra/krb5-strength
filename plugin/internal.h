@@ -99,6 +99,11 @@ krb5_error_code strength_init_cracklib(krb5_context, krb5_pwqual_moddata,
 krb5_error_code strength_check_cracklib(krb5_context, krb5_pwqual_moddata,
                                         const char *password);
 
+/* Check whether the password is based on the principal in some way. */
+krb5_error_code strength_check_principal(krb5_context, krb5_pwqual_moddata,
+                                         const char *principal,
+                                         const char *password);
+
 /*
  * Obtain configuration settings from krb5.conf.  These are wrappers around
  * the krb5_appdefault_* APIs that handle setting the section name, obtaining
