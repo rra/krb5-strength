@@ -46,6 +46,12 @@ krb5-strength 2.0 (unreleased)
     This mode is mostly useful for testing, since such simple checking can
     more easily be done via less complex password strength configurations.
 
+    The check for passwords based on the principal now check for passwords
+    formed by reversing or adding numbers before and after each separate
+    component of the principal.  This will catch passwords based on the
+    realm or components of the realm, which will often catch passwords
+    based on the name of the local institution.
+
     The plugin now sets the Kerberos error message in the context to pass
     error information, resulting in higher-quality error reporting in the
     MIT Kerberos plugin.
