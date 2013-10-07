@@ -1,6 +1,6 @@
                     User-Visible krb5-strength Changes
 
-krb5-strength 2.0 (unreleased)
+krb5-strength 2.0 (2013-10-07)
 
     Add support for the MIT Kerberos password quality plugin interface,
     available in MIT Kerberos 1.9 and later, contributed by Greg Hudson
