@@ -36,6 +36,7 @@ krb5-strength (2.0-1) UNRELEASED; urgency=low
     - Enable hardening flags, including bindnow and PIE.
     - Enable parallel builds.
   * Use dh-autoreconf to rebuild the build system during package builds.
+  * Use xz compression for the upstream and Debian tarballs.
   * Update standards version to 3.9.4 (no changes required).
   * Rewrite debian/copyright in copyright-format 1.0.
   * Remove Bugs header now that this package is in Debian proper.
