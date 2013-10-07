@@ -7,16 +7,18 @@
 # See LICENSE for licensing terms.
 
 ACLOCAL_AMFLAGS = -I m4
-EXTRA_DIST = .gitignore LICENSE autogen cracklib/HISTORY cracklib/LICENCE   \
-	cracklib/README cracklib/genrules.pl cracklib/mkdict tests/HOWTO    \
-	tests/TESTS tests/data/krb5.conf tests/data/make-krb5-conf	    \
-	tests/data/passwords tests/data/perl.conf tests/data/perlcriticrc   \
-	tests/data/perltidyrc tests/data/wordlist tests/docs/pod-spelling-t \
-	tests/docs/pod-t tests/perl/critic-t tests/perl/minimum-version-t   \
-	tests/perl/strict-t tests/tap/libtap.sh tests/tap/perl/Test/RRA.pm  \
-	tests/tap/perl/Test/RRA/Config.pm				    \
-	tests/tap/perl/Test/RRA/Automake.pm tests/tools/cdbmake-wordlist    \
-	tests/tools/heimdal-strength-t tools/heimdal-strength.pod
+EXTRA_DIST = .gitignore LICENSE autogen cracklib/HISTORY cracklib/LICENCE  \
+	cracklib/README cracklib/genrules.pl cracklib/mkdict tests/HOWTO   \
+	tests/TESTS tests/data/krb5.conf tests/data/make-krb5-conf	   \
+	tests/data/passwords tests/data/perl.conf tests/data/perlcriticrc  \
+	tests/data/perltidyrc tests/data/wordlist tests/data/wordlist.cdb  \
+	tests/docs/pod-spelling-t tests/docs/pod-t tests/perl/critic-t	   \
+	tests/perl/minimum-version-t tests/perl/strict-t		   \
+	tests/tap/libtap.sh tests/tap/perl/Test/RRA.pm			   \
+	tests/tap/perl/Test/RRA/Config.pm				   \
+	tests/tap/perl/Test/RRA/Automake.pm tests/tools/cdbmake-wordlist-t \
+	tests/tools/heimdal-strength-t tests/util/xmalloc-t		   \
+	tools/heimdal-strength.pod
 
 # Do this globally.  Everything needs to find the Kerberos headers and
 # libraries, and if we're using the system CrackLib or libcdb, add its
