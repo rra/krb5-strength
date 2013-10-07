@@ -36,6 +36,7 @@ krb5-strength (2.0-1) UNRELEASED; urgency=low
     - Enable hardening flags, including bindnow and PIE.
     - Enable parallel builds.
   * Use dh-autoreconf to rebuild the build system during package builds.
+  * Update standards version to 3.9.4 (no changes required).
   * Remove Bugs header now that this package is in Debian proper.
 
  -- Russ Allbery <rra@debian.org>  Mon, 07 Oct 2013 16:30:08 -0700
