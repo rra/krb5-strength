@@ -19,13 +19,14 @@ fi
 # Output the test plan.
 plan 11
 
-# Create a temporary directory and wordlist.
+# Create a temporary directory and wordlist and ensure it's writable.
 tmpdir=`test_tmpdir`
 wordlist=`test_file_path data/wordlist`
 if [ -z "$wordlist" ] ; then
     bail 'cannot find data/wordlist in test suite'
 fi
 cp "$wordlist" "$tmpdir/wordlist"
+chmod 644 "$tmpdir/wordlist"
 
 # Add a non-ASCII word to the wordlist.
 echo 'عربى' >> "$tmpdir/wordlist"
@@ -61,6 +62,6 @@ ok_program 'Database does not contain non-ASCII password' 100 '' \
     cdb -q "$tmpdir/wordlist.cdb" 'عربى'
 
 # Clean up.
-rm "$tmpdir/wordlist.cdb"
-rm "$tmpdir/wordlist"
+rm -f "$tmpdir/wordlist.cdb"
+rm -f "$tmpdir/wordlist"
 rmdir "$tmpdir" 2>/dev/null

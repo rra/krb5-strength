@@ -24,8 +24,9 @@ fi
 shift
 shift
 
-# Copy over the template.
+# Copy over the template and ensure it's writable.
 cp "$source" "$tmpdir"/krb5.conf
+chmod 644 "$tmpdir"/krb5.conf
 
 # Add the appdefaults section.
 cat <<EOF >>"$tmpdir"/krb5.conf
