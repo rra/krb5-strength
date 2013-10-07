@@ -35,6 +35,7 @@ krb5-strength (2.0-1) UNRELEASED; urgency=low
   * Update debhelper compatibility level to V9.
     - Enable hardening flags, including bindnow and PIE.
     - Enable parallel builds.
+  * Use dh-autoreconf to rebuild the build system during package builds.
   * Remove Bugs header now that this package is in Debian proper.
 
  -- Russ Allbery <rra@debian.org>  Mon, 07 Oct 2013 16:30:08 -0700
