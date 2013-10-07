@@ -1,3 +1,29 @@
+krb5-strength (2.0-1) UNRELEASED; urgency=low
+
+  * New upstream release.
+    - Add native support for the MIT Kerberos password quality plugin
+      interface included in MIT Kerberos 1.9 and later.
+    - Stop building the Heimdal plugin.  Heimdal prefers using an external
+      check program anyway.
+    - Add support for TinyCDB dictionaries with a simpler dictionary
+      lookup algorithm.  This allows use of this package to check
+      passwords against a large, fast dictionary with a minimum of
+      permutations as an alternative or supplement to the extensive
+      permutations tested by CrackLib.
+    - Minimum password length can now be enforced directly through
+      configuration of this module without relying on CrackLib.
+    - New boolean settings require_ascii_printable and require_non_letter
+      to reject passwords with non-ASCII or non-printable characters and
+      to require passwords contain at least one non-letter (and
+      non-space).
+    - The plugin and external checking program will now run without a
+      dictionary configured so that they can be used only to check length
+      and the lighter character restrictions if so desired.
+    - When checking for passwords based on the principal, also check each
+      component of the principal to find passwords based on the realm.
+
+ -- Russ Allbery <rra@debian.org>  Mon, 07 Oct 2013 16:30:08 -0700
+
 krb5-strength (1.1-1) unstable; urgency=low
 
   * New upstream release.
