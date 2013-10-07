@@ -1,34 +1,43 @@
 # Automake makefile for krb5-strength.
 #
 # Written by Russ Allbery <rra@stanford.edu>
-# Copyright 2007, 2009, 2010, 2012
+# Copyright 2007, 2009, 2010, 2012, 2013
 #     The Board of Trustees of the Leland Stanford Junior University
 #
 # See LICENSE for licensing terms.
 
 ACLOCAL_AMFLAGS = -I m4
-EXTRA_DIST = .gitignore LICENSE autogen cracklib/HISTORY cracklib/LICENCE   \
-	cracklib/README cracklib/genrules.pl cracklib/mkdict		    \
-	external/heimdal-strength.pod patches/README patches/mit-krb5-1.4.4 \
-	tests/HOWTO tests/TESTS tests/data/wordlist			    \
-	tests/heimdal/external-t tests/heimdal/plugin-t			    \
-	tests/heimdal/pod-spelling-t tests/heimdal/pod-t tests/mit/plugin-t \
-	tests/tap/libtap.sh
+EXTRA_DIST = .gitignore LICENSE autogen cracklib/HISTORY cracklib/LICENCE  \
+	cracklib/README cracklib/genrules.pl cracklib/mkdict tests/HOWTO   \
+	tests/TESTS tests/data/krb5.conf tests/data/make-krb5-conf	   \
+	tests/data/passwords tests/data/perl.conf tests/data/perlcriticrc  \
+	tests/data/perltidyrc tests/data/wordlist tests/data/wordlist.cdb  \
+	tests/docs/pod-spelling-t tests/docs/pod-t tests/perl/critic-t	   \
+	tests/perl/minimum-version-t tests/perl/strict-t		   \
+	tests/tap/libtap.sh tests/tap/perl/Test/RRA.pm			   \
+	tests/tap/perl/Test/RRA/Config.pm				   \
+	tests/tap/perl/Test/RRA/Automake.pm tests/tools/cdbmake-wordlist-t \
+	tests/tools/heimdal-strength-t tests/util/xmalloc-t		   \
+	tools/heimdal-strength.pod
 
 # Do this globally.  Everything needs to find the Kerberos headers and
-# libraries, and if we're using the system CrackLib, add its location
-# unconditionally as well.
-AM_CPPFLAGS = $(CRACKLIB_CPPFLAGS) $(KRB5_CPPFLAGS)
-AM_LDFLAGS = $(CRACKLIB_LDFLAGS) $(KRB5_LDFLAGS)
-
-# Put the module into /usr/local/lib/kadmind by default, relative to --libdir.
-moduledir = $(libdir)/kadmind
+# libraries, and if we're using the system CrackLib or libcdb, add its
+# location unconditionally as well.
+AM_CPPFLAGS = $(CRACKLIB_CPPFLAGS) $(KRB5_CPPFLAGS) $(CDB_CPPFLAGS)
+AM_LDFLAGS = $(CRACKLIB_LDFLAGS) $(KRB5_LDFLAGS) $(CDB_LDFLAGS)
 
 # Build our portability library.
 noinst_LTLIBRARIES = portable/libportable.la
-portable_libportable_la_SOURCES = portable/dummy.c portable/macros.h \
-        portable/stdbool.h portable/system.h
+portable_libportable_la_SOURCES = portable/dummy.c portable/kadmin.h	\
+        portable/krb5.h portable/macros.h portable/stdbool.h		\
+        portable/system.h
 portable_libportable_la_LIBADD = $(LTLIBOBJS)
+
+# Build our command-line utility library.
+noinst_LIBRARIES = util/libutil.a
+util_libutil_a_SOURCES = util/macros.h util/messages-krb5.c		    \
+	util/messages-krb5.h util/messages.c util/messages.h util/xmalloc.c \
+	util/xmalloc.h
 
 # If we're building with the embedded cracklib, build cracklib as a helper
 # library and build (but don't install) the packer program.
@@ -41,29 +50,41 @@ if EMBEDDED_CRACKLIB
     noinst_LTLIBRARIES += cracklib/libcracklib.la
 endif
 
-# Rules for building the password strength plugin.
-module_LTLIBRARIES = plugin/passwd_strength.la
-plugin_passwd_strength_la_SOURCES = plugin/api.c plugin/heimdal.c plugin/mit.c
-plugin_passwd_strength_la_LDFLAGS = -module -avoid-version
-if EMBEDDED_CRACKLIB
-    plugin_passwd_strength_la_LIBADD = cracklib/libcracklib.la
-else
-    plugin_passwd_strength_la_LIBADD = $(CRACKLIB_LIBS)
-endif
-plugin_passwd_strength_la_LIBADD += portable/libportable.la $(KRB5_LIBS)
+# Put the plugin into $(libdir)/krb5/plugins/pwqual by default,
+moduledir = $(libdir)/krb5/plugins/pwqual
 
-# The Heimdal external-check program.
-bin_PROGRAMS = external/heimdal-strength
-external_heimdal_strength_CFLAGS = $(AM_CFLAGS)
-external_heimdal_strength_SOURCES = plugin/api.c plugin/api.h \
-	external/heimdal-strength.c
+# Rules for building the password strength plugin.
+module_LTLIBRARIES = plugin/strength.la
+plugin_strength_la_SOURCES = plugin/cdb.c plugin/config.c plugin/cracklib.c \
+	plugin/error.c plugin/general.c plugin/heimdal.c plugin/internal.h  \
+	plugin/mit.c plugin/principal.c
+plugin_strength_la_LDFLAGS = -module -avoid-version
 if EMBEDDED_CRACKLIB
-    external_heimdal_strength_LDADD = cracklib/libcracklib.la
+    plugin_strength_la_LIBADD = cracklib/libcracklib.la
 else
-    external_heimdal_strength_LDADD = $(CRACKLIB_LIBS)
+    plugin_strength_la_LIBADD = $(CRACKLIB_LIBS)
 endif
-external_heimdal_strength_LDADD += portable/libportable.la $(KRB5_LIBS)
-dist_man_MANS = external/heimdal-strength.1
+plugin_strength_la_LIBADD += portable/libportable.la $(KRB5_LIBS) $(CDB_LIBS)
+
+# The Heimdal external check program.
+bin_PROGRAMS = tools/heimdal-strength
+tools_heimdal_strength_CFLAGS = $(AM_CFLAGS)
+tools_heimdal_strength_SOURCES = plugin/cdb.c plugin/config.c		    \
+	plugin/cracklib.c plugin/error.c plugin/general.c plugin/internal.h \
+	plugin/principal.c tools/heimdal-strength.c
+if EMBEDDED_CRACKLIB
+    tools_heimdal_strength_LDADD = cracklib/libcracklib.la
+else
+    tools_heimdal_strength_LDADD = $(CRACKLIB_LIBS)
+endif
+tools_heimdal_strength_LDADD += util/libutil.a portable/libportable.la \
+	$(KRB5_LIBS) $(CDB_LIBS)
+
+# Other tools.
+dist_bin_SCRIPTS = tools/cdbmake-wordlist
+
+# Man pages for all tools.
+dist_man_MANS = tools/heimdal-strength.1 tools/cdbmake-wordlist.1
 
 # Handle the standard stuff that make maintainer-clean should probably remove
 # but doesn't.  This breaks the GNU coding standard, but in this area the GNU
@@ -83,53 +104,69 @@ MAINTAINERCLEANFILES = Makefile.in aclocal.m4 build-aux/compile		 \
 #
 #     -Wconversion      http://bugs.debian.org/488884 (htons warnings)
 #
-# Last checked against gcc 4.6.1 (2011-05-04).  -D_FORTIFY_SOURCE=2 enables
+# Last checked against gcc 4.7.2 (2013-04-22).  -D_FORTIFY_SOURCE=2 enables
 # warn_unused_result attribute markings on glibc functions on Linux, which
 # catches a few more issues.
-WARNINGS = -g -O -D_FORTIFY_SOURCE=2 -Wall -Wextra -Wendif-labels	    \
-	-Wformat=2 -Winit-self -Wswitch-enum -Wdeclaration-after-statement  \
-	-Wshadow -Wpointer-arith -Wbad-function-cast -Wcast-align	    \
-	-Wwrite-strings -Wjump-misses-init -Wlogical-op			    \
-	-Wstrict-prototypes -Wmissing-prototypes -Wredundant-decls	    \
-	-Wnested-externs -Werror
+WARNINGS = -g -O -D_FORTIFY_SOURCE=2 -Wall -Wextra -Wendif-labels	   \
+	-Wformat=2 -Winit-self -Wswitch-enum -Wuninitialized -Wfloat-equal \
+	-Wdeclaration-after-statement -Wshadow -Wpointer-arith		   \
+	-Wbad-function-cast -Wcast-align -Wwrite-strings		   \
+	-Wjump-misses-init -Wlogical-op -Wstrict-prototypes		   \
+	-Wold-style-definition -Wmissing-prototypes -Wnormalized=nfc	   \
+	-Wpacked -Wredundant-decls -Wnested-externs -Winline -Wvla -Werror
 
 warnings:
 	$(MAKE) V=0 CFLAGS='$(WARNINGS)'
 	$(MAKE) V=0 CFLAGS='$(WARNINGS)' $(check_PROGRAMS)
 
 # The bits below are for the test suite, not for the main package.
-check_PROGRAMS = tests/heimdal/plugin tests/mit/plugin			 \
-	tests/portable/asprintf-t tests/portable/snprintf-t		 \
-	tests/portable/strlcat-t tests/portable/strlcpy-t tests/runtests
+check_PROGRAMS = tests/runtests tests/plugin/heimdal-t tests/plugin/mit-t   \
+	tests/portable/asprintf-t tests/portable/snprintf-t		    \
+	tests/util/messages-krb5-t tests/util/messages-t tests/util/xmalloc
 if EMBEDDED_CRACKLIB
     check_PROGRAMS += cracklib/packer
 endif
 tests_runtests_CPPFLAGS = -DSOURCE='"$(abs_top_srcdir)/tests"' \
 	-DBUILD='"$(abs_top_builddir)/tests"'
 check_LIBRARIES = tests/tap/libtap.a
-tests_tap_libtap_a_CPPFLAGS = -I$(abs_top_srcdir)/tests
-tests_tap_libtap_a_SOURCES = tests/tap/basic.c tests/tap/basic.h \
-	tests/tap/macros.h
+tests_tap_libtap_a_CPPFLAGS = -I$(abs_top_srcdir)/tests $(KRB5_CPPFLAGS)
+tests_tap_libtap_a_SOURCES = tests/tap/basic.c tests/tap/basic.h	\
+	tests/tap/kerberos.c tests/tap/kerberos.h tests/tap/macros.h	\
+	tests/tap/process.c tests/tap/process.h tests/tap/string.c	\
+	tests/tap/string.h
 
-tests_heimdal_plugin_SOURCES = tests/heimdal/plugin.c
-tests_heimdal_plugin_LDADD = portable/libportable.la $(KRB5_LIBS) $(DL_LIBS)
-tests_mit_plugin_SOURCES = tests/mit/plugin.c
-tests_mit_plugin_LDADD = portable/libportable.la $(KRB5_LIBS) $(DL_LIBS)
+# The actual test programs.
+tests_plugin_heimdal_t_CPPFLAGS = $(KRB5_CPPFLAGS)
+tests_plugin_heimdal_t_LDADD = tests/tap/libtap.a portable/libportable.la \
+	$(KRB5_LIBS) $(CDB_LIBS) $(DL_LIBS)
+tests_plugin_mit_t_CPPFLAGS = $(KRB5_CPPFLAGS)
+tests_plugin_mit_t_LDADD = tests/tap/libtap.a portable/libportable.la \
+	$(KRB5_LIBS) $(CDB_LIBS) $(DL_LIBS)
 tests_portable_asprintf_t_SOURCES = tests/portable/asprintf-t.c \
 	tests/portable/asprintf.c
 tests_portable_asprintf_t_LDADD = tests/tap/libtap.a portable/libportable.la
 tests_portable_snprintf_t_SOURCES = tests/portable/snprintf-t.c \
 	tests/portable/snprintf.c
 tests_portable_snprintf_t_LDADD = tests/tap/libtap.a portable/libportable.la
-tests_portable_strlcat_t_SOURCES = tests/portable/strlcat-t.c \
-	tests/portable/strlcat.c
-tests_portable_strlcat_t_LDADD = tests/tap/libtap.a portable/libportable.la
-tests_portable_strlcpy_t_SOURCES = tests/portable/strlcpy-t.c \
-	tests/portable/strlcpy.c
-tests_portable_strlcpy_t_LDADD = tests/tap/libtap.a portable/libportable.la
+tests_util_messages_t_LDADD = tests/tap/libtap.a util/libutil.a \
+	portable/libportable.la
+tests_util_messages_krb5_t_LDADD = tests/tap/libtap.a util/libutil.a \
+	portable/libportable.la $(KRB5_LIBS)
+tests_util_xmalloc_LDADD = util/libutil.a portable/libportable.la
 
-tests/data/dictionary.pwd: cracklib/packer $(srcdir)/tests/data/wordlist
-	cracklib/packer tests/data/dictionary < $(srcdir)/tests/data/wordlist
+# The dictionary is used by the tests and needs to be built first.
+if EMBEDDED_CRACKLIB
+tests/data/dictionary.pwd: cracklib/packer $(srcdir)/cracklib/mkdict \
+		$(srcdir)/tests/data/wordlist
+	mkdir -p tests/data
+	$(srcdir)/cracklib/mkdict $(srcdir)/tests/data/wordlist \
+	    | cracklib/packer tests/data/dictionary
+else
+tests/data/dictionary.pwd: $(srcdir)/tests/data/wordlist
+	mkdir -p tests/data
+	cracklib-format $(srcdir)/tests/data/wordlist \
+	    | cracklib-packer tests/data/dictionary
+endif
 
 check-local: $(check_PROGRAMS) tests/data/dictionary.pwd
-	cd tests && ./runtests $(abs_top_srcdir)/tests/TESTS
+	cd tests && ./runtests -l $(abs_top_srcdir)/tests/TESTS
