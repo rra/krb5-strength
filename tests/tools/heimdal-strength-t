@@ -206,8 +206,8 @@ for my $test (@{ $tests{class} }) {
 
 # Install the krb5.conf file with configuration pointing to the CDB
 # dictionary.
-$krb5_conf
-  = create_krb5_conf({ password_dictionary_cdb => "$datadir/wordlist.cdb" });
+my $cdb_database = test_file_path('data/wordlist.cdb');
+$krb5_conf = create_krb5_conf({ password_dictionary_cdb => $cdb_database });
 local $ENV{KRB5_CONFIG} = $krb5_conf;
 
 # Check whether we were built with CDB support.  If so, run those tests.
