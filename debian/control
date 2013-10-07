@@ -3,7 +3,7 @@ Section: net
 Priority: extra
 Maintainer: Russ Allbery <rra@debian.org>
 Bugs: mailto:rra@debian.org
-Build-Depends: debhelper (>= 8), libkrb5-dev
+Build-Depends: debhelper (>= 8), libcdb-dev, libcrack2-dev, libkrb5-dev
 Standards-Version: 3.9.3
 Homepage: http://www.eyrie.org/~eagle/software/krb5-strength/
 Vcs-Git: git://git.eyrie.org/kerberos/krb5-strength.git
