@@ -1,54 +1,79 @@
 dnl Process this file with autoconf to produce a configure script.
 dnl
 dnl Written by Russ Allbery <rra@stanford.edu>
-dnl Copyright 2006, 2007, 2009, 2010, 2012
+dnl Copyright 2006, 2007, 2009, 2010, 2012, 2013
 dnl     The Board of Trustees of the Leland Stanford Junior University
 dnl
 dnl See LICENSE for licensing terms.
 
+dnl Basic Autoconf configuration.
 AC_PREREQ([2.64])
-AC_INIT([krb5-strength], [1.1], [rra@stanford.edu])
+AC_INIT([krb5-strength], [2.0], [rra@stanford.edu])
 AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_LIBOBJ_DIR([portable])
 AC_CONFIG_MACRO_DIR([m4])
-AM_INIT_AUTOMAKE([1.11 check-news foreign silent-rules subdir-objects \
+AM_INIT_AUTOMAKE([1.11 check-news dist-xz foreign silent-rules subdir-objects
     -Wall -Werror])
 AM_MAINTAINER_MODE
 
+dnl Probe for basic build system tools.
 AC_PROG_CC
 AC_USE_SYSTEM_EXTENSIONS
+AC_SYS_LARGEFILE
 AM_PROG_CC_C_O
 AC_PROG_INSTALL
+m4_ifdef([AM_PROG_AR], [AM_PROG_AR])
 AM_DISABLE_STATIC
 AC_PROG_LIBTOOL
 
-AC_HEADER_STDBOOL
-AC_CHECK_HEADERS([sys/bittypes.h])
-AC_CHECK_DECLS([snprintf, vsnprintf])
-AC_TYPE_LONG_LONG_INT
-AC_CHECK_TYPES([ssize_t], [], [],
-    [#include <sys/types.h>])
-AC_TYPE_UINT8_T
-AC_TYPE_UINT16_T
-AC_TYPE_UINT32_T
-RRA_FUNC_SNPRINTF
-AC_REPLACE_FUNCS([asprintf strlcat strlcpy])
+dnl External libraries.
+RRA_LIB_CDB_OPTIONAL
+RRA_LIB_CRACKLIB
+AS_IF([test x"$rra_system_cracklib" = xyes],
+    [RRA_LIB_CRACKLIB_SWITCH
+     AC_CHECK_HEADERS([crack.h])
+     RRA_LIB_CRACKLIB_RESTORE])
+RRA_LIB_KRB5
+RRA_LIB_KRB5_SWITCH
+AC_CHECK_HEADERS([kadm5/kadm5-pwcheck.h kadm5/kadm5_err.h], [], [],
+    [RRA_INCLUDES_KRB5])
+AC_CHECK_HEADERS([krb5/pwqual_plugin.h], [], [], [RRA_INCLUDES_KRB5])
+AC_CHECK_TYPES([krb5_realm], [], [], [RRA_INCLUDES_KRB5])
+AC_CHECK_FUNCS([krb5_free_default_realm \
+    krb5_free_string \
+    krb5_principal_get_realm \
+    krb5_get_init_creds_opt_alloc \
+    krb5_get_init_creds_opt_set_default_flags \
+    krb5_xfree])
+AC_CHECK_FUNCS([krb5_get_init_creds_opt_free],
+    [RRA_FUNC_KRB5_GET_INIT_CREDS_OPT_FREE_ARGS])
+AC_CHECK_DECLS([krb5_kt_free_entry], [], [], [RRA_INCLUDES_KRB5])
+AC_LIBOBJ([krb5-extra])
+RRA_LIB_KRB5_RESTORE
 
+dnl Probe for libdl, which is used for the test suite.
 save_LIBS="$LIBS"
 AC_SEARCH_LIBS([dlopen], [dl], [DL_LIBS="$LIBS"])
 LIBS="$save_LIBS"
 AC_SUBST([DL_LIBS])
 
-RRA_LIB_CRACKLIB
-RRA_LIB_KRB5
-RRA_LIB_KRB5_SWITCH
-AC_CHECK_HEADERS([kadm5-pwcheck.h krb5/pwcheck_plugin.h])
-AC_CHECK_TYPES([krb5_realm], [], [], [RRA_INCLUDES_KRB5])
-RRA_LIB_KRB5_RESTORE
+dnl Checks for basic C functionality.
+AC_HEADER_STDBOOL
+AC_CHECK_HEADERS([sys/bittypes.h syslog.h])
+AC_CHECK_DECLS([snprintf, vsnprintf])
+RRA_C_C99_VAMACROS
+RRA_C_GNU_VAMACROS
+AC_TYPE_LONG_LONG_INT
+AC_TYPE_UINT8_T
+AC_TYPE_UINT16_T
+AC_TYPE_UINT32_T
+AC_CHECK_TYPES([ssize_t], [], [],
+    [#include <sys/types.h>])
+RRA_FUNC_SNPRINTF
+AC_CHECK_FUNCS([setrlimit])
+AC_REPLACE_FUNCS([asprintf])
 
-dnl Create the tests/data directory for builds outside the source directory.
-AC_CONFIG_COMMANDS([tests/data/.placeholder], [touch tests/data/.placeholder])
-
+dnl Write out the results.
 AC_CONFIG_FILES([Makefile])
 AC_CONFIG_HEADER([config.h])
 AC_OUTPUT

@@ -25,6 +25,10 @@
  *   - Change MINLENGTH to 8.
  *   - Use a separate buffer to hold the reversed password.
  *   - Also check whether a password is a duplicated dictionary word.
+ * 2013-09-24  Russ Allbery <rra@stanford.edu>
+ *   - Replaced MAXSTEP with allowing one increment per four characters.
+ *   - Changed error for very short passwords to match current CrackLib.
+ *   - Close the dictionary after each password lookup.
  */
 
 static const char vers_id[] = "fascist.c : v2.3p3 Alec Muffett 14 dec 1997";
@@ -40,7 +44,6 @@ static const char vers_id[] = "fascist.c : v2.3p3 Alec Muffett 14 dec 1997";
 
 #define MINDIFF 5
 #define MINLEN 8
-#define MAXSTEP 4
 #define MAXMINDIFF 8
 
 #undef DEBUG
@@ -452,7 +455,7 @@ FascistLook(PWDICT *pwp, const char *instring)
     pw_len = strlen(password); 
     if (pw_len < 4)
     {
-	return ("it's WAY too short");
+	return ("it is WAY too short");
     }
 
     if (pw_len < MINLEN)
@@ -527,7 +530,8 @@ FascistLook(PWDICT *pwp, const char *instring)
 	ptr++;
     }
 
-    if (i > MAXSTEP)
+    /* Allow one simple letter increment per three characters. */
+    if (i > (int) strlen(password) / 3)
     {
 	return ("it is too simplistic/systematic");
     }
@@ -619,9 +623,9 @@ FascistLook(PWDICT *pwp, const char *instring)
 const char *
 FascistCheck(const char *password, const char *path)
 {
-    static char lastpath[STRINGSIZE];
-    static PWDICT *pwp;
+    PWDICT *pwp;
     char pwtrunced[STRINGSIZE];
+    const char *result;
 
     /* security problem: assume we may have been given a really long
        password (buffer attack) and so truncate it to a workable size;
@@ -634,21 +638,13 @@ FascistCheck(const char *password, const char *path)
     /* perhaps someone should put something here to check if password
        is really long and syslog() a message denoting buffer attacks?  */
 
-    if (pwp && strncmp(lastpath, path, STRINGSIZE))
+    if (!(pwp = PWOpen(path, "r")))
     {
-	PWClose(pwp);
-	pwp = (PWDICT *)0;
+	perror("PWOpen");
+	return "Cannot check password: dictionary unavailable";
     }
 
-    if (!pwp)
-    {
-	if (!(pwp = PWOpen(path, "r")))
-	{
-	    perror("PWOpen");
-	    return "Cannot check password: dictionary unavailable";
-	}
-	strncpy(lastpath, path, STRINGSIZE);
-    }
-
-    return (FascistLook(pwp, pwtrunced));
+    result = FascistLook(pwp, pwtrunced);
+    PWClose(pwp);
+    return result;
 }

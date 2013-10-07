@@ -1,5 +1,88 @@
                     User-Visible krb5-strength Changes
 
+krb5-strength 2.0 (2013-10-07)
+
+    Add support for the MIT Kerberos password quality plugin interface,
+    available in MIT Kerberos 1.9 and later, contributed by Greg Hudson
+    and MIT.  Drop the patch for MIT Kerberos 1.4 (and hence support for
+    versions of MIT Kerberos prior to 1.9).  A dictionary path set in
+    krb5.conf takes precedence over the dictionary path provided by MIT
+    Kerberos when the plugin is initialized, if both are set, to allow the
+    dict_path configuration setting to be used for other plugins while
+    using a separate dictionary for krb5-strength.
+
+    The default installation path for this plugin is now
+    /usr/local/lib/krb5/plugins/pwqual/strength.so (for both MIT and
+    Heimdal), assuming a --libdir setting of /usr/local/lib.  This may
+    require updates to the Kerberos KDC configuration or moving the plugin
+    when upgrading from earlier versions.
+
+    Add support for building with TinyCDB and then checking passwords
+    against a CDB database.  There is a new password_dictionary_cdb
+    krb5.conf configuration setting that configures a CDB directory to
+    use.  The tests with a CDB dictionary are much simpler: passwords are
+    rejected if found in the dictionary either literally, with one or two
+    characters removed from the start or end, or with one character
+    removed from both the start and the end.  Both a CrackLib and a CDB
+    dictionary can be specified to check both dictionaries.  A new
+    cdbmake-wordlist utility (written in Perl) is included to ease the
+    process of creating a CDB database from a simple word list.
+
+    A minimum password length can now be enforced directly via the plugin
+    or external check program without relying on CrackLib.  To set a
+    minimum password length, add a minimum_length setting to the
+    krb5-strength section of [appdefaults] in krb5.conf.
+
+    New boolean settings require_ascii_printable and require_non_letter
+    are supported in the krb5-strength setting of [appdefaults] in
+    krb5.conf.  The former rejects passwords containing characters other
+    than printable ASCII characters (including space), and the latter
+    requires that passwords contain at least one character that is not a
+    letter (upper or lower case) or a space.
+
+    The plugin can now be configured without a dictionary, in which case
+    only checks for a password based on the principal and the simpler
+    checks available through the new configuration variables are done.
+    This mode is mostly useful for testing, since such simple checking can
+    more easily be done via less complex password strength configurations.
+
+    The check for passwords based on the principal now check for passwords
+    formed by reversing or adding numbers before and after each separate
+    component of the principal.  This will catch passwords based on the
+    realm or components of the realm, which will often catch passwords
+    based on the name of the local institution.
+
+    The plugin now sets the Kerberos error message in the context to pass
+    error information, resulting in higher-quality error reporting in the
+    MIT Kerberos plugin.
+
+    CrackLib checks for passwords where a character is a simple increment
+    or decrement of the previous character.  In previous versions, the
+    embedded version of CrackLib allowed at most four such occurrences in
+    the entire password.  This results in false positives on long
+    passphrases, since such accidental letter relationships aren't
+    uncommon in human languages.  Change the embedded CrackLib to allow
+    one such simple increment for every three characters in the password,
+    which tightens the check somewhat for shorter passwords and loosens it
+    considerably for longer passwords.
+
+    Expect the Heimdal password strength checking plugin header in
+    kadm5/kadm5-pwcheck.h instead of outside of the kadm5 directory.  This
+    is the path used by current versions of Heimdal.  Drop support for
+    older versions of Heimdal that don't install this header file.
+
+    Update to rra-c-util 4.9:
+
+    * Probe for Kerberos headers using file checks instead of compiles.
+    * Improve probe for the Heimdal libroken library.
+    * Always build with large file support.
+    * Conditionally call AM_PROG_AR for portability to new Autotools.
+
+    Update to C TAP Harness 2.2:
+
+    * Allow more easily running single programs under tests/runtests.
+    * Flush the output from the test harness after each test.
+
 krb5-strength 1.1 (2012-05-11)
 
     Change the minimum password length in the embedded CrackLib to 8.

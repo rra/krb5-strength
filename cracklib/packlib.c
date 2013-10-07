@@ -21,6 +21,9 @@
  *   - Remove unused variables.
  * 2009-11-18  Russ Allbery <rra@stanford.edu>
  *   - Fixed the data format output by packer to properly pad the end.
+ * 2013-09-24  Russ Allbery <rra@stanford.edu>
+ *   - Add a missing ANSI C prototype.
+ *   - Remove last block optimization in GetPW and start fresh each time.
  */
 
 #include <stdio.h>
@@ -130,8 +133,7 @@ PWOpen(const char *prefix, const char *mode)
 }
 
 int
-PWClose(pwp)
-    PWDICT *pwp;
+PWClose(PWDICT *pwp)
 {
     if (pwp->header.pih_magic != PIH_MAGIC)
     {
@@ -255,15 +257,9 @@ GetPW(PWDICT *pwp, int32 number)
     register char *bptr;
     char buffer[NUMWORDS * MAXWORDLEN];
     static char data[NUMWORDS][MAXWORDLEN];
-    static int32 prevblock = 0xffffffff;
     int32 thisblock;
 
     thisblock = number / NUMWORDS;
-
-    if (prevblock == thisblock)
-    {
-	return (data[number % NUMWORDS]);
-    }
 
     if (fseek(pwp->ifp, sizeof(struct pi_header) + (thisblock * sizeof(int32)), 0))
     {
@@ -288,8 +284,6 @@ GetPW(PWDICT *pwp, int32 number)
 	perror("(data fread failed)");
 	return ((char *) 0);
     }
-
-    prevblock = thisblock;
 
     bptr = buffer;
 
