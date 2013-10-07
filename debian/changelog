@@ -32,6 +32,9 @@ krb5-strength (2.0-1) UNRELEASED; urgency=low
   * Recommend cracklib-runtime and tinycdb since they are required to
     build dictionaries.  Downgrade krb5-admin-server to Enhances and add
     heimdal-kdc.
+  * Update debhelper compatibility level to V9.
+    - Enable hardening flags, including bindnow and PIE.
+    - Enable parallel builds.
   * Remove Bugs header now that this package is in Debian proper.
 
  -- Russ Allbery <rra@debian.org>  Mon, 07 Oct 2013 16:30:08 -0700

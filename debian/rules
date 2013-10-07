@@ -1,14 +1,18 @@
 #!/usr/bin/make -f
 
+# Add hardening build flags.  We have to omit PIE because it breaks the Perl
+# module build (and probably the other interpretors as well).
+export DEB_BUILD_MAINT_OPTIONS = hardening=+bindnow
+
 %:
-	dh $@
+	dh $@ --parallel
 
 override_dh_auto_configure:
-	dh_auto_configure -- --enable-reduced-depends --with-cracklib \
-	    --with-tinycdb
+	dh_auto_configure --parallel -- --enable-reduced-depends \
+	    --with-cracklib --with-tinycdb
 
 override_dh_auto_install:
-	dh_auto_install
+	dh_auto_install --parallel
 	chmod 644 debian/tmp/usr/lib/kadmind/*.so
 
 override_dh_installchangelogs:
