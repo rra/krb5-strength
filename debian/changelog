@@ -21,6 +21,17 @@ krb5-strength (2.0-1) UNRELEASED; urgency=low
       and the lighter character restrictions if so desired.
     - When checking for passwords based on the principal, also check each
       component of the principal to find passwords based on the realm.
+  * Eliminate the heimdal-strength package.  krb5-strength now builds a
+    single binary package of the same name including the MIT plugin and
+    the Heimdal external password quality program.  The Heimdal plugin is
+    not built by the Debian packaging because Heimdal prefers external
+    programs.  The plugin can be added later as a separate package if
+    there is demand.
+  * Revise the package long description for the merger of krb5-strength
+    and heimdal-strength and the new capabilities in 2.0.
+  * Recommend cracklib-runtime and tinycdb since they are required to
+    build dictionaries.  Downgrade krb5-admin-server to Enhances and add
+    heimdal-kdc.
 
  -- Russ Allbery <rra@debian.org>  Mon, 07 Oct 2013 16:30:08 -0700
 

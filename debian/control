@@ -11,23 +11,19 @@ Vcs-Browser: http://git.eyrie.org/?p=kerberos/krb5-strength.git
 
 Package: krb5-strength
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}
-Recommends: krb5-admin-server
-Description: MIT Kerberos KDC plugin for password strength checking
- This plugin checks passwords set via kadmin either through new account
- creation or password changes.  It rejects passwords that fit common
- patterns and then uses an embedded version of CrackLib to reject
- passwords based on dictionary words.  No dictionary is shipped with this
- package; a dictionary package must be installed separately.
-
-Package: heimdal-strength
-Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}
-Description: Heimdal external password strength check utility
- This external password strength checking program implements the Heimdal
- password checking protocol.  It rejects passwords that fit common
- patterns and then uses an embedded version of CrackLib to reject
- passwords based on dictionary words.  The CrackLib rules are modified
- from the default to reject more passwords that other password cracking
- utilities such as John the Ripper can crack.  No dictionary is shipped
- with this package; a dictionary package must be installed separately.
+Depends: ${shlibs:Depends}, ${misc:Depends}, ${perl:Depends}
+Recommends: cracklib-runtime, tinycdb
+Enhances: krb5-admin-server, heimdal-kdc
+Description: Password strength checking for Kerberos KDCs
+ krb5-strength provides a password quality plugin for the MIT Kerberos KDC
+ (specifically the kadmind server) and an external password quality
+ program for use with the Heimdal kpasswdd server.  Passwords can be
+ tested with CrackLib, checked against a CDB database of known weak
+ passwords, checked for length, checked for non-printable or non-ASCII
+ characters that may be difficult to enter reproducibly, required to
+ contain a non-alphabetic character, or any combination of these tests.
+ .
+ No dictionary is shipped with this package.  A CrackLib dictionary can be
+ created with the tools in cracklib-runtime, a CDB database can be created
+ from a password list (obtained separately) using the tools included in
+ this package, or both.

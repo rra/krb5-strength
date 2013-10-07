@@ -1,0 +1,3 @@
+usr/bin/cdbmake-wordlist
+usr/bin/heimdal-strength
+usr/lib/*/krb5/plugins/pwqual/strength.so
