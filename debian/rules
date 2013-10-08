@@ -20,7 +20,7 @@ override_dh_auto_test:
 
 override_dh_auto_install:
 	dh_auto_install --parallel
-	rm debian/$(PACKAGE)/usr/lib/*/krb5/plugins/pwqual/*.la
+	rm debian/$(PACKAGE)/usr/lib/krb5/plugins/pwqual/*.la
 
 override_dh_installchangelogs:
 	dh_installchangelogs NEWS
