@@ -1,5 +1,6 @@
 krb5-strength (2.0-1) UNRELEASED; urgency=low
 
+  * Initial upload to Debian.  (Closes: #725753)
   * New upstream release.
     - Add native support for the MIT Kerberos password quality plugin
       interface included in MIT Kerberos 1.9 and later.
