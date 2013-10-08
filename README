@@ -12,12 +12,14 @@
 
 BLURB
 
-  krb5-strength provides mechanisms for checking the strength of Kerberos
-  passwords against an external dictionary when a user changes passwords
-  in a Kerberos KDC.  It is roughly equivalent to checking password
-  strength via CrackLib, except that it embeds a copy of Alec Muffett's
-  CrackLib that has been modified to perform slightly more strenuous
-  tests.  It supports both Heimdal and MIT Kerberos (1.9 or later).
+  krb5-strength provides a password quality plugin for the MIT Kerberos
+  KDC (specifically the kadmind server) and an external password quality
+  program for use with the Heimdal kpasswdd server.  Passwords can be
+  tested with CrackLib, checked against a CDB database of known weak
+  passwords, checked for length, checked for non-printable or non-ASCII
+  characters that may be difficult to enter reproducibly, required to
+  contain a non-alphabetic character, or any combination of these tests.
+  It supports both Heimdal and MIT Kerberos (1.9 or later).
 
 DESCRIPTION
 
