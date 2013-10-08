@@ -2,8 +2,10 @@ Source: krb5-strength
 Section: net
 Priority: extra
 Maintainer: Russ Allbery <rra@debian.org>
-Build-Depends: debhelper (>= 9), dh-autoreconf, libcdb-dev, libcrack2-dev,
- libkrb5-dev (>= 1.9)
+Build-Depends: debhelper (>= 9), cracklib-runtime, dh-autoreconf,
+ libcdb-dev, libcrack2-dev, libfile-slurp-perl, libipc-run-perl,
+ libjson-perl, libkrb5-dev (>= 1.9), libtest-pod-perl,
+ libtest-minimumversion-perl, libtest-strict-perl, perl, tinycdb
 Standards-Version: 3.9.4
 Homepage: http://www.eyrie.org/~eagle/software/krb5-strength/
 Vcs-Git: git://git.eyrie.org/kerberos/krb5-strength.git -b debian
