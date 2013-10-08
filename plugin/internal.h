@@ -2,10 +2,10 @@
  * Prototypes for the kadmin password strength checking plugin.
  *
  * Developed by Derrick Brashear and Ken Hornstein of Sine Nomine Associates,
- *     on behalf of Stanford University.
+ *     on behalf of Stanford University
  * Extensive modifications by Russ Allbery <rra@stanford.edu>
  * Copyright 2006, 2007, 2009, 2012, 2013
- *     The Board of Trustees of the Leland Stanford Junior Unversity
+ *     The Board of Trustees of the Leland Stanford Junior University
  *
  * See LICENSE for licensing terms.
  */
