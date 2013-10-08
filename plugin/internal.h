@@ -29,10 +29,10 @@ typedef struct krb5_pwqual_moddata_st *krb5_pwqual_moddata;
 
 /* Error strings returned (and displayed to the user) for various failures. */
 #define ERROR_ASCII    "password contains non-ASCII or control characters"
-#define ERROR_DICT     "password is based on a dictionary word"
+#define ERROR_DICT     "password found in list of common passwords"
 #define ERROR_LETTER   "password is only letters and spaces"
 #define ERROR_SHORT    "password is too short"
-#define ERROR_USERNAME "password based on username"
+#define ERROR_USERNAME "password based on username or principal"
 
 /*
  * MIT Kerberos uses this type as an abstract data type for any data that a
