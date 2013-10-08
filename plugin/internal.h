@@ -67,8 +67,8 @@ krb5_error_code strength_init(krb5_context, const char *dictionary,
 krb5_error_code strength_check(krb5_context, krb5_pwqual_moddata,
                                const char *principal, const char *password);
 
-/* Free the subset of internal data used by the CDB dictionary checks. */
-void strength_close_cdb(krb5_context, krb5_pwqual_moddata);
+/* Free the internal plugin state. */
+void strength_close(krb5_context, krb5_pwqual_moddata);
 
 /*
  * CDB handling.  strength_init_cdb gets the dictionary configuration and sets
@@ -83,7 +83,7 @@ krb5_error_code strength_init_cdb(krb5_context, krb5_pwqual_moddata);
 #ifdef HAVE_CDB
 krb5_error_code strength_check_cdb(krb5_context, krb5_pwqual_moddata,
                                    const char *password);
-void strength_close(krb5_context, krb5_pwqual_moddata);
+void strength_close_cdb(krb5_context, krb5_pwqual_moddata);
 #else
 # define strength_check_cdb(c, d, p) 0
 # define strength_close_cdb(c, d)    /* empty */
