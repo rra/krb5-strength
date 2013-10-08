@@ -4,6 +4,8 @@
 # module build (and probably the other interpretors as well).
 export DEB_BUILD_MAINT_OPTIONS = hardening=+bindnow
 
+PACKAGE := $(shell dh_listpackages)
+
 %:
 	dh $@ --parallel --with autoreconf
 
@@ -19,7 +21,7 @@ override_dh_auto_test:
 
 override_dh_auto_install:
 	dh_auto_install --parallel
-	chmod 644 debian/tmp/usr/lib/*/krb5/plugins/pwqual/strength.so
+	chmod 644 debian/$(PACKAGE)/usr/lib/*/krb5/plugins/pwqual/strength.so
 
 override_dh_installchangelogs:
 	dh_installchangelogs NEWS
