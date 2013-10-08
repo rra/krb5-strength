@@ -9,7 +9,7 @@ export DEB_BUILD_MAINT_OPTIONS = hardening=+bindnow
 
 override_dh_auto_configure:
 	dh_auto_configure --parallel -- --enable-reduced-depends \
-	    --with-cracklib --with-tinycdb
+	    --with-cracklib
 
 override_dh_auto_install:
 	dh_auto_install --parallel
