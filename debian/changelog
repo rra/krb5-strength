@@ -41,6 +41,8 @@ krb5-strength (2.0-1) UNRELEASED; urgency=low
   * Add branch information to the Vcs-Git metadata.
   * Update standards version to 3.9.4 (no changes required).
   * Rewrite debian/copyright in copyright-format 1.0.
+  * Remove README.Debian.  All of that information is now available in the
+    installed upstream README file.
   * Remove Bugs header now that this package is in Debian proper.
 
  -- Russ Allbery <rra@debian.org>  Mon, 07 Oct 2013 16:30:08 -0700
