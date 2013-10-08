@@ -15,9 +15,9 @@ override_dh_auto_configure:
 
 override_dh_auto_test:
 	-dh_auto_test --parallel
-	echo ''
-	echo 'TEST ERRORS TEMPORARILY IGNORED DUE TO #724570'
-	echo ''
+	@echo ''
+	@echo 'TEST ERRORS TEMPORARILY IGNORED DUE TO #724570'
+	@echo ''
 
 override_dh_auto_install:
 	dh_auto_install --parallel
