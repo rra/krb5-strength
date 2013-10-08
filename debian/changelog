@@ -1,4 +1,4 @@
-krb5-strength (2.0-1) UNRELEASED; urgency=low
+krb5-strength (2.0-1) unstable; urgency=low
 
   * Initial upload to Debian.  (Closes: #725753)
   * New upstream release.
@@ -45,7 +45,7 @@ krb5-strength (2.0-1) UNRELEASED; urgency=low
     installed upstream README file.
   * Remove Bugs header now that this package is in Debian proper.
 
- -- Russ Allbery <rra@debian.org>  Mon, 07 Oct 2013 16:30:08 -0700
+ -- Russ Allbery <rra@debian.org>  Mon, 07 Oct 2013 18:56:49 -0700
 
 krb5-strength (1.1-1) unstable; urgency=low
 
