@@ -1,4 +1,4 @@
-                            krb5-strength 2.0
+                            krb5-strength 2.1
                (Kerberos password strength checking plugin)
 
               Maintained by Russ Allbery <rra@stanford.edu>
