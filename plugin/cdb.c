@@ -35,9 +35,8 @@
  * Stub for strength_init_cdb if not built with CDB support.
  */
 #ifndef HAVE_CDB
-static krb5_error_code
-strength_init_cdb(krb5_context ctx, krb5_pwqual_moddata data UNUSED,
-                  const char *database UNUSED)
+krb5_error_code
+strength_init_cdb(krb5_context ctx, krb5_pwqual_moddata data UNUSED)
 {
     char *path = NULL;
 

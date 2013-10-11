@@ -1,5 +1,17 @@
                     User-Visible krb5-strength Changes
 
+krb5-strength 2.1 (2013-10-10)
+
+    Fix the package build when CDB support is disabled or TinyCDB was not
+    found.
+
+    Some of the password rejection error messages have been changed to
+    make them more accurate or comprehensible to the user.
+
+    Passing --with-tinycdb to configure now correctly makes TinyCDB
+    support mandatory without adding bogus directories to the library and
+    include search paths.
+
 krb5-strength 2.0 (2013-10-07)
 
     Add support for the MIT Kerberos password quality plugin interface,
