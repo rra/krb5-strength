@@ -1,3 +1,10 @@
+krb5-strength (2.1-1) unstable; urgency=low
+
+  * New upstream release.
+    - Improve some of the password rejection error messages.
+
+ -- Russ Allbery <rra@debian.org>  Thu, 10 Oct 2013 17:09:37 -0700
+
 krb5-strength (2.0-1) unstable; urgency=low
 
   * Initial upload to Debian.  (Closes: #725753)
