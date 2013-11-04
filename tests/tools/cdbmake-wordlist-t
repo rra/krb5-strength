@@ -17,7 +17,7 @@ if ! command -v cdb >/dev/null 2>&1 ; then
 fi
 
 # Output the test plan.
-plan 14
+plan 18
 
 # Create a temporary directory and wordlist and ensure it's writable.
 tmpdir=`test_tmpdir`
@@ -68,6 +68,16 @@ ok_program 'Database still contains bitterbane' 0 '1' \
     cdb -q "$tmpdir/wordlist.cdb" bitterbane
 ok_program 'Database does not contain happenstance' 100 '' \
     cdb -q "$tmpdir/wordlist.cdb" happenstance
+
+# Regenerate the database, filtering out words starting with b or ending in d.
+ok_program 'Database generation with no b passwords' 0 '' \
+    "$cdbmake" -x '\Ab' -x '.*d' "$tmpdir/wordlist"
+ok_program 'Database does not contain bitterbane' 100 '' \
+    cdb -q "$tmpdir/wordlist.cdb" bitterbane
+ok_program 'Database still contains happenstance' 0 '1' \
+    cdb -q "$tmpdir/wordlist.cdb" happenstance
+ok_program 'Database does not contain password' 100 '' \
+    cdb -q "$tmpdir/wordlist.cdb" password
 
 # Clean up.
 rm -f "$tmpdir/wordlist.cdb"
