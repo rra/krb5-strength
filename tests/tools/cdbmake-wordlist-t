@@ -17,7 +17,7 @@ if ! command -v cdb >/dev/null 2>&1 ; then
 fi
 
 # Output the test plan.
-plan 11
+plan 14
 
 # Create a temporary directory and wordlist and ensure it's writable.
 tmpdir=`test_tmpdir`
@@ -60,6 +60,14 @@ ok_program 'Database still contains password' 0 '1' \
     cdb -q "$tmpdir/wordlist.cdb" password
 ok_program 'Database does not contain non-ASCII password' 100 '' \
     cdb -q "$tmpdir/wordlist.cdb" 'عربى'
+
+# Regenerate the database, filtering out long passwords.
+ok_program 'Database generation with no long passwords' 0 '' \
+    "$cdbmake" -L 10 "$tmpdir/wordlist"
+ok_program 'Database still contains bitterbane' 0 '1' \
+    cdb -q "$tmpdir/wordlist.cdb" bitterbane
+ok_program 'Database does not contain happenstance' 100 '' \
+    cdb -q "$tmpdir/wordlist.cdb" happenstance
 
 # Clean up.
 rm -f "$tmpdir/wordlist.cdb"
