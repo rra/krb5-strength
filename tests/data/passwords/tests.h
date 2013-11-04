@@ -4,7 +4,7 @@
  * This header provides the struct definition for password test data written
  * out by make-c-data.  It's included by the test data files.
  *
- * Written by Russ Allbery <rra@stanford.edu>
+ * Written by Russ Allbery <eagle@eyrie.org>
  * Copyright 2013
  *     The Board of Trustees of the Leland Stanford Junior University
  *

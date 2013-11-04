@@ -9,19 +9,19 @@
 /*
  * Modified as part of the krb5-strength project as follows:
  *
- * 2007-03-23  Russ Allbery <rra@stanford.edu>
+ * 2007-03-23  Russ Allbery <eagle@eyrie.org>
  *   - Apply Debian patch to improve the search logic.
  *   - Don't crash if the dictionary is corrupt.
  *   - Additional system includes for other functions.
- * 2009-10-14  Russ Allbery <rra@stanford.edu>
+ * 2009-10-14  Russ Allbery <eagle@eyrie.org>
  *   - Add ANSI C protototypes for all functions.
  *   - Tweaks for const cleanliness.
  *   - Add parentheses around assignment used for its truth value.
  *   - Make internal functions static.
  *   - Remove unused variables.
- * 2009-11-18  Russ Allbery <rra@stanford.edu>
+ * 2009-11-18  Russ Allbery <eagle@eyrie.org>
  *   - Fixed the data format output by packer to properly pad the end.
- * 2013-09-24  Russ Allbery <rra@stanford.edu>
+ * 2013-09-24  Russ Allbery <eagle@eyrie.org>
  *   - Add a missing ANSI C prototype.
  *   - Remove last block optimization in GetPW and start fresh each time.
  */

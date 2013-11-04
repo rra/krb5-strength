@@ -1,6 +1,6 @@
 dnl Process this file with autoconf to produce a configure script.
 dnl
-dnl Written by Russ Allbery <rra@stanford.edu>
+dnl Written by Russ Allbery <eagle@eyrie.org>
 dnl Copyright 2006, 2007, 2009, 2010, 2012, 2013
 dnl     The Board of Trustees of the Leland Stanford Junior University
 dnl
@@ -8,7 +8,7 @@ dnl See LICENSE for licensing terms.
 
 dnl Basic Autoconf configuration.
 AC_PREREQ([2.64])
-AC_INIT([krb5-strength], [2.1], [rra@stanford.edu])
+AC_INIT([krb5-strength], [2.1], [eagle@eyrie.org])
 AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_LIBOBJ_DIR([portable])
 AC_CONFIG_MACRO_DIR([m4])

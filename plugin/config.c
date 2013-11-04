@@ -5,7 +5,7 @@
  * settings from krb5.conf.  This wraps the somewhat awkward
  * krb5_appdefaults_* functions.
  *
- * Written by Russ Allbery <rra@stanford.edu>
+ * Written by Russ Allbery <eagle@eyrie.org>
  * Copyright 2013
  *     The Board of Trustees of the Leland Stanford Junior University
  *

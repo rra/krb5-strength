@@ -1,7 +1,7 @@
 /*
  * Test for the MIT Kerberos shared module API.
  *
- * Written by Russ Allbery <rra@stanford.edu>
+ * Written by Russ Allbery <eagle@eyrie.org>
  * Copyright 2010, 2013
  *     The Board of Trustees of the Leland Stanford Junior University
  *
