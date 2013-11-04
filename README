@@ -1,7 +1,7 @@
                             krb5-strength 2.1
                (Kerberos password strength checking plugin)
 
-              Maintained by Russ Allbery <eagle@eyrie.org>
+               Maintained by Russ Allbery <eagle@eyrie.org>
 
   Copyright 2006, 2007, 2009, 2010, 2012, 2013 The Board of Trustees of
   the Leland Stanford Junior University.  Portions copyright 1993 Alec
