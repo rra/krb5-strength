@@ -1,10 +1,17 @@
-krb5-strength (2.0-1~sbp60+1) squeeze-backports; urgency=low
+krb5-strength (2.1-1~sbp60+1) squeeze-backports; urgency=low
 
   * Special Stanford-only local backport that builds the package against
     Heimdal instead of MIT Kerberos.  We only need the heimdal-strength
     program and the MIT API isn't supported until wheezy.
 
- -- Russ Allbery <rra@debian.org>  Mon, 07 Oct 2013 19:15:22 -0700
+ -- Russ Allbery <rra@debian.org>  Tue, 05 Nov 2013 12:00:21 -0800
+
+krb5-strength (2.1-1) unstable; urgency=low
+
+  * New upstream release.
+    - Improve some of the password rejection error messages.
+
+ -- Russ Allbery <rra@debian.org>  Thu, 10 Oct 2013 17:09:37 -0700
 
 krb5-strength (2.0-1) unstable; urgency=low
 
