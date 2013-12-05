@@ -68,13 +68,13 @@ load_plugin(void)
         bail("cannot find plugin");
     handle = dlopen(path, RTLD_NOW);
     if (handle == NULL)
-        sysbail("cannot dlopen %s: %s", path, dlerror());
+        bail("cannot dlopen %s: %s", path, dlerror());
     test_file_path_free(path);
 
     /* Find the dispatch table and do a basic sanity check. */
     verifier = dlsym(handle, "kadm5_password_verifier");
     if (verifier == NULL)
-        sysbail("cannot get kadm5_password_verifier symbol: %s", dlerror());
+        bail("cannot get kadm5_password_verifier symbol: %s", dlerror());
     if (verifier->funcs == NULL || verifier->funcs[0].func == NULL)
         bail("no verifier functions in module");
 
