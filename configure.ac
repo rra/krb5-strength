@@ -41,9 +41,9 @@ AC_CHECK_HEADERS([krb5/pwqual_plugin.h], [], [], [RRA_INCLUDES_KRB5])
 AC_CHECK_TYPES([krb5_realm], [], [], [RRA_INCLUDES_KRB5])
 AC_CHECK_FUNCS([krb5_free_default_realm \
     krb5_free_string \
-    krb5_principal_get_realm \
     krb5_get_init_creds_opt_alloc \
     krb5_get_init_creds_opt_set_default_flags \
+    krb5_principal_get_realm \
     krb5_xfree])
 AC_CHECK_FUNCS([krb5_get_init_creds_opt_free],
     [RRA_FUNC_KRB5_GET_INIT_CREDS_OPT_FREE_ARGS])
