@@ -1,8 +1,8 @@
 #!/bin/sh
 #
-# Generate a krb5.conf file with an [appdefault] password_dictionary setting
-# pointing to the password dictionary we generated for the build.  This script
-# is used by C tests to set up the environment.
+# Generate a krb5.conf file with an [appdefault] krb5-strength section that
+# contains all the key/value pairs given on the command line.  This script is
+# used by C tests to set up the environment.
 #
 # Written by Russ Allbery <eagle@eyrie.org>
 # Copyright 2009, 2013
