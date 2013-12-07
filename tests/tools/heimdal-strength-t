@@ -43,8 +43,7 @@ sub run_heimdal_strength {
     my $program = test_file_path('../tools/heimdal-strength');
 
     # Run the password strength checker.
-    my $out;
-    my $err;
+    my ($out, $err);
     run([$program, $principal], \$in, \$out, \$err);
     my $status = ($? >> 8);
 
