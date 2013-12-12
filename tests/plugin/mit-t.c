@@ -30,9 +30,9 @@
  * named cdb_tests, cracklib_tests, and principal_tests.
  */
 #include <tests/data/passwords/cdb.c>
-#include <tests/data/passwords/class.c>
 #include <tests/data/passwords/cracklib.c>
 #include <tests/data/passwords/length.c>
+#include <tests/data/passwords/letter.c>
 #include <tests/data/passwords/principal.c>
 
 
@@ -166,8 +166,8 @@ main(void)
      */
     count = 2 * ARRAY_SIZE(cracklib_tests);
     count += ARRAY_SIZE(cdb_tests);
-    count += ARRAY_SIZE(class_tests);
     count += ARRAY_SIZE(length_tests);
+    count += ARRAY_SIZE(letter_tests);
     count += 2 * ARRAY_SIZE(principal_tests);
     plan(2 + 5 + count * 2);
 
@@ -239,7 +239,7 @@ main(void)
         is_password_test(ctx, vtable, data, &cracklib_tests[i]);
     vtable->close(ctx, data);
 
-    /* Add character class configuration to krb5.conf. */
+    /* Add simple character class configuration to krb5.conf. */
     setup_argv[5] = (char *) "require_ascii_printable";
     setup_argv[6] = (char *) "true";
     setup_argv[7] = (char *) "require_non_letter";
@@ -253,13 +253,13 @@ main(void)
     if (code != 0)
         bail_krb5(ctx, code, "cannot initialize Kerberos context");
 
-    /* Run all the character class tests. */
+    /* Run all the simple character class tests. */
     code = vtable->open(ctx, NULL, &data);
-    is_int(0, code, "Plugin initialization (character class)");
+    is_int(0, code, "Plugin initialization (simple character class)");
     if (code != 0)
         bail("cannot continue after plugin initialization failure");
-    for (i = 0; i < ARRAY_SIZE(class_tests); i++)
-        is_password_test(ctx, vtable, data, &class_tests[i]);
+    for (i = 0; i < ARRAY_SIZE(letter_tests); i++)
+        is_password_test(ctx, vtable, data, &letter_tests[i]);
     vtable->close(ctx, data);
 
     /*

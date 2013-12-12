@@ -29,9 +29,9 @@
  * named cdb_tests, cracklib_tests, and principal_tests.
  */
 #include <tests/data/passwords/cdb.c>
-#include <tests/data/passwords/class.c>
 #include <tests/data/passwords/cracklib.c>
 #include <tests/data/passwords/length.c>
+#include <tests/data/passwords/letter.c>
 #include <tests/data/passwords/principal.c>
 
 
@@ -148,8 +148,8 @@ main(void)
      */
     count = ARRAY_SIZE(cracklib_tests);
     count += ARRAY_SIZE(cdb_tests);
-    count += ARRAY_SIZE(class_tests);
     count += ARRAY_SIZE(length_tests);
+    count += ARRAY_SIZE(letter_tests);
     count += ARRAY_SIZE(principal_tests) * 2;
     plan(5 + count * 2);
 
@@ -186,7 +186,7 @@ main(void)
     for (i = 0; i < ARRAY_SIZE(principal_tests); i++)
         is_password_test(verifier, &principal_tests[i]);
 
-    /* Add character class restrictions. */
+    /* Add simple character class restrictions. */
     setup_argv[5] = (char *) "require_ascii_printable";
     setup_argv[6] = (char *) "true";
     setup_argv[7] = (char *) "require_non_letter";
@@ -194,9 +194,9 @@ main(void)
     setup_argv[9] = NULL;
     run_setup((const char **) setup_argv);
 
-    /* Run the character class tests. */
-    for (i = 0; i < ARRAY_SIZE(class_tests); i++)
-        is_password_test(verifier, &class_tests[i]);
+    /* Run the simple character class tests. */
+    for (i = 0; i < ARRAY_SIZE(letter_tests); i++)
+        is_password_test(verifier, &letter_tests[i]);
 
     /*
      * Add length restrictions and remove the dictionary.  This should only do
