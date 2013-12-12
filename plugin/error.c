@@ -60,6 +60,7 @@ set_error(krb5_context ctx, krb5_error_code code, const char *format,
         return code;                                                    \
     }
 ERROR_FUNC(class,    KADM5_PASS_Q_CLASS)
+ERROR_FUNC(config,   KADM5_MISSING_KRB5_CONF_PARAMS)
 ERROR_FUNC(dict,     KADM5_PASS_Q_DICT)
 ERROR_FUNC(generic,  KADM5_PASS_Q_GENERIC)
 ERROR_FUNC(tooshort, KADM5_PASS_Q_TOOSHORT)

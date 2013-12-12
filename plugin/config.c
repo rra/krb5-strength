@@ -128,6 +128,143 @@ strength_config_boolean(krb5_context ctx, const char *opt, bool *result)
 
 
 /*
+ * Parse a single class specification.  Currently, this assumes that the class
+ * specification is a comma-separated list of required classes, and those
+ * classes are required for any length of password.  This will be enhanced
+ * later.
+ */
+static krb5_error_code
+parse_class(krb5_context ctx, const char *spec, struct class_rule **rule)
+{
+    struct vector *classes;
+    size_t i;
+    krb5_error_code code;
+
+    /* Parse the required classes into a vector. */
+    classes = strength_vector_split_multi(spec, ",", NULL);
+    if (classes == NULL)
+        return strength_error_system(ctx, "cannot allocate memory");
+
+    /* Create the basic rule structure. */
+    *rule = calloc(1, sizeof(struct class_rule));
+    (*rule)->min = 0;
+    (*rule)->max = 0;
+
+    /*
+     * Walk the list of required classes and set our flags, diagnosing an
+     * unknown character class.
+     */
+    for (i = 0; i < classes->count; i++) {
+        if (strcmp(classes->strings[i], "upper") == 0)
+            (*rule)->upper = true;
+        else if (strcmp(classes->strings[i], "lower") == 0)
+            (*rule)->lower = true;
+        else if (strcmp(classes->strings[i], "digit") == 0)
+            (*rule)->digit = true;
+        else if (strcmp(classes->strings[i], "symbol") == 0)
+            (*rule)->symbol = true;
+        else {
+            code = strength_error_config(ctx, "unknown character class %s",
+                                         classes->strings[i]);
+            strength_vector_free(classes);
+            free(*rule);
+            *rule = NULL;
+            return code;
+        }
+    }
+    strength_vector_free(classes);
+    return 0;
+}
+
+
+/*
+ * Parse character class requirements from Kerberos appdefaults.  Takes the
+ * Kerberos context, the option, and the place to store the linked list of
+ * class requirements.
+ */
+krb5_error_code
+strength_config_classes(krb5_context ctx, const char *opt,
+                        struct class_rule **result)
+{
+    struct vector *config;
+    struct class_rule *rules, *last, *tmp;
+    krb5_error_code code;
+    size_t i;
+
+    /* Get the basic configuration as a list. */
+    code = strength_config_list(ctx, opt, &config);
+    if (code != 0)
+        return code;
+    if (config == NULL || config->count == 0) {
+        *result = NULL;
+        return 0;
+    }
+
+    /* Each word in the list will be a class rule. */
+    code = parse_class(ctx, config->strings[0], &rules);
+    if (code != 0)
+        goto fail;
+    last = rules;
+    for (i = 1; i < config->count; i++) {
+        code = parse_class(ctx, config->strings[i], &last->next);
+        if (code != 0)
+            goto fail;
+        last = last->next;
+    }
+
+    /* Success.  Free the vector and return the results. */
+    strength_vector_free(config);
+    *result = rules;
+    return 0;
+
+fail:
+    last = rules;
+    while (last != NULL) {
+        tmp = last;
+        last = last->next;
+        free(tmp);
+    }
+    strength_vector_free(config);
+    return code;
+}
+
+
+/*
+ * Load a list option from Kerberos appdefaults.  Takes the Kerberos context,
+ * the option, and the result location.  The option is read as a string and
+ * the split on spaces and tabs into a list.
+ *
+ * This requires an annoying workaround because one cannot specify a default
+ * value of NULL with MIT Kerberos, since MIT Kerberos unconditionally calls
+ * strdup on the default value.  There's also no way to determine if memory
+ * allocation failed while parsing or while setting the default value.
+ */
+krb5_error_code
+strength_config_list(krb5_context ctx, const char *opt,
+                     struct vector **result)
+{
+    realm_type realm;
+    char *value = NULL;
+
+    /* Obtain the string from [appdefaults]. */
+    realm = default_realm(ctx);
+    krb5_appdefault_string(ctx, "krb5-sync", realm, opt, "", &value);
+    free_default_realm(ctx, realm);
+
+    /* If we got something back, store it in result. */
+    if (value != NULL) {
+        if (value[0] != '\0') {
+            *result = strength_vector_split_multi(value, " \t", *result);
+            if (*result == NULL)
+                return strength_error_system(ctx, "cannot allocate memory");
+        }
+        krb5_free_string(ctx, value);
+    }
+    return 0;
+}
+
+
+/*
  * Load a number option from Kerberos appdefaults.  Takes the Kerberos
  * context, the option, and the result location.  The native interface doesn't
  * support numbers, so we actually read a string and then convert.

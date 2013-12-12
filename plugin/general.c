@@ -139,6 +139,14 @@ strength_check(krb5_context ctx UNUSED, krb5_pwqual_moddata data,
     if (data->nonletter && only_alpha_space(password))
         return strength_error_class(ctx, ERROR_LETTER);
 
+    /*
+     * If desired, check that the password satisfies character class
+     * restrictions.
+     */
+    code = strength_check_classes(ctx, data, password);
+    if (code != 0)
+        return code;
+
     /* Check if the password is based on the principal in some way. */
     code = strength_check_principal(ctx, data, principal, password);
     if (code != 0)

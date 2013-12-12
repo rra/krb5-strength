@@ -20,6 +20,7 @@
 #ifdef HAVE_CDB_H
 # include <cdb.h>
 #endif
+#include <stddef.h>
 
 #ifdef HAVE_KRB5_PWQUAL_PLUGIN_H
 # include <krb5/pwqual_plugin.h>
@@ -35,6 +36,30 @@ typedef struct krb5_pwqual_moddata_st *krb5_pwqual_moddata;
 #define ERROR_USERNAME "password based on username or principal"
 
 /*
+ * A character class rule, which consists of a minimum length to which the
+ * rule is applied, a maximum length to which the rule is applied, and a set
+ * of flags for which character classes are required.  The symbol class
+ * includes everything that isn't in one of the other classes, including
+ * space.
+ */
+struct class_rule {
+    size_t min;
+    size_t max;
+    bool lower;
+    bool upper;
+    bool digit;
+    bool symbol;
+    struct class_rule *next;
+};
+
+/* Used to store a list of strings, managed by the sync_vector_* functions. */
+struct vector {
+    size_t count;
+    size_t allocated;
+    char **strings;
+};
+
+/*
  * MIT Kerberos uses this type as an abstract data type for any data that a
  * password quality check needs to carry.  Reuse it since then we get type
  * checking for at least the MIT plugin.
@@ -43,6 +68,7 @@ struct krb5_pwqual_moddata_st {
     long minimum_length;        /* Minimum password length */
     bool ascii;                 /* Whether to require printable ASCII */
     bool nonletter;             /* Whether to require a non-letter */
+    struct class_rule *rules;   /* Linked list of character class rules */
     char *dictionary;           /* Base path to CrackLib dictionary */
     bool have_cdb;              /* Whether we have a CDB dictionary */
     int cdb_fd;                 /* File descriptor of CDB dictionary */
@@ -99,10 +125,39 @@ krb5_error_code strength_init_cracklib(krb5_context, krb5_pwqual_moddata,
 krb5_error_code strength_check_cracklib(krb5_context, krb5_pwqual_moddata,
                                         const char *password);
 
+/* Check whether the password statisfies character class requirements. */
+krb5_error_code strength_check_classes(krb5_context, krb5_pwqual_moddata,
+                                       const char *password);
+
 /* Check whether the password is based on the principal in some way. */
 krb5_error_code strength_check_principal(krb5_context, krb5_pwqual_moddata,
                                          const char *principal,
                                          const char *password);
+
+/*
+ * Manage vectors, which are counted lists of strings.  The functions that
+ * return a boolean return false if memory allocation fails.
+ */
+struct vector *strength_vector_new(void)
+    __attribute__((__malloc__));
+bool strength_vector_add(struct vector *, const char *string)
+    __attribute__((__nonnull__));
+void strength_vector_free(struct vector *);
+
+/*
+ * vector_split_multi splits on a set of characters.  If the vector argument
+ * is NULL, a new vector is allocated; otherwise, the provided one is reused.
+ * Returns NULL on memory allocation failure, after which the provided vector
+ * may have been modified to only have partial results.
+ *
+ * Empty strings will yield zero-length vectors.  Adjacent delimiters are
+ * treated as a single delimiter by vector_split_multi.  Any leading or
+ * trailing delimiters are ignored, so this function will never create
+ * zero-length strings (similar to the behavior of strtok).
+ */
+struct vector *strength_vector_split_multi(const char *string,
+                                           const char *seps, struct vector *)
+    __attribute__((__nonnull__(1, 2)));
 
 /*
  * Obtain configuration settings from krb5.conf.  These are wrappers around
@@ -112,9 +167,17 @@ krb5_error_code strength_check_principal(krb5_context, krb5_pwqual_moddata,
  */
 void strength_config_boolean(krb5_context, const char *, bool *)
     __attribute__((__nonnull__));
+krb5_error_code strength_config_list(krb5_context, const char *,
+                                     struct vector **)
+    __attribute__((__nonnull__));
 void strength_config_number(krb5_context, const char *, long *)
     __attribute__((__nonnull__));
 void strength_config_string(krb5_context, const char *, char **)
+    __attribute__((__nonnull__));
+
+/* Parse the more complex configuration of required character classes. */
+krb5_error_code strength_config_classes(krb5_context, const char *,
+                                        struct class_rule **)
     __attribute__((__nonnull__));
 
 /*
@@ -123,6 +186,8 @@ void strength_config_string(krb5_context, const char *, char **)
  * results to the message.  All versions return the error code set.
  */
 krb5_error_code strength_error_class(krb5_context, const char *format, ...)
+    __attribute__((__nonnull__, __format__(printf, 2, 3)));
+krb5_error_code strength_error_config(krb5_context, const char *format, ...)
     __attribute__((__nonnull__, __format__(printf, 2, 3)));
 krb5_error_code strength_error_dict(krb5_context, const char *format, ...)
     __attribute__((__nonnull__, __format__(printf, 2, 3)));
