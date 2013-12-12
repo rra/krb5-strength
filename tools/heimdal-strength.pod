@@ -1,5 +1,5 @@
 =for stopwords
-heimdal-strength Heimdal CrackLib krb5.conf krb5-strength Allbery
+heimdal-strength Heimdal CrackLib krb5-strength Allbery
 
 =head1 NAME
 
@@ -18,8 +18,8 @@ rules.  It is normally run via kpasswdd(8) using the Heimdal password
 quality check interface rather than directly.
 
 To use this program, the path to a CrackLib database must be configured in
-krb5.conf via the C<password_dictionary> setting in C<[appdefaults]>.  It
-uses the application name C<krb5-strength> when trying to find this
+F<krb5.conf> via the C<password_dictionary> setting in C<[appdefaults]>.
+It uses the application name C<krb5-strength> when trying to find this
 setting.  A typical setting would be:
 
     krb5-strength = {
