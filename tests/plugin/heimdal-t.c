@@ -54,26 +54,26 @@ main(void)
 /*
  * Loads the Heimdal password change plugin and tests that its metadata is
  * correct.  Returns a pointer to the kadm5_pw_policy_verifier struct or bails
- * on failure to load the plugin.
+ * on failure to load the plugin.  Stores the handle in the last argument so
+ * that the caller can free the handle at the end of the test suite.
  */
 static struct kadm5_pw_policy_verifier *
-load_plugin(void)
+load_plugin(void **handle)
 {
     char *path;
-    void *handle;
     struct kadm5_pw_policy_verifier *verifier;
 
     /* Load the module. */
     path = test_file_path("../plugin/.libs/strength.so");
     if (path == NULL)
         bail("cannot find plugin");
-    handle = dlopen(path, RTLD_NOW);
-    if (handle == NULL)
+    *handle = dlopen(path, RTLD_NOW);
+    if (*handle == NULL)
         bail("cannot dlopen %s: %s", path, dlerror());
     test_file_path_free(path);
 
     /* Find the dispatch table and do a basic sanity check. */
-    verifier = dlsym(handle, "kadm5_password_verifier");
+    verifier = dlsym(*handle, "kadm5_password_verifier");
     if (verifier == NULL)
         bail("cannot get kadm5_password_verifier symbol: %s", dlerror());
     if (verifier->funcs == NULL || verifier->funcs[0].func == NULL)
@@ -141,6 +141,7 @@ main(void)
     char *setup_argv[10];
     size_t i, count;
     struct kadm5_pw_policy_verifier *verifier;
+    void *handle;
 
     /*
      * Calculate how many tests we have.  There are five tests for the module
@@ -163,7 +164,7 @@ main(void)
     putenv(krb5_config_empty);
 
     /* Load the plugin. */
-    verifier = load_plugin();
+    verifier = load_plugin(&handle);
 
     /* Set up our krb5.conf with the dictionary configuration. */
     setup_argv[0] = test_file_path("data/make-krb5-conf");
@@ -256,6 +257,10 @@ main(void)
     unlink(path);
     free(path);
     test_tmpdir_free(tmpdir);
+
+    /* Close down the module. */
+    if (dlclose(handle) != 0)
+        bail("cannot close plugin: %s", dlerror());
 
     /* Keep valgrind clean by freeing environmental memory. */
     putenv((char *) "KRB5_CONFIG=");
