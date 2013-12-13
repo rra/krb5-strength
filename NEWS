@@ -14,6 +14,9 @@ krb5-strength 2.2 (unreleased)
     also supports running in filter mode to produce a new wordlist instead
     of a CDB file (-o).
 
+    Close a file descriptor and memory leak in the included version of
+    CrackLib.  This problem was already fixed in CrackLib 2.9.0.
+
 krb5-strength 2.1 (2013-10-10)
 
     Fix the package build when CDB support is disabled or TinyCDB was not

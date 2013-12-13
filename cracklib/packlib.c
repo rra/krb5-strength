@@ -24,6 +24,8 @@
  * 2013-09-24  Russ Allbery <eagle@eyrie.org>
  *   - Add a missing ANSI C prototype.
  *   - Remove last block optimization in GetPW and start fresh each time.
+ * 2013-12-13  Russ Allbery <eagle@eyrie.org>
+ *   - Close the wfp file handle on PWClose if it's open.
  */
 
 #include <stdio.h>
@@ -97,6 +99,10 @@ PWOpen(const char *prefix, const char *mode)
 	    pdesc.header.pih_magic = 0;
 	    fclose(ifp);
 	    fclose(dfp);
+	    if (wfp != NULL)
+	    {
+		fclose(wfp);
+	    }
 	    return ((PWDICT *) 0);
 	}
 
@@ -107,6 +113,10 @@ PWOpen(const char *prefix, const char *mode)
 	    pdesc.header.pih_magic = 0;
 	    fclose(ifp);
 	    fclose(dfp);
+	    if (wfp != NULL)
+	    {
+		fclose(wfp);
+	    }
 	    return ((PWDICT *) 0);
 	}
 
@@ -117,6 +127,10 @@ PWOpen(const char *prefix, const char *mode)
 	    pdesc.header.pih_magic = 0;
 	    fclose(ifp);
 	    fclose(dfp);
+	    if (wfp != NULL)
+	    {
+		fclose(wfp);
+	    }
 	    return ((PWDICT *) 0);
 	}
 
@@ -177,6 +191,10 @@ PWClose(PWDICT *pwp)
 
     fclose(pwp->ifp);
     fclose(pwp->dfp);
+    if (pwp->wfp != NULL)
+    {
+	fclose(pwp->wfp);
+    }
 
     pwp->header.pih_magic = 0;
 
