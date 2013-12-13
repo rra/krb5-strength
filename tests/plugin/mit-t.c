@@ -60,13 +60,13 @@ typedef krb5_error_code pwqual_strength_initvt(krb5_context, int, int,
 /*
  * Loads the Heimdal password change plugin and tests that its metadata is
  * correct.  Returns a pointer to the kadm5_pw_policy_verifier struct or bails
- * on failure to load the plugin.
+ * on failure to load the plugin.  Stores the handle from dlopen in its second
+ * argument for a later clean shutdown.
  */
 static krb5_pwqual_vtable
-load_plugin(krb5_context ctx)
+load_plugin(krb5_context ctx, void **handle)
 {
     char *path;
-    void *handle;
     krb5_error_code code;
     krb5_pwqual_vtable vtable = NULL;
     krb5_error_code (*init)(krb5_context, int, int, krb5_plugin_vtable);
@@ -75,13 +75,13 @@ load_plugin(krb5_context ctx)
     path = test_file_path("../plugin/.libs/strength.so");
     if (path == NULL)
         bail("cannot find plugin");
-    handle = dlopen(path, RTLD_NOW);
-    if (handle == NULL)
+    *handle = dlopen(path, RTLD_NOW);
+    if (*handle == NULL)
         bail("cannot dlopen %s: %s", path, dlerror());
     test_file_path_free(path);
 
     /* Find the entry point function. */
-    init = dlsym(handle, "pwqual_strength_initvt");
+    init = dlsym(*handle, "pwqual_strength_initvt");
     if (init == NULL)
         bail("cannot get pwqual_strength_initvt symbol: %s", dlerror());
 
@@ -155,6 +155,7 @@ main(void)
     krb5_pwqual_vtable vtable;
     krb5_pwqual_moddata data;
     krb5_error_code code;
+    void *handle;
 
     /*
      * Calculate how many tests we have.  There are two tests for the module
@@ -186,7 +187,7 @@ main(void)
         bail_krb5(ctx, code, "cannot initialize Kerberos context");
 
     /* Load the plugin. */
-    vtable = load_plugin(ctx);
+    vtable = load_plugin(ctx, &handle);
 
     /* Initialize the plugin with a CrackLib dictionary. */
     build = getenv("BUILD");
@@ -356,6 +357,10 @@ main(void)
     unlink(path);
     free(path);
     test_tmpdir_free(tmpdir);
+
+    /* Close down the module. */
+    if (dlclose(handle) != 0)
+        bail("cannot close plugin: %s", dlerror());
 
     /* Keep valgrind clean by freeing all memory. */
     test_file_path_free(dictionary);
