@@ -18,10 +18,10 @@ use File::Copy qw(copy);
 use Test::RRA qw(use_prereq);
 use Test::RRA::Automake qw(test_file_path);
 
-use_prereq('File::Slurp');
 use_prereq('IPC::Run', 'run');
 use_prereq('JSON');
-use_prereq('Test::More', '0.87_01');
+use_prereq('Perl6::Slurp', 'slurp');
+use_prereq('Test::More',   '0.87_01');
 
 # Run the newly-built heimdal-strength command and return the status, output,
 # and error output as a list.
@@ -139,7 +139,7 @@ sub load_password_tests {
     my $path = test_file_path("data/passwords/$file");
 
     # Load the test file data into memory.
-    my $testdata = read_file($path);
+    my $testdata = slurp($path);
 
     # Decode the JSON into Perl objects and return them.
     my $json = JSON->new->utf8;

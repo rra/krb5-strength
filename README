@@ -111,9 +111,9 @@ REQUIREMENTS
   following additional Perl modules will be used by the test suite if
   present:
 
-      File::Slurp
       IPC::Run
       JSON
+      Perl6::Slurp
       Test::MinimumVersion
       Test::Perl::Critic
       Test::Pod
@@ -131,7 +131,9 @@ REQUIREMENTS
   and need to regenerate Makefile.in, you will need Automake 1.11 or
   later.  For bootstrap or if you change configure.ac or any of the m4
   files it includes and need to regenerate configure or config.h.in, you
-  will need Autoconf 2.64 or later.
+  will need Autoconf 2.64 or later.  You will also need Perl 5.010 or
+  later and the JSON, Perl6::Slurp, and Readonly modules (from CPAN) to
+  bootstrap the test suite data from a Git checkout.
 
 COMPILING AND INSTALLING
 
