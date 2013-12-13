@@ -14,3 +14,6 @@
 
  * Use the realm of the principal changing its password to determine the
    krb5.conf configuration rather than always using the default realm.
+
+ * Refactor the tests for configuration errors in the heimdal-strength
+   test suite into JSON.

@@ -158,8 +158,9 @@ for my $type (qw(cdb classes cracklib length letter principal)) {
 # We run the principal tests twice, once for CrackLib and once for CDB.
 $count += scalar(@{ $tests{principal} });
 
-# We can now calculate our plan based on three tests for each password test.
-plan(tests => $count * 3);
+# We can now calculate our plan based on three tests for each password test,
+# plus 21 additional tests for error handling.
+plan(tests => $count * 3 + 21);
 
 # Install the krb5.conf file with a configuration pointing to the test
 # CrackLib dictionary.
@@ -237,6 +238,29 @@ SKIP: {
     for my $test (@{ $tests{principal} }) {
         check_password($test);
     }
+}
+
+# Test error for an unknown character class.
+$krb5_conf = create_krb5_conf({ require_classes => 'bogus' });
+local $ENV{KRB5_CONFIG} = $krb5_conf;
+my $error_prefix = 'Cannot initialize strength checking';
+($status, $output, $err) = run_heimdal_strength('test', 'password');
+is($status, 1,   'Bad character class (status)');
+is($output, q{}, '...no output');
+is($err, "$error_prefix: unknown character class bogus\n", '...correct error');
+
+# Test a variety of configuration syntax errors in require_classes.
+my @bad_classes = qw(
+  8 8bogus 8:bogus 4-:bogus 4-bogus 4-8bogus
+);
+my $bad_message = 'bad character class requirement in configuration';
+for my $bad_class (@bad_classes) {
+    $krb5_conf = create_krb5_conf({ require_classes => $bad_class });
+    local $ENV{KRB5_CONFIG} = $krb5_conf;
+    ($status, $output, $err) = run_heimdal_strength('test', 'password');
+    is($status, 1,   "Bad class specification '$bad_class' (status)");
+    is($output, q{}, '...no output');
+    is($err, "$error_prefix: $bad_message: $bad_class\n", '...correct error');
 }
 
 # Clean up our temporary krb5.conf file on any exit.
