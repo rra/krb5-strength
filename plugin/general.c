@@ -177,9 +177,17 @@ strength_check(krb5_context ctx UNUSED, krb5_pwqual_moddata data,
 void
 strength_close(krb5_context ctx UNUSED, krb5_pwqual_moddata data)
 {
-    if (data != NULL) {
-        strength_close_cdb(ctx, data);
-        free(data->dictionary);
-        free(data);
+    struct class_rule *last, *tmp;
+
+    if (data == NULL)
+        return;
+    strength_close_cdb(ctx, data);
+    last = data->rules;
+    while (last != NULL) {
+        tmp = last;
+        last = last->next;
+        free(tmp);
     }
+    free(data->dictionary);
+    free(data);
 }
