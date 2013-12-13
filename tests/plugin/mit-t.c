@@ -30,6 +30,7 @@
  * named cdb_tests, cracklib_tests, and principal_tests.
  */
 #include <tests/data/passwords/cdb.c>
+#include <tests/data/passwords/classes.c>
 #include <tests/data/passwords/cracklib.c>
 #include <tests/data/passwords/length.c>
 #include <tests/data/passwords/letter.c>
@@ -157,7 +158,7 @@ main(void)
 
     /*
      * Calculate how many tests we have.  There are two tests for the module
-     * metadata, five more tests for initializing the plugin, and two tests per
+     * metadata, six more tests for initializing the plugin, and two tests per
      * password test.
      *
      * We run all the CrackLib tests twice, once with an explicit dictionary
@@ -166,10 +167,11 @@ main(void)
      */
     count = 2 * ARRAY_SIZE(cracklib_tests);
     count += ARRAY_SIZE(cdb_tests);
+    count += ARRAY_SIZE(classes_tests);
     count += ARRAY_SIZE(length_tests);
     count += ARRAY_SIZE(letter_tests);
     count += 2 * ARRAY_SIZE(principal_tests);
-    plan(2 + 5 + count * 2);
+    plan(2 + 6 + count * 2);
 
     /* Start with the krb5.conf that contains no dictionary configuration. */
     path = test_file_path("data/krb5.conf");
@@ -263,8 +265,32 @@ main(void)
     vtable->close(ctx, data);
 
     /*
-     * Add length restrictions and remove the dictionary.  This should only do
-     * length checks without any dictionary checks.
+     * Add complex character class configuration to krb5.conf but drop
+     * the dictionary configuration.
+     */
+    setup_argv[3] = (char *) "require_classes";
+    setup_argv[4] = (char *) "8-19:lower,upper 8-15:digit 8-11:symbol";
+    setup_argv[5] = NULL;
+    run_setup((const char **) setup_argv);
+
+    /* Obtain a new Kerberos context with that krb5.conf file. */
+    krb5_free_context(ctx);
+    code = krb5_init_context(&ctx);
+    if (code != 0)
+        bail_krb5(ctx, code, "cannot initialize Kerberos context");
+
+    /* Run all the complex character class tests. */
+    code = vtable->open(ctx, NULL, &data);
+    is_int(0, code, "Plugin initialization (complex character class)");
+    if (code != 0)
+        bail("cannot continue after plugin initialization failure");
+    for (i = 0; i < ARRAY_SIZE(classes_tests); i++)
+        is_password_test(ctx, vtable, data, &classes_tests[i]);
+    vtable->close(ctx, data);
+
+    /*
+     * Add length restrictions.  This should only do length checks without any
+     * dictionary checks.
      */
     setup_argv[3] = (char *) "minimum_length";
     setup_argv[4] = (char *) "12";
@@ -289,7 +315,7 @@ main(void)
 #ifdef HAVE_CDB
 
     /* If built with CDB, set up krb5.conf to use a CDB dictionary instead. */
-    free(dictionary);
+    test_file_path_free(dictionary);
     dictionary = test_file_path("data/wordlist.cdb");
     if (dictionary == NULL)
         bail("cannot find data/wordlist.cdb in the test suite");

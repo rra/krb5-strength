@@ -43,8 +43,8 @@ typedef struct krb5_pwqual_moddata_st *krb5_pwqual_moddata;
  * space.
  */
 struct class_rule {
-    size_t min;
-    size_t max;
+    unsigned long min;
+    unsigned long max;
     bool lower;
     bool upper;
     bool digit;

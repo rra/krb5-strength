@@ -204,8 +204,8 @@ for my $test (@{ $tests{letter} }) {
 }
 
 # Install the krb5.conf file for complex character class restrictions.
-$krb5_conf
-  = create_krb5_conf({ require_classes => 'lower,upper,digit,symbol' });
+my $classes = '8-19:lower,upper 8-15:digit 8-11:symbol';
+$krb5_conf = create_krb5_conf({ require_classes => $classes });
 local $ENV{KRB5_CONFIG} = $krb5_conf;
 
 # Run the complex character class tests.

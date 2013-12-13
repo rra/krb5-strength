@@ -336,6 +336,45 @@ CONFIGURATION
       interoperability problems with computers with different default
       character sets or Unicode normalization forms.
 
+  require_classes
+
+      This option allows specification of more complex character class
+      requirements.  The value of this parameter should be one or more
+      whitespace-separated rule.  Each rule has the syntax:
+
+          [<min>-<max>:]<class>[,<class>...]
+
+      where <class> is one of "upper", "lower", "digit", or "symbol"
+      (without the quote marks).  The symbol class includes all characters
+      other than alphanumeric characters, including space.  The listed
+      classes must appear in the password.  Separate multiple required
+      classes with a comma (and no space).
+
+      The character class checks will be done in whatever locale the
+      plugin or password check program is run in, which will normally be
+      the C locale but may be different depending on local configuration.
+
+      A simple example:
+
+          require_classes = upper,lower,digit
+
+      This requires all passwords contain at least one uppercase letter,
+      at least one lowercase letter, and at least one digit.
+
+      If present, <min> and <max> specify the minimum password length and
+      maximum password length to which this rule applies.  This allows one
+      to specify character class requirements that change with password
+      length.  So, for example:
+
+          require_classes = 8-19:upper,lower 8-15:digit 8-11:symbol
+
+      requires all passwords from 8 to 11 characters long contain all four
+      character classes, passwords from 12 to 15 characters long contain
+      upper and lower case and a digit, and passwords from 16 to 19
+      characters long contain both upper and lower case.  Passowrds longer
+      than 20 characters have no character class restrictions.  (This
+      example is probably used in conjunction with minimum_length = 8.)
+
   require_non_letter
 
       If set to a true boolean value, the password must contain at least

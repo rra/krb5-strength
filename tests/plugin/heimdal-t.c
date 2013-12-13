@@ -29,6 +29,7 @@
  * named cdb_tests, cracklib_tests, and principal_tests.
  */
 #include <tests/data/passwords/cdb.c>
+#include <tests/data/passwords/classes.c>
 #include <tests/data/passwords/cracklib.c>
 #include <tests/data/passwords/length.c>
 #include <tests/data/passwords/letter.c>
@@ -148,6 +149,7 @@ main(void)
      */
     count = ARRAY_SIZE(cracklib_tests);
     count += ARRAY_SIZE(cdb_tests);
+    count += ARRAY_SIZE(classes_tests);
     count += ARRAY_SIZE(length_tests);
     count += ARRAY_SIZE(letter_tests);
     count += ARRAY_SIZE(principal_tests) * 2;
@@ -198,11 +200,21 @@ main(void)
     for (i = 0; i < ARRAY_SIZE(letter_tests); i++)
         is_password_test(verifier, &letter_tests[i]);
 
-    /*
-     * Add length restrictions and remove the dictionary.  This should only do
-     * length checks without any dictionary checks.
-     */
+    /* Add complex character class restrictions and remove the dictionary. */
     free(setup_argv[4]);
+    setup_argv[3] = (char *) "require_classes";
+    setup_argv[4] = (char *) "8-19:lower,upper 8-15:digit 8-11:symbol";
+    setup_argv[5] = NULL;
+    run_setup((const char **) setup_argv);
+
+    /* Run the simple character class tests. */
+    for (i = 0; i < ARRAY_SIZE(classes_tests); i++)
+        is_password_test(verifier, &classes_tests[i]);
+
+    /*
+     * Add length restrictions.  This should only do length checks without any
+     * dictionary checks.
+     */
     setup_argv[3] = (char *) "minimum_length";
     setup_argv[4] = (char *) "12";
     setup_argv[5] = NULL;

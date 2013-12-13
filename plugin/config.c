@@ -16,6 +16,7 @@
 #include <portable/krb5.h>
 #include <portable/system.h>
 
+#include <ctype.h>
 #include <errno.h>
 
 #include <plugin/internal.h>
@@ -106,6 +107,26 @@ free_default_realm(krb5_context ctx UNUSED, realm_type realm)
 
 
 /*
+ * Helper function to parse a number.  Takes the string to parse, the unsigned
+ * int in which to store the number, and the pointer to set to the first
+ * invalid character after the number.  Returns true if a number could be
+ * successfully parsed and false otherwise.
+ */
+static bool
+parse_number(const char *string, unsigned long *result, const char **end)
+{
+    unsigned long value;
+
+    errno = 0;
+    value = strtoul(string, (char **) end, 10);
+    if (errno != 0 || *end == string)
+        return false;
+    *result = value;
+    return true;
+}
+
+
+/*
  * Load a boolean option from Kerberos appdefaults.  Takes the Kerberos
  * context, the option, and the result location.
  */
@@ -136,19 +157,42 @@ strength_config_boolean(krb5_context ctx, const char *opt, bool *result)
 static krb5_error_code
 parse_class(krb5_context ctx, const char *spec, struct class_rule **rule)
 {
-    struct vector *classes;
+    struct vector *classes = NULL;
     size_t i;
     krb5_error_code code;
-
-    /* Parse the required classes into a vector. */
-    classes = strength_vector_split_multi(spec, ",", NULL);
-    if (classes == NULL)
-        return strength_error_system(ctx, "cannot allocate memory");
+    const char *end;
+    bool okay;
 
     /* Create the basic rule structure. */
     *rule = calloc(1, sizeof(struct class_rule));
-    (*rule)->min = 0;
-    (*rule)->max = 0;
+
+    /*
+     * If the rule starts with a digit, it starts with a range of affected
+     * password lengths.  Parse that range.
+     */
+    if (isdigit((unsigned char) *spec)) {
+        okay = parse_number(spec, &(*rule)->min, &end);
+        if (okay)
+            okay = (*end == '-');
+        if (okay)
+            okay = parse_number(end + 1, &(*rule)->max, &end);
+        if (okay)
+            okay = (*end == ':');
+        if (okay)
+            spec = end + 1;
+        else {
+            code = strength_error_config(ctx, "bad character class requirement"
+                                         " in configuration: %s", spec);
+            goto fail;
+        }
+    }
+
+    /* Parse the required classes into a vector. */
+    classes = strength_vector_split_multi(spec, ",", NULL);
+    if (classes == NULL) {
+        code = strength_error_system(ctx, "cannot allocate memory");
+        goto fail;
+    }
 
     /*
      * Walk the list of required classes and set our flags, diagnosing an
@@ -166,14 +210,17 @@ parse_class(krb5_context ctx, const char *spec, struct class_rule **rule)
         else {
             code = strength_error_config(ctx, "unknown character class %s",
                                          classes->strings[i]);
-            strength_vector_free(classes);
-            free(*rule);
-            *rule = NULL;
-            return code;
+            goto fail;
         }
     }
     strength_vector_free(classes);
     return 0;
+
+fail:
+    strength_vector_free(classes);
+    free(*rule);
+    *rule = NULL;
+    return code;
 }
 
 
