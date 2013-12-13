@@ -149,7 +149,7 @@ sub load_password_tests {
 # Load the password tests from JSON.  Accumulate a total count of tests for
 # the testing plan.
 my (%tests, $count);
-for my $type (qw(cdb cracklib length letter principal)) {
+for my $type (qw(cdb classes cracklib length letter principal)) {
     my $tests = load_password_tests("$type.json");
     $tests{$type} = $tests;
     $count += scalar(@{$tests});
@@ -197,9 +197,20 @@ $krb5_conf = create_krb5_conf(
 );
 local $ENV{KRB5_CONFIG} = $krb5_conf;
 
-# Run the character class tests.
+# Run the simple character class tests.
 note('Simple password character class checks');
 for my $test (@{ $tests{letter} }) {
+    check_password($test);
+}
+
+# Install the krb5.conf file for complex character class restrictions.
+$krb5_conf
+  = create_krb5_conf({ require_classes => 'lower,upper,digit,symbol' });
+local $ENV{KRB5_CONFIG} = $krb5_conf;
+
+# Run the complex character class tests.
+note('Complex password character class checks');
+for my $test (@{ $tests{classes} }) {
     check_password($test);
 }
 

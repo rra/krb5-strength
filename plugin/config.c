@@ -186,7 +186,7 @@ krb5_error_code
 strength_config_classes(krb5_context ctx, const char *opt,
                         struct class_rule **result)
 {
-    struct vector *config;
+    struct vector *config = NULL;
     struct class_rule *rules, *last, *tmp;
     krb5_error_code code;
     size_t i;
@@ -248,7 +248,7 @@ strength_config_list(krb5_context ctx, const char *opt,
 
     /* Obtain the string from [appdefaults]. */
     realm = default_realm(ctx);
-    krb5_appdefault_string(ctx, "krb5-sync", realm, opt, "", &value);
+    krb5_appdefault_string(ctx, "krb5-strength", realm, opt, "", &value);
     free_default_realm(ctx, realm);
 
     /* If we got something back, store it in result. */

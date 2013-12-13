@@ -50,9 +50,14 @@ strength_init(krb5_context ctx, const char *dictionary,
     /* Get minimum length information from krb5.conf. */
     strength_config_number(ctx, "minimum_length", &data->minimum_length);
 
-    /* Get character class restrictions from krb5.conf. */
+    /* Get simple character class restrictions from krb5.conf. */
     strength_config_boolean(ctx, "require_ascii_printable", &data->ascii);
     strength_config_boolean(ctx, "require_non_letter", &data->nonletter);
+
+    /* Get complex character class restrictions from krb5.conf. */
+    code = strength_config_classes(ctx, "require_classes", &data->rules);
+    if (code != 0)
+        goto fail;
 
     /*
      * Try to initialize CDB and CrackLib dictionaries.  Both functions handle

@@ -27,7 +27,7 @@ struct password_classes {
 
 /* Abbreviate the most common error reporting syntax. */
 #define MUST_HAVE(ctx, err) \
-    strength_error_class((ctx), "password must contain" err)
+    strength_error_class((ctx), "password must contain " err)
 
 
 /*
@@ -39,7 +39,8 @@ analyze_password(const char *password, struct password_classes *classes)
 {
     const char *p;
 
-    for (p = password; p != '\0'; p++) {
+    memset(classes, 0, sizeof(struct password_classes));
+    for (p = password; *p != '\0'; p++) {
         if (islower((unsigned char) *p))
             classes->lower = true;
         else if (isupper((unsigned char) *p))
@@ -68,9 +69,9 @@ check_rule(krb5_context ctx, struct class_rule *rule, size_t length,
     if (rule->upper && !classes->upper)
         return MUST_HAVE(ctx, "an uppercase letter");
     if (rule->digit && !classes->digit)
-        return MUST_HAVE(ctx, "a digit");
+        return MUST_HAVE(ctx, "a number");
     if (rule->symbol && !classes->symbol)
-        return MUST_HAVE(ctx, "a symbol");
+        return MUST_HAVE(ctx, "a space or punctuation character");
     return 0;
 }
 
