@@ -18,7 +18,7 @@ BLURB
   tested with CrackLib, checked against a CDB database of known weak
   passwords, checked for length, checked for non-printable or non-ASCII
   characters that may be difficult to enter reproducibly, required to
-  contain a non-alphabetic character, or any combination of these tests.
+  contain particular character classes, or any combination of these tests.
   It supports both Heimdal and MIT Kerberos (1.9 or later).
 
 DESCRIPTION
@@ -352,7 +352,8 @@ CONFIGURATION
 
       The character class checks will be done in whatever locale the
       plugin or password check program is run in, which will normally be
-      the C locale but may be different depending on local configuration.
+      the POSIX C locale but may be different depending on local
+      configuration.
 
       A simple example:
 
