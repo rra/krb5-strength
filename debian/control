@@ -7,7 +7,7 @@ Build-Depends: debhelper (>= 9), cracklib-runtime, dh-autoreconf,
  libjson-perl, libkrb5-dev (>= 1.9), libperl6-slurp-perl,
  libreadonly-perl, libtest-pod-perl, libtest-minimumversion-perl,
  libtest-strict-perl, perl, tinycdb
-Standards-Version: 3.9.4
+Standards-Version: 3.9.5
 Homepage: http://www.eyrie.org/~eagle/software/krb5-strength/
 Vcs-Git: git://git.eyrie.org/kerberos/krb5-strength.git -b debian
 Vcs-Browser: http://git.eyrie.org/?p=kerberos/krb5-strength.git
