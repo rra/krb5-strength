@@ -1,4 +1,4 @@
-krb5-strength (2.2-1) UNRELEASED; urgency=low
+krb5-strength (2.2-1) unstable; urgency=low
 
   * New upstream release.
     - Support for more complex length-sensitive character class
@@ -8,7 +8,7 @@ krb5-strength (2.2-1) UNRELEASED; urgency=low
       in filter mode to generate a new word list.
   * Update to standards version 3.9.5 (no changes required).
 
- -- Russ Allbery <rra@debian.org>  Mon, 16 Dec 2013 15:15:07 -0800
+ -- Russ Allbery <rra@debian.org>  Mon, 16 Dec 2013 15:36:29 -0800
 
 krb5-strength (2.1-1) unstable; urgency=low
 
