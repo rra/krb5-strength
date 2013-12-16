@@ -10,7 +10,7 @@ Copyright: 2006-2007, 2009-2013
 License: Expat
 
 Files: *
-Copyright: 2000-2002, 2004-2012 Russ Allbery <eagle@eyrie.org>
+Copyright: 2000-2002, 2004-2013 Russ Allbery <eagle@eyrie.org>
   2001-2002, 2004-2013
     The Board of Trustees of the Leland Stanford Junior University
   2010 the Massachusetts Institute of Technology
@@ -97,7 +97,8 @@ License: FSF-unlimited, and GPL-2+ with Libtool exception or Expat
 
 Files: portable/asprintf.c portable/dummy.c portable/kadmin.h
  portable/krb5-extra.c portable/krb5.h portable/macros.h portable/stdbool.h
- portable/system.h tests/portable/asprintf-t.c util/macros.h
+ portable/strndup.c portable/system.h tests/portable/asprintf-t.c
+ tests/portable/strndup-t.c util/macros.h
 Copyright: no copyright notice, see License
 License: rra-public-domain
  The authors hereby relinquish any claim to any copyright that they may

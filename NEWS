@@ -1,6 +1,6 @@
                     User-Visible krb5-strength Changes
 
-krb5-strength 2.2 (unreleased)
+krb5-strength 2.2 (2013-12-16)
 
     More complex character class requirements can be specified with the
     configuration option require_classes.  This option lists the character
