@@ -34,6 +34,74 @@ sub print_fh {
     return;
 }
 
+# Filter the given input file and write it to a CDB data file, and then use
+# cdb to turn that into a database.
+#
+# $in_fh  - Input file handle for the source wordlist
+# $input  - Name of the input file, from which the CDB file name is derived
+# $filter - Reference to sub that returns true to keep a word, false otherwise
+#
+# Returns: undef
+#  Throws: Text exception on output failure or pre-existing temporary file
+sub write_cdb {
+    my ($in_fh, $input, $filter) = @_;
+
+    # Create a temporary file to write the CDB input into.
+    my $tmp = $input . '.data';
+    if (-f $tmp) {
+        die "$0: temporary output file $tmp already exists\n";
+    }
+    open(my $tmp_fh, '>', $tmp)
+      or die "$0: cannot create output file $tmp: $!\n";
+
+    # Walk through the input word list and write each word that passes the
+    # filter to the output file handle as CDB data.
+    while (defined(my $word = <$in_fh>)) {
+        chomp($word);
+        next if !$filter->($word);
+        my $length = length($word);
+        print_fh($tmp_fh, "+$length,1:$word->1\n");
+    }
+
+    # Add a trailing newline, required by the CDB data format, and close.
+    print_fh($tmp_fh, "\n");
+    close($tmp_fh) or die "$0: cannot write to temporary file $tmp: $!\n";
+
+    # Run cdb to turn the result into a CDB database.  Ignore duplicate keys.
+    system($CDB, '-c', '-u', "$input.cdb", $tmp) == 0
+      or die "$0: cdb -c failed\n";
+
+    # Remove the temporary file and return.
+    unlink($tmp) or die "$0: cannot remove temporary file $tmp: $!\n";
+    return;
+}
+
+# Filter the given input file and write the results to a new wordlist.
+#
+# $in_fh  - Input file handle for the source wordlist
+# $output - Output file name to which to write the resulting wordlist
+# $filter - Reference to sub that returns true to keep a word, false otherwise
+#
+# Returns: undef
+#  Throws: Text exception on output failure
+sub write_wordlist {
+    my ($in_fh, $output, $filter) = @_;
+    open(my $out_fh, '>', $output)
+      or die "$0: cannot create output file $output: $!\n";
+
+    # Walk through the input word list and write each word that passes the
+    # filter to the output file handle.
+    while (defined(my $word = <$in_fh>)) {
+        chomp($word);
+        next if !$filter->($word);
+        print_fh($out_fh, "$word\n");
+    }
+
+    # All done.
+    close($out_fh) or die "$0: cannot write to output file $output: $!\n";
+    return;
+}
+
 # Always flush output.
 STDOUT->autoflush;
 
@@ -42,12 +110,15 @@ my $fullpath = $0;
 local $0 = basename($0);
 
 # Parse the argument list.
-my ($ascii, $min_length, $manual);
+my ($ascii, @exclude, $max_length, $min_length, $manual, $output);
 Getopt::Long::config('bundling', 'no_ignore_case');
 GetOptions(
     'ascii|a'        => \$ascii,
+    'max-length|L=i' => \$max_length,
     'min-length|l=i' => \$min_length,
-    'manual|man|m'   => \$manual
+    'manual|man|m'   => \$manual,
+    'output|o=s'     => \$output,
+    'exclude|x=s'    => \@exclude,
 );
 if ($manual) {
     print_fh(\*STDOUT, "Feeding myself to perldoc, please wait...\n");
@@ -58,39 +129,40 @@ if (@ARGV != 1) {
 }
 my $input = $ARGV[0];
 
-# The output file goes in the same directory and is named the same as the
-# input but with .data appended.
-my $output = $input . '.data';
-if (-f $output) {
-    die "$0: temporary output file $output already exists\n";
-}
-
-# Process the input file into the output file, converting it to cdb input
-# format.
-open(my $in, '<', $input)
-  or die "$0: cannot open input file $input: $!\n";
-open(my $out, '>', $output)
-  or die "$0: cannot create output file $output: $!\n";
-while (defined(my $word = <$in>)) {
-    chomp($word);
+# Build a filter from our command-line parameters.  This is an anonymous sub
+# that returns true to keep a word and false otherwise.
+my $filter = sub {
+    my ($word) = @_;
     my $length = length($word);
-    next if (defined($min_length) && $length < $min_length);
+
+    # Check length.
+    return if (defined($min_length) && $length < $min_length);
+    return if (defined($max_length) && $length > $max_length);
+
+    # Check character classes.
     if ($ascii) {
-        next if $word =~ m{ [^[:ascii:]] }xms;
-        next if $word =~ m{ [[:cntrl:]] }xms;
+        return if $word =~ m{ [^[:ascii:]] }xms;
+        return if $word =~ m{ [[:cntrl:]] }xms;
     }
-    print_fh($out, "+$length,1:$word->1\n");
+
+    # Check regex exclusions.
+    for my $pattern (@exclude) {
+        return if $word =~ m{ $pattern }xms;
+    }
+
+    # Word passes.  Return success.
+    return 1;
+};
+
+# Process the input file into either wordlist output or a CDB file.
+open(my $in_fh, '<', $input)
+  or die "$0: cannot open input file $input: $!\n";
+if (defined($output)) {
+    write_wordlist($in_fh, $output, $filter);
+} else {
+    write_cdb($in_fh, $input, $filter);
 }
-print_fh($out, "\n");
-close($in)  or die "$0: cannot read all of input file $input: $!\n";
-close($out) or die "$0: cannot write to output file $output: $!\n";
-
-# Run cdb to turn the result into a constant database.  Ignore duplicate keys.
-system($CDB, '-c', '-u', "$input.cdb", $output) == 0
-  or die "$0: cdb -c failed\n";
-
-# Remove the temporary file.
-unlink($output) or die "$0: cannot remove temporary file $output: $!\n";
+close($in_fh) or die "$0: cannot read all of input file $input: $!\n";
 
 # All done.
 exit(0);
@@ -98,7 +170,8 @@ __END__
 
 =for stopwords
 cdbmake-wordlist cdb whitespace wordlist lookups lookup sublicense
-MERCHANTABILITY NONINFRINGEMENT krb5-strength --ascii Allbery
+MERCHANTABILITY NONINFRINGEMENT krb5-strength --ascii Allbery regexes
+output-wordlist
 
 =head1 NAME
 
@@ -106,7 +179,8 @@ cdbmake-wordlist - Create a cdb database from a wordlist
 
 =head1 SYNOPSIS
 
-B<cdbmake-wordlist> [B<-am>] [B<-l> I<length>] I<wordlist>
+B<cdbmake-wordlist> [B<-am>] [B<-l> I<min-length>] [B<-L> I<max-length>]
+    [B<-o> I<output-wordlist>] [B<-x> I<exclude> ...] I<wordlist>
 
 =head1 DESCRIPTION
 
@@ -123,6 +197,10 @@ B<cdbmake-wordlist> takes one argument, the input wordlist file.  The
 output cdb database will have the same name as I<wordlist> but with
 C<.cdb> appended.  The input wordlist file does not have to be sorted.
 
+B<cdbmake-wordlist> can, instead of building a CDB file, filter a wordlist
+against the criteria given on the command line and generate a new
+wordlist.  See the B<-o> option for more details.
+
 =head1 OPTIONS
 
 =over 4
@@ -132,6 +210,17 @@ C<.cdb> appended.  The input wordlist file does not have to be sorted.
 Filter all words that contain non-ASCII characters or control characters
 from the resulting cdb file, leaving only words that consist solely of
 ASCII non-control characters.
+
+=item B<-L> I<maximum>, B<--max-length>=I<maximum>
+
+Filter all words of length greater than I<maximum> from the resulting cdb
+database.  The length of each line (minus the separating newline) in the
+input wordlist will be checked against I<minimum> and will be filtered out
+of the resulting database if it is shorter.  Useful for generating
+password dictionaries from word lists that contain random noise that's
+highly unlikely to be used as a password.
+
+The default is to not filter out any words for maximum length.
 
 =item B<-l> I<minimum>, B<--min-length>=I<minimum>
 
@@ -150,11 +239,29 @@ The default is not to filter out any words for minimum length.
 Print out this documentation (which is done simply by feeding the script to
 C<perldoc -t>).
 
+=item B<-o> I<wordlist>, B<--output>=I<wordlist>
+
+Rather than creating a CDB database, apply the filter rules given by the
+other command-line arguments and generate a new wordlist in the file name
+given by the I<wordlist> option.  This can be used to reduce the size of
+a raw wordlist file (such as one taken from Internet sources) by removing
+the words that will be filtered out of the CDB file anyway, thus reducing
+the size of the source required to regenerate the CDB database.
+
+If this option is given, no CDB database will be created.
+
+=item B<-x> I<exclude>, B<--exclude>=I<exclude>
+
+Filter all words matching the regular expression I<exclude> from the
+resulting cdb database.  This regular expression will be matched against
+each line of the source wordlist after the trailing newline is removed.
+This option may be given repeatedly to add multiple exclusion regexes.
+
 =back
 
 =head1 AUTHOR
 
-Russ Allbery <rra@stanford.edu>
+Russ Allbery <eagle@eyrie.org>
 
 =head1 COPYRIGHT AND LICENSE
 

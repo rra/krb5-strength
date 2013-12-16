@@ -9,13 +9,13 @@
 /*
  * Modified as part of the krb5-strength project as follows:
  *
- * 2007-03-23  Russ Allbery <rra@stanford.edu>
+ * 2007-03-23  Russ Allbery <eagle@eyrie.org>
  *   - Add ANSI C prototypes and prototype additional functions.
- * 2009-10-14  Russ Allbery <rra@stanford.edu>
+ * 2009-10-14  Russ Allbery <eagle@eyrie.org>
  *   - Prototype changes for const cleanliness.
- * 2010-03-14  Russ Allbery <rra@stanford.edu>
+ * 2010-03-14  Russ Allbery <eagle@eyrie.org>
  *   - Fix int8, int16, and int32 definitions.
- * 2013-10-01  Russ Allbery <rra@stanford.edu>
+ * 2013-10-01  Russ Allbery <eagle@eyrie.org>
  *   - Set hidden visibility on all symbols by default.
  */
 

@@ -9,9 +9,9 @@
 /*
  * Modified as part of the krb5-strength project as follows:
  *
- * 2009-10-14  Russ Allbery <rra@stanford.edu>
+ * 2009-10-14  Russ Allbery <eagle@eyrie.org>
  *   - Add ANSI C protototypes for all functions.
- * 2010-03-14  Russ Allbery <rra@stanford.edu>
+ * 2010-03-14  Russ Allbery <eagle@eyrie.org>
  *   - Use unsigned long instead of int32 to avoid printf warnings.
  */
 

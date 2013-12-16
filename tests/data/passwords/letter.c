@@ -13,7 +13,7 @@
 
 #include <tests/data/passwords/tests.h>
 
-const struct password_test class_tests[] = {
+const struct password_test letter_tests[] = {
     {
 
         "non-ASCII characters",

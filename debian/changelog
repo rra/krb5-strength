@@ -1,10 +1,22 @@
-krb5-strength (2.1-1~sbp60+1) squeeze-backports; urgency=low
+krb5-strength (2.2-1~sbp60+1) squeeze-backports; urgency=low
 
   * Special Stanford-only local backport that builds the package against
     Heimdal instead of MIT Kerberos.  We only need the heimdal-strength
     program and the MIT API isn't supported until wheezy.
 
- -- Russ Allbery <rra@debian.org>  Tue, 05 Nov 2013 12:00:21 -0800
+ -- Russ Allbery <rra@debian.org>  Mon, 16 Dec 2013 15:56:00 -0800
+
+krb5-strength (2.2-1) unstable; urgency=low
+
+  * New upstream release.
+    - Support for more complex length-sensitive character class
+      restrictions using the new require_classes configuration setting.
+    - cdbmake-wordlist now supports filtering out words based on maximum
+      length and user-supplied regular expressions, and supports running
+      in filter mode to generate a new word list.
+  * Update to standards version 3.9.5 (no changes required).
+
+ -- Russ Allbery <rra@debian.org>  Mon, 16 Dec 2013 15:36:29 -0800
 
 krb5-strength (2.1-1) unstable; urgency=low
 

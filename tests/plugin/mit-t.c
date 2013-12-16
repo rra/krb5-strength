@@ -1,7 +1,7 @@
 /*
  * Test for the MIT Kerberos shared module API.
  *
- * Written by Russ Allbery <rra@stanford.edu>
+ * Written by Russ Allbery <eagle@eyrie.org>
  * Copyright 2010, 2013
  *     The Board of Trustees of the Leland Stanford Junior University
  *
@@ -30,9 +30,10 @@
  * named cdb_tests, cracklib_tests, and principal_tests.
  */
 #include <tests/data/passwords/cdb.c>
-#include <tests/data/passwords/class.c>
+#include <tests/data/passwords/classes.c>
 #include <tests/data/passwords/cracklib.c>
 #include <tests/data/passwords/length.c>
+#include <tests/data/passwords/letter.c>
 #include <tests/data/passwords/principal.c>
 
 
@@ -59,13 +60,13 @@ typedef krb5_error_code pwqual_strength_initvt(krb5_context, int, int,
 /*
  * Loads the Heimdal password change plugin and tests that its metadata is
  * correct.  Returns a pointer to the kadm5_pw_policy_verifier struct or bails
- * on failure to load the plugin.
+ * on failure to load the plugin.  Stores the handle from dlopen in its second
+ * argument for a later clean shutdown.
  */
 static krb5_pwqual_vtable
-load_plugin(krb5_context ctx)
+load_plugin(krb5_context ctx, void **handle)
 {
     char *path;
-    void *handle;
     krb5_error_code code;
     krb5_pwqual_vtable vtable = NULL;
     krb5_error_code (*init)(krb5_context, int, int, krb5_plugin_vtable);
@@ -74,13 +75,13 @@ load_plugin(krb5_context ctx)
     path = test_file_path("../plugin/.libs/strength.so");
     if (path == NULL)
         bail("cannot find plugin");
-    handle = dlopen(path, RTLD_NOW);
-    if (handle == NULL)
+    *handle = dlopen(path, RTLD_NOW);
+    if (*handle == NULL)
         bail("cannot dlopen %s: %s", path, dlerror());
     test_file_path_free(path);
 
     /* Find the entry point function. */
-    init = dlsym(handle, "pwqual_strength_initvt");
+    init = dlsym(*handle, "pwqual_strength_initvt");
     if (init == NULL)
         bail("cannot get pwqual_strength_initvt symbol: %s", dlerror());
 
@@ -154,10 +155,11 @@ main(void)
     krb5_pwqual_vtable vtable;
     krb5_pwqual_moddata data;
     krb5_error_code code;
+    void *handle;
 
     /*
      * Calculate how many tests we have.  There are two tests for the module
-     * metadata, five more tests for initializing the plugin, and two tests per
+     * metadata, six more tests for initializing the plugin, and two tests per
      * password test.
      *
      * We run all the CrackLib tests twice, once with an explicit dictionary
@@ -166,10 +168,11 @@ main(void)
      */
     count = 2 * ARRAY_SIZE(cracklib_tests);
     count += ARRAY_SIZE(cdb_tests);
-    count += ARRAY_SIZE(class_tests);
+    count += ARRAY_SIZE(classes_tests);
     count += ARRAY_SIZE(length_tests);
+    count += ARRAY_SIZE(letter_tests);
     count += 2 * ARRAY_SIZE(principal_tests);
-    plan(2 + 5 + count * 2);
+    plan(2 + 6 + count * 2);
 
     /* Start with the krb5.conf that contains no dictionary configuration. */
     path = test_file_path("data/krb5.conf");
@@ -184,7 +187,7 @@ main(void)
         bail_krb5(ctx, code, "cannot initialize Kerberos context");
 
     /* Load the plugin. */
-    vtable = load_plugin(ctx);
+    vtable = load_plugin(ctx, &handle);
 
     /* Initialize the plugin with a CrackLib dictionary. */
     build = getenv("BUILD");
@@ -239,7 +242,7 @@ main(void)
         is_password_test(ctx, vtable, data, &cracklib_tests[i]);
     vtable->close(ctx, data);
 
-    /* Add character class configuration to krb5.conf. */
+    /* Add simple character class configuration to krb5.conf. */
     setup_argv[5] = (char *) "require_ascii_printable";
     setup_argv[6] = (char *) "true";
     setup_argv[7] = (char *) "require_non_letter";
@@ -253,18 +256,42 @@ main(void)
     if (code != 0)
         bail_krb5(ctx, code, "cannot initialize Kerberos context");
 
-    /* Run all the character class tests. */
+    /* Run all the simple character class tests. */
     code = vtable->open(ctx, NULL, &data);
-    is_int(0, code, "Plugin initialization (character class)");
+    is_int(0, code, "Plugin initialization (simple character class)");
     if (code != 0)
         bail("cannot continue after plugin initialization failure");
-    for (i = 0; i < ARRAY_SIZE(class_tests); i++)
-        is_password_test(ctx, vtable, data, &class_tests[i]);
+    for (i = 0; i < ARRAY_SIZE(letter_tests); i++)
+        is_password_test(ctx, vtable, data, &letter_tests[i]);
     vtable->close(ctx, data);
 
     /*
-     * Add length restrictions and remove the dictionary.  This should only do
-     * length checks without any dictionary checks.
+     * Add complex character class configuration to krb5.conf but drop
+     * the dictionary configuration.
+     */
+    setup_argv[3] = (char *) "require_classes";
+    setup_argv[4] = (char *) "8-19:lower,upper 8-15:digit 8-11:symbol";
+    setup_argv[5] = NULL;
+    run_setup((const char **) setup_argv);
+
+    /* Obtain a new Kerberos context with that krb5.conf file. */
+    krb5_free_context(ctx);
+    code = krb5_init_context(&ctx);
+    if (code != 0)
+        bail_krb5(ctx, code, "cannot initialize Kerberos context");
+
+    /* Run all the complex character class tests. */
+    code = vtable->open(ctx, NULL, &data);
+    is_int(0, code, "Plugin initialization (complex character class)");
+    if (code != 0)
+        bail("cannot continue after plugin initialization failure");
+    for (i = 0; i < ARRAY_SIZE(classes_tests); i++)
+        is_password_test(ctx, vtable, data, &classes_tests[i]);
+    vtable->close(ctx, data);
+
+    /*
+     * Add length restrictions.  This should only do length checks without any
+     * dictionary checks.
      */
     setup_argv[3] = (char *) "minimum_length";
     setup_argv[4] = (char *) "12";
@@ -289,7 +316,7 @@ main(void)
 #ifdef HAVE_CDB
 
     /* If built with CDB, set up krb5.conf to use a CDB dictionary instead. */
-    free(dictionary);
+    test_file_path_free(dictionary);
     dictionary = test_file_path("data/wordlist.cdb");
     if (dictionary == NULL)
         bail("cannot find data/wordlist.cdb in the test suite");
@@ -330,6 +357,10 @@ main(void)
     unlink(path);
     free(path);
     test_tmpdir_free(tmpdir);
+
+    /* Close down the module. */
+    if (dlclose(handle) != 0)
+        bail("cannot close plugin: %s", dlerror());
 
     /* Keep valgrind clean by freeing all memory. */
     test_file_path_free(dictionary);

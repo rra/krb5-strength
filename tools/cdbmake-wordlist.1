@@ -133,7 +133,7 @@
 .\" ========================================================================
 .\"
 .IX Title "CDBMAKE-WORDLIST 1"
-.TH CDBMAKE-WORDLIST 1 "2013-10-10" "2.1" "krb5-strength"
+.TH CDBMAKE-WORDLIST 1 "2013-12-16" "2.2" "krb5-strength"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -142,7 +142,8 @@
 cdbmake\-wordlist \- Create a cdb database from a wordlist
 .SH "SYNOPSIS"
 .IX Header "SYNOPSIS"
-\&\fBcdbmake-wordlist\fR [\fB\-am\fR] [\fB\-l\fR \fIlength\fR] \fIwordlist\fR
+\&\fBcdbmake-wordlist\fR [\fB\-am\fR] [\fB\-l\fR \fImin-length\fR] [\fB\-L\fR \fImax-length\fR]
+    [\fB\-o\fR \fIoutput-wordlist\fR] [\fB\-x\fR \fIexclude\fR ...] \fIwordlist\fR
 .SH "DESCRIPTION"
 .IX Header "DESCRIPTION"
 cdb is a format invented by Dan Bernstein for fast, constant databases.
@@ -157,6 +158,10 @@ checks.
 \&\fBcdbmake-wordlist\fR takes one argument, the input wordlist file.  The
 output cdb database will have the same name as \fIwordlist\fR but with
 \&\f(CW\*(C`.cdb\*(C'\fR appended.  The input wordlist file does not have to be sorted.
+.PP
+\&\fBcdbmake-wordlist\fR can, instead of building a \s-1CDB\s0 file, filter a wordlist
+against the criteria given on the command line and generate a new
+wordlist.  See the \fB\-o\fR option for more details.
 .SH "OPTIONS"
 .IX Header "OPTIONS"
 .IP "\fB\-a\fR, \fB\-\-ascii\fR" 4
@@ -164,6 +169,16 @@ output cdb database will have the same name as \fIwordlist\fR but with
 Filter all words that contain non-ASCII characters or control characters
 from the resulting cdb file, leaving only words that consist solely of
 \&\s-1ASCII\s0 non-control characters.
+.IP "\fB\-L\fR \fImaximum\fR, \fB\-\-max\-length\fR=\fImaximum\fR" 4
+.IX Item "-L maximum, --max-length=maximum"
+Filter all words of length greater than \fImaximum\fR from the resulting cdb
+database.  The length of each line (minus the separating newline) in the
+input wordlist will be checked against \fIminimum\fR and will be filtered out
+of the resulting database if it is shorter.  Useful for generating
+password dictionaries from word lists that contain random noise that's
+highly unlikely to be used as a password.
+.Sp
+The default is to not filter out any words for maximum length.
 .IP "\fB\-l\fR \fIminimum\fR, \fB\-\-min\-length\fR=\fIminimum\fR" 4
 .IX Item "-l minimum, --min-length=minimum"
 Filter all words of length less than \fIminimum\fR from the resulting cdb
@@ -179,9 +194,25 @@ The default is not to filter out any words for minimum length.
 .IX Item "-m, --man, --manual"
 Print out this documentation (which is done simply by feeding the script to
 \&\f(CW\*(C`perldoc \-t\*(C'\fR).
+.IP "\fB\-o\fR \fIwordlist\fR, \fB\-\-output\fR=\fIwordlist\fR" 4
+.IX Item "-o wordlist, --output=wordlist"
+Rather than creating a \s-1CDB\s0 database, apply the filter rules given by the
+other command-line arguments and generate a new wordlist in the file name
+given by the \fIwordlist\fR option.  This can be used to reduce the size of
+a raw wordlist file (such as one taken from Internet sources) by removing
+the words that will be filtered out of the \s-1CDB\s0 file anyway, thus reducing
+the size of the source required to regenerate the \s-1CDB\s0 database.
+.Sp
+If this option is given, no \s-1CDB\s0 database will be created.
+.IP "\fB\-x\fR \fIexclude\fR, \fB\-\-exclude\fR=\fIexclude\fR" 4
+.IX Item "-x exclude, --exclude=exclude"
+Filter all words matching the regular expression \fIexclude\fR from the
+resulting cdb database.  This regular expression will be matched against
+each line of the source wordlist after the trailing newline is removed.
+This option may be given repeatedly to add multiple exclusion regexes.
 .SH "AUTHOR"
 .IX Header "AUTHOR"
-Russ Allbery <rra@stanford.edu>
+Russ Allbery <eagle@eyrie.org>
 .SH "COPYRIGHT AND LICENSE"
 .IX Header "COPYRIGHT AND LICENSE"
 Copyright 2013 The Board of Trustees of the Leland Stanford Junior

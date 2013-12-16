@@ -1,7 +1,7 @@
-                            krb5-strength 2.1
+                            krb5-strength 2.2
                (Kerberos password strength checking plugin)
 
-              Maintained by Russ Allbery <rra@stanford.edu>
+               Maintained by Russ Allbery <eagle@eyrie.org>
 
   Copyright 2006, 2007, 2009, 2010, 2012, 2013 The Board of Trustees of
   the Leland Stanford Junior University.  Portions copyright 1993 Alec
@@ -18,7 +18,7 @@ BLURB
   tested with CrackLib, checked against a CDB database of known weak
   passwords, checked for length, checked for non-printable or non-ASCII
   characters that may be difficult to enter reproducibly, required to
-  contain a non-alphabetic character, or any combination of these tests.
+  contain particular character classes, or any combination of these tests.
   It supports both Heimdal and MIT Kerberos (1.9 or later).
 
 DESCRIPTION
@@ -27,15 +27,23 @@ DESCRIPTION
   checks and comes with an example that checks passwords against CrackLib.
   However, in testing at Stanford, we found that CrackLib with its default
   transform rules does not catch passwords that can be guessed using the
-  same dictionary with other tools, such as Jack the Ripper.
+  same dictionary with other tools, such as Jack the Ripper.  We then
+  discovered other issues with CrackLib with longer passwords, such as
+  some bad assumptions about how certain measures of complexity will
+  scale, and wanted to impose other limitations that it didn't support.
 
   This plugin provides the ability to check password quality against the
   standard version of CrackLib, or against a modified version of CrackLib
   that only passes passwords that resist attacks from both Crack and Jack
-  the Ripper using the same rule sets.  For Heimdal, it includes both a
-  program usable as an external password quality check and a plugin that
-  implements the dynamic module API.  For MIT Kerberos (1.9 or later), it
-  includes a plugin for the password quality (pwqual) plugin API.
+  the Ripper using the same rule sets.  It also supports doing simpler
+  dictionary checks against a CDB database, which is fast with very large
+  dictionaries, and imposing other programmatic checks on passwords such
+  as character class requirements.
+
+  For Heimdal, it includes both a program usable as an external password
+  quality check and a plugin that implements the dynamic module API.  For
+  MIT Kerberos (1.9 or later), it includes a plugin for the password
+  quality (pwqual) plugin API.
 
   krb5-strength can be built with either the system CrackLib or with the
   modified version of CrackLib included in this package.  Note, however,
@@ -79,9 +87,7 @@ REQUIREMENTS
 
   You can also optionally build against the TinyCDB library, which
   provides support for simpler and faster password checking against a CDB
-  dictionary file.  Building a CDB dictionary with cdbmake-wordlist
-  (included) requires Perl 5.006 or later and the CDB utility that comes
-  with TinyCDB.
+  dictionary file.
 
   For this module to be effective for either Heimdal or MIT Kerberos, you
   will also need to construct a dictionary.  The mkdict and packer
@@ -89,9 +95,11 @@ REQUIREMENTS
   in this toolkit but not installed by default.  You can run them out of
   the cracklib directory after building.  You can also use the utilities
   that come with the stock CrackLib package (often already packaged in a
-  Linux distribution); the database format is compatible.  For building a
-  CDB dictionary, use the provided cdbmake-wordlist program.  The CDB
-  utility must be on your PATH.
+  Linux distribution); the database format is compatible.
+
+  For building a CDB dictionary, use the provided cdbmake-wordlist
+  program.  The CDB utility must be on your PATH.  cdbmake-wordlist
+  requires Perl 5.006 or later.
 
   For a word list to use as source for the dictionary, you can use
   /usr/share/dict/words if it's available on your system, but it would be
@@ -103,9 +111,9 @@ REQUIREMENTS
   following additional Perl modules will be used by the test suite if
   present:
 
-      File::Slurp
       IPC::Run
       JSON
+      Perl6::Slurp
       Test::MinimumVersion
       Test::Perl::Critic
       Test::Pod
@@ -123,7 +131,9 @@ REQUIREMENTS
   and need to regenerate Makefile.in, you will need Automake 1.11 or
   later.  For bootstrap or if you change configure.ac or any of the m4
   files it includes and need to regenerate configure or config.h.in, you
-  will need Autoconf 2.64 or later.
+  will need Autoconf 2.64 or later.  You will also need Perl 5.010 or
+  later and the JSON, Perl6::Slurp, and Readonly modules (from CPAN) to
+  bootstrap the test suite data from a Git checkout.
 
 COMPILING AND INSTALLING
 
@@ -228,7 +238,11 @@ CONFIGURATION
   dictionary.  The provided path should be the full path to the dictionary
   files, omitting the trailing *.hwm, *.pwd, and *.pwi extensions for the
   CrackLib dictionary.  You can use either or both settings.  If you use
-  both, CrackLib will be checked first, and then CDB.
+  both, CrackLib will be checked first, and then CDB.  When checking a CDB
+  database, the password, the password with the first character removed,
+  the last character removed, the first and last characters removed, the
+  first two characters removed, and the last two characters removed will
+  all be checked against the dictionary.
 
   Then, for the external password checking program, add a new section (or
   modify the existing [password_quality] section) to look like the
@@ -286,7 +300,11 @@ CONFIGURATION
   dictionary.  The provided path should be the full path to the dictionary
   files, omitting the trailing *.hwm, *.pwd, and *.pwi extensions for the
   CrackLib dictionary.  You can use either or both settings.  If you use
-  both, CrackLib will be checked first, and then CDB.
+  both, CrackLib will be checked first, and then CDB.  When checking a CDB
+  database, the password, the password with the first character removed,
+  the last character removed, the first and last characters removed, the
+  first two characters removed, and the last two characters removed will
+  all be checked against the dictionary.
 
   The second option is to use the normal dict_path setting.  In the
   [realms] section of your krb5.conf kdc.conf, under the appropriate realm
@@ -336,6 +354,46 @@ CONFIGURATION
       interoperability problems with computers with different default
       character sets or Unicode normalization forms.
 
+  require_classes
+
+      This option allows specification of more complex character class
+      requirements.  The value of this parameter should be one or more
+      whitespace-separated rule.  Each rule has the syntax:
+
+          [<min>-<max>:]<class>[,<class>...]
+
+      where <class> is one of "upper", "lower", "digit", or "symbol"
+      (without the quote marks).  The symbol class includes all characters
+      other than alphanumeric characters, including space.  The listed
+      classes must appear in the password.  Separate multiple required
+      classes with a comma (and no space).
+
+      The character class checks will be done in whatever locale the
+      plugin or password check program is run in, which will normally be
+      the POSIX C locale but may be different depending on local
+      configuration.
+
+      A simple example:
+
+          require_classes = upper,lower,digit
+
+      This requires all passwords contain at least one uppercase letter,
+      at least one lowercase letter, and at least one digit.
+
+      If present, <min> and <max> specify the minimum password length and
+      maximum password length to which this rule applies.  This allows one
+      to specify character class requirements that change with password
+      length.  So, for example:
+
+          require_classes = 8-19:upper,lower 8-15:digit 8-11:symbol
+
+      requires all passwords from 8 to 11 characters long contain all four
+      character classes, passwords from 12 to 15 characters long contain
+      upper and lower case and a digit, and passwords from 16 to 19
+      characters long contain both upper and lower case.  Passowrds longer
+      than 20 characters have no character class restrictions.  (This
+      example is probably used in conjunction with minimum_length = 8.)
+
   require_non_letter
 
       If set to a true boolean value, the password must contain at least
@@ -359,7 +417,7 @@ SUPPORT
   will always have the current version of this package, the current
   documentation, and pointers to any additional resources.
 
-  I welcome bug reports and patches for this package at rra@stanford.edu.
+  I welcome bug reports and patches for this package at eagle@eyrie.org.
   However, please be aware that I tend to be extremely busy and work
   projects often take priority.  I'll save your mail and get to it as soon
   as I can, but it may take me a couple of months.

@@ -9,7 +9,7 @@
 # The canonical version of this file is maintained in the rra-c-util package,
 # which can be found at <http://www.eyrie.org/~eagle/software/rra-c-util/>.
 #
-# Written by Russ Allbery <rra@stanford.edu>
+# Written by Russ Allbery <eagle@eyrie.org>
 # Copyright 2013
 #     The Board of Trustees of the Leland Stanford Junior University
 #
@@ -56,7 +56,7 @@ BEGIN {
     # This version should match the corresponding rra-c-util release, but with
     # two digits for the minor version, including a leading zero if necessary,
     # so that it will sort properly.
-    $VERSION = '4.09';
+    $VERSION = '4.12';
 }
 
 # Skip this test unless maintainer tests are requested.  Takes a short
@@ -149,7 +149,7 @@ Test::RRA - Support functions for Perl tests
     skip_unless_maintainer('Coding style tests');
 
     # Load modules, skipping the test if they're not available.
-    use_prereq('File::Slurp');
+    use_prereq('Perl6::Slurp', 'slurp');
     use_prereq('Test::Script::Run', '0.04');
 
 =head1 DESCRIPTION
@@ -188,7 +188,7 @@ value of an array.
 
 =head1 AUTHOR
 
-Russ Allbery <rra@stanford.edu>
+Russ Allbery <eagle@eyrie.org>
 
 =head1 COPYRIGHT AND LICENSE
 

@@ -9,23 +9,23 @@
 /*
  * Modified as part of the krb5-strength project as follows:
  *
- * 2007-03-22  Russ Allbery <rra@stanford.edu>
+ * 2007-03-22  Russ Allbery <eagle@eyrie.org>
  *   - Add four-, five-, and six-character prefix and suffix rules.
  *   - Longer passwords must contain more different characters, up to 8.
  *   - Disable GECOS checking (useless for a server).
  *   - Replace exit(-1) with return when dictionary doesn't exist.
  *   - Additional system includes for other functions.
- * 2009-10-14  Russ Allbery <rra@stanford.edu>
+ * 2009-10-14  Russ Allbery <eagle@eyrie.org>
  *   - Add ANSI C protototypes for all functions.
  *   - Tweaks for const cleanliness.
  *   - Add parentheses around assignment used for its truth value.
  *   - Change a variable to unsigned int to avoid gcc warnings.
  *   - Remove the unused FascistGecos function.
- * 2012-05-11  Russ Allbery <rra@stanford.edu>
+ * 2012-05-11  Russ Allbery <eagle@eyrie.org>
  *   - Change MINLENGTH to 8.
  *   - Use a separate buffer to hold the reversed password.
  *   - Also check whether a password is a duplicated dictionary word.
- * 2013-09-24  Russ Allbery <rra@stanford.edu>
+ * 2013-09-24  Russ Allbery <eagle@eyrie.org>
  *   - Replaced MAXSTEP with allowing one increment per four characters.
  *   - Changed error for very short passwords to match current CrackLib.
  *   - Close the dictionary after each password lookup.
