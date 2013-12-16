@@ -20,6 +20,7 @@ following modifications have been made:
  * Remove last block optimization in GetPW and start fresh each time.
  * Close the dictionary after each password lookup.
  * Set hidden visibility on all CrackLib symbols.
+ * Close the wfp file handle on PWClose if it's open.
 
 Below is the original changelog for CrackLib:
 

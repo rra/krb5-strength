@@ -1,7 +1,7 @@
 /*
  * Test for the Heimdal shared module API.
  *
- * Written by Russ Allbery <rra@stanford.edu>
+ * Written by Russ Allbery <eagle@eyrie.org>
  * Copyright 2009, 2013
  *     The Board of Trustees of the Leland Stanford Junior University
  *
@@ -29,9 +29,10 @@
  * named cdb_tests, cracklib_tests, and principal_tests.
  */
 #include <tests/data/passwords/cdb.c>
-#include <tests/data/passwords/class.c>
+#include <tests/data/passwords/classes.c>
 #include <tests/data/passwords/cracklib.c>
 #include <tests/data/passwords/length.c>
+#include <tests/data/passwords/letter.c>
 #include <tests/data/passwords/principal.c>
 
 
@@ -53,28 +54,28 @@ main(void)
 /*
  * Loads the Heimdal password change plugin and tests that its metadata is
  * correct.  Returns a pointer to the kadm5_pw_policy_verifier struct or bails
- * on failure to load the plugin.
+ * on failure to load the plugin.  Stores the handle in the last argument so
+ * that the caller can free the handle at the end of the test suite.
  */
 static struct kadm5_pw_policy_verifier *
-load_plugin(void)
+load_plugin(void **handle)
 {
     char *path;
-    void *handle;
     struct kadm5_pw_policy_verifier *verifier;
 
     /* Load the module. */
     path = test_file_path("../plugin/.libs/strength.so");
     if (path == NULL)
         bail("cannot find plugin");
-    handle = dlopen(path, RTLD_NOW);
-    if (handle == NULL)
-        sysbail("cannot dlopen %s: %s", path, dlerror());
+    *handle = dlopen(path, RTLD_NOW);
+    if (*handle == NULL)
+        bail("cannot dlopen %s: %s", path, dlerror());
     test_file_path_free(path);
 
     /* Find the dispatch table and do a basic sanity check. */
-    verifier = dlsym(handle, "kadm5_password_verifier");
+    verifier = dlsym(*handle, "kadm5_password_verifier");
     if (verifier == NULL)
-        sysbail("cannot get kadm5_password_verifier symbol: %s", dlerror());
+        bail("cannot get kadm5_password_verifier symbol: %s", dlerror());
     if (verifier->funcs == NULL || verifier->funcs[0].func == NULL)
         bail("no verifier functions in module");
 
@@ -140,6 +141,7 @@ main(void)
     char *setup_argv[10];
     size_t i, count;
     struct kadm5_pw_policy_verifier *verifier;
+    void *handle;
 
     /*
      * Calculate how many tests we have.  There are five tests for the module
@@ -148,8 +150,9 @@ main(void)
      */
     count = ARRAY_SIZE(cracklib_tests);
     count += ARRAY_SIZE(cdb_tests);
-    count += ARRAY_SIZE(class_tests);
+    count += ARRAY_SIZE(classes_tests);
     count += ARRAY_SIZE(length_tests);
+    count += ARRAY_SIZE(letter_tests);
     count += ARRAY_SIZE(principal_tests) * 2;
     plan(5 + count * 2);
 
@@ -161,7 +164,7 @@ main(void)
     putenv(krb5_config_empty);
 
     /* Load the plugin. */
-    verifier = load_plugin();
+    verifier = load_plugin(&handle);
 
     /* Set up our krb5.conf with the dictionary configuration. */
     setup_argv[0] = test_file_path("data/make-krb5-conf");
@@ -186,7 +189,7 @@ main(void)
     for (i = 0; i < ARRAY_SIZE(principal_tests); i++)
         is_password_test(verifier, &principal_tests[i]);
 
-    /* Add character class restrictions. */
+    /* Add simple character class restrictions. */
     setup_argv[5] = (char *) "require_ascii_printable";
     setup_argv[6] = (char *) "true";
     setup_argv[7] = (char *) "require_non_letter";
@@ -194,15 +197,25 @@ main(void)
     setup_argv[9] = NULL;
     run_setup((const char **) setup_argv);
 
-    /* Run the character class tests. */
-    for (i = 0; i < ARRAY_SIZE(class_tests); i++)
-        is_password_test(verifier, &class_tests[i]);
+    /* Run the simple character class tests. */
+    for (i = 0; i < ARRAY_SIZE(letter_tests); i++)
+        is_password_test(verifier, &letter_tests[i]);
+
+    /* Add complex character class restrictions and remove the dictionary. */
+    free(setup_argv[4]);
+    setup_argv[3] = (char *) "require_classes";
+    setup_argv[4] = (char *) "8-19:lower,upper 8-15:digit 8-11:symbol";
+    setup_argv[5] = NULL;
+    run_setup((const char **) setup_argv);
+
+    /* Run the simple character class tests. */
+    for (i = 0; i < ARRAY_SIZE(classes_tests); i++)
+        is_password_test(verifier, &classes_tests[i]);
 
     /*
-     * Add length restrictions and remove the dictionary.  This should only do
-     * length checks without any dictionary checks.
+     * Add length restrictions.  This should only do length checks without any
+     * dictionary checks.
      */
-    free(setup_argv[4]);
     setup_argv[3] = (char *) "minimum_length";
     setup_argv[4] = (char *) "12";
     setup_argv[5] = NULL;
@@ -244,6 +257,10 @@ main(void)
     unlink(path);
     free(path);
     test_tmpdir_free(tmpdir);
+
+    /* Close down the module. */
+    if (dlclose(handle) != 0)
+        bail("cannot close plugin: %s", dlerror());
 
     /* Keep valgrind clean by freeing environmental memory. */
     putenv((char *) "KRB5_CONFIG=");

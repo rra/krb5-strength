@@ -4,7 +4,7 @@
  * The canonical version of this file is maintained in the rra-c-util package,
  * which can be found at <http://www.eyrie.org/~eagle/software/rra-c-util/>.
  *
- * Written by Russ Allbery <rra@stanford.edu>
+ * Written by Russ Allbery <eagle@eyrie.org>
  * Copyright 2006, 2007, 2009, 2011, 2012, 2013
  *     The Board of Trustees of the Leland Stanford Junior University
  *
@@ -33,7 +33,7 @@
 #include <config.h>
 #include <tests/tap/macros.h>
 
-#ifdef HAVE_KERBEROS
+#ifdef HAVE_KRB5
 # include <portable/krb5.h>
 #endif
 
@@ -100,7 +100,7 @@ void kerberos_generate_conf(const char *realm);
 void kerberos_cleanup_conf(void);
 
 /* Thes interfaces are only available with native Kerberos support. */
-#ifdef HAVE_KERBEROS
+#ifdef HAVE_KRB5
 
 /* Bail out with an error, appending the Kerberos error message. */
 void bail_krb5(krb5_context, krb5_error_code, const char *format, ...)
@@ -118,7 +118,7 @@ void diag_krb5(krb5_context, krb5_error_code, const char *format, ...)
 krb5_principal kerberos_keytab_principal(krb5_context, const char *path)
     __attribute__((__nonnull__));
 
-#endif /* HAVE_KERBEROS */
+#endif /* HAVE_KRB5 */
 
 END_DECLS
 

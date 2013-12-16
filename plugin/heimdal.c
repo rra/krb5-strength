@@ -11,9 +11,9 @@
  * Of course, the external Heimdal strength checking program can be used
  * instead.
  *
- * Written by Russ Allbery <rra@stanford.edu>
+ * Written by Russ Allbery <eagle@eyrie.org>
  * Copyright 2009, 2013
- *     The Board of Trustees of the Leland Stanford Junior Unversity
+ *     The Board of Trustees of the Leland Stanford Junior University
  *
  * See LICENSE for licensing terms.
  */

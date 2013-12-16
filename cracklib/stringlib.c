@@ -9,9 +9,9 @@
 /*
  * Modified as part of the krb5-strength project as follows:
  *
- * 2007-03-23  Russ Allbery <rra@stanford.edu>
+ * 2007-03-23  Russ Allbery <eagle@eyrie.org>
  *   - Additional system includes for other functions.
- * 2009-10-14  Russ Allbery <rra@stanford.edu>
+ * 2009-10-14  Russ Allbery <eagle@eyrie.org>
  *   - Add ANSI C protototypes for all functions.
  *   - Remove unused Clone function.
  */

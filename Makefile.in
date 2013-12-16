@@ -16,7 +16,7 @@
 
 # Automake makefile for krb5-strength.
 #
-# Written by Russ Allbery <rra@stanford.edu>
+# Written by Russ Allbery <eagle@eyrie.org>
 # Copyright 2007, 2009, 2010, 2012, 2013
 #     The Board of Trustees of the Leland Stanford Junior University
 #
@@ -95,6 +95,7 @@ check_PROGRAMS = tests/runtests$(EXEEXT) \
 	tests/plugin/heimdal-t$(EXEEXT) tests/plugin/mit-t$(EXEEXT) \
 	tests/portable/asprintf-t$(EXEEXT) \
 	tests/portable/snprintf-t$(EXEEXT) \
+	tests/portable/strndup-t$(EXEEXT) \
 	tests/util/messages-krb5-t$(EXEEXT) \
 	tests/util/messages-t$(EXEEXT) tests/util/xmalloc$(EXEEXT) \
 	$(am__EXEEXT_1)
@@ -102,9 +103,10 @@ check_PROGRAMS = tests/runtests$(EXEEXT) \
 subdir = .
 DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am \
 	$(top_srcdir)/configure $(am__configure_deps) \
-	$(srcdir)/config.h.in $(top_srcdir)/portable/asprintf.c \
-	$(top_srcdir)/portable/krb5-extra.c \
-	$(top_srcdir)/portable/snprintf.c $(dist_bin_SCRIPTS) \
+	$(srcdir)/config.h.in $(top_srcdir)/portable/snprintf.c \
+	$(top_srcdir)/portable/asprintf.c \
+	$(top_srcdir)/portable/strndup.c \
+	$(top_srcdir)/portable/krb5-extra.c $(dist_bin_SCRIPTS) \
 	$(top_srcdir)/build-aux/depcomp $(dist_man_MANS) NEWS README \
 	TODO build-aux/ar-lib build-aux/compile build-aux/config.guess \
 	build-aux/config.sub build-aux/depcomp build-aux/install-sh \
@@ -206,9 +208,10 @@ am__DEPENDENCIES_1 =
 @EMBEDDED_CRACKLIB_TRUE@	portable/libportable.la \
 @EMBEDDED_CRACKLIB_TRUE@	$(am__DEPENDENCIES_1) \
 @EMBEDDED_CRACKLIB_TRUE@	$(am__DEPENDENCIES_1)
-am_plugin_strength_la_OBJECTS = plugin/cdb.lo plugin/config.lo \
-	plugin/cracklib.lo plugin/error.lo plugin/general.lo \
-	plugin/heimdal.lo plugin/mit.lo plugin/principal.lo
+am_plugin_strength_la_OBJECTS = plugin/cdb.lo plugin/classes.lo \
+	plugin/config.lo plugin/cracklib.lo plugin/error.lo \
+	plugin/general.lo plugin/heimdal.lo plugin/mit.lo \
+	plugin/principal.lo plugin/vector.lo
 plugin_strength_la_OBJECTS = $(am_plugin_strength_la_OBJECTS)
 plugin_strength_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
 	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
@@ -250,6 +253,13 @@ tests_portable_snprintf_t_OBJECTS =  \
 	$(am_tests_portable_snprintf_t_OBJECTS)
 tests_portable_snprintf_t_DEPENDENCIES = tests/tap/libtap.a \
 	portable/libportable.la
+am_tests_portable_strndup_t_OBJECTS =  \
+	tests/portable/strndup-t.$(OBJEXT) \
+	tests/portable/strndup.$(OBJEXT)
+tests_portable_strndup_t_OBJECTS =  \
+	$(am_tests_portable_strndup_t_OBJECTS)
+tests_portable_strndup_t_DEPENDENCIES = tests/tap/libtap.a \
+	portable/libportable.la
 tests_runtests_SOURCES = tests/runtests.c
 tests_runtests_OBJECTS = tests/tests_runtests-runtests.$(OBJEXT)
 tests_runtests_LDADD = $(LDADD)
@@ -268,11 +278,13 @@ tests_util_xmalloc_DEPENDENCIES = util/libutil.a \
 	portable/libportable.la
 am_tools_heimdal_strength_OBJECTS =  \
 	plugin/tools_heimdal_strength-cdb.$(OBJEXT) \
+	plugin/tools_heimdal_strength-classes.$(OBJEXT) \
 	plugin/tools_heimdal_strength-config.$(OBJEXT) \
 	plugin/tools_heimdal_strength-cracklib.$(OBJEXT) \
 	plugin/tools_heimdal_strength-error.$(OBJEXT) \
 	plugin/tools_heimdal_strength-general.$(OBJEXT) \
 	plugin/tools_heimdal_strength-principal.$(OBJEXT) \
+	plugin/tools_heimdal_strength-vector.$(OBJEXT) \
 	tools/tools_heimdal_strength-heimdal-strength.$(OBJEXT)
 tools_heimdal_strength_OBJECTS = $(am_tools_heimdal_strength_OBJECTS)
 @EMBEDDED_CRACKLIB_FALSE@tools_heimdal_strength_DEPENDENCIES =  \
@@ -330,7 +342,8 @@ SOURCES = $(tests_tap_libtap_a_SOURCES) $(util_libutil_a_SOURCES) \
 	$(portable_libportable_la_SOURCES) $(cracklib_packer_SOURCES) \
 	tests/plugin/heimdal-t.c tests/plugin/mit-t.c \
 	$(tests_portable_asprintf_t_SOURCES) \
-	$(tests_portable_snprintf_t_SOURCES) tests/runtests.c \
+	$(tests_portable_snprintf_t_SOURCES) \
+	$(tests_portable_strndup_t_SOURCES) tests/runtests.c \
 	tests/util/messages-krb5-t.c tests/util/messages-t.c \
 	tests/util/xmalloc.c $(tools_heimdal_strength_SOURCES)
 DIST_SOURCES = $(tests_tap_libtap_a_SOURCES) $(util_libutil_a_SOURCES) \
@@ -339,7 +352,8 @@ DIST_SOURCES = $(tests_tap_libtap_a_SOURCES) $(util_libutil_a_SOURCES) \
 	$(portable_libportable_la_SOURCES) $(cracklib_packer_SOURCES) \
 	tests/plugin/heimdal-t.c tests/plugin/mit-t.c \
 	$(tests_portable_asprintf_t_SOURCES) \
-	$(tests_portable_snprintf_t_SOURCES) tests/runtests.c \
+	$(tests_portable_snprintf_t_SOURCES) \
+	$(tests_portable_strndup_t_SOURCES) tests/runtests.c \
 	tests/util/messages-krb5-t.c tests/util/messages-t.c \
 	tests/util/xmalloc.c $(tools_heimdal_strength_SOURCES)
 am__can_run_installinfo = \
@@ -520,10 +534,10 @@ EXTRA_DIST = .gitignore LICENSE autogen cracklib/HISTORY cracklib/LICENCE  \
 	cracklib/README cracklib/genrules.pl cracklib/mkdict tests/HOWTO   \
 	tests/TESTS tests/data/krb5.conf tests/data/make-krb5-conf	   \
 	tests/data/passwords tests/data/perl.conf tests/data/perlcriticrc  \
-	tests/data/perltidyrc tests/data/wordlist tests/data/wordlist.cdb  \
-	tests/docs/pod-spelling-t tests/docs/pod-t tests/perl/critic-t	   \
-	tests/perl/minimum-version-t tests/perl/strict-t		   \
-	tests/tap/libtap.sh tests/tap/perl/Test/RRA.pm			   \
+	tests/data/perltidyrc tests/data/valgrind.supp tests/data/wordlist \
+	tests/data/wordlist.cdb tests/docs/pod-spelling-t tests/docs/pod-t \
+	tests/perl/critic-t tests/perl/minimum-version-t		   \
+	tests/perl/strict-t tests/tap/libtap.sh tests/tap/perl/Test/RRA.pm \
 	tests/tap/perl/Test/RRA/Config.pm				   \
 	tests/tap/perl/Test/RRA/Automake.pm tests/tools/cdbmake-wordlist-t \
 	tests/tools/heimdal-strength-t tests/util/xmalloc-t		   \
@@ -565,9 +579,9 @@ moduledir = $(libdir)/krb5/plugins/pwqual
 
 # Rules for building the password strength plugin.
 module_LTLIBRARIES = plugin/strength.la
-plugin_strength_la_SOURCES = plugin/cdb.c plugin/config.c plugin/cracklib.c \
-	plugin/error.c plugin/general.c plugin/heimdal.c plugin/internal.h  \
-	plugin/mit.c plugin/principal.c
+plugin_strength_la_SOURCES = plugin/cdb.c plugin/classes.c plugin/config.c \
+	plugin/cracklib.c plugin/error.c plugin/general.c plugin/heimdal.c \
+	plugin/internal.h plugin/mit.c plugin/principal.c plugin/vector.c
 
 plugin_strength_la_LDFLAGS = -module -avoid-version
 @EMBEDDED_CRACKLIB_FALSE@plugin_strength_la_LIBADD = $(CRACKLIB_LIBS) \
@@ -578,9 +592,10 @@ plugin_strength_la_LDFLAGS = -module -avoid-version
 @EMBEDDED_CRACKLIB_TRUE@	portable/libportable.la $(KRB5_LIBS) \
 @EMBEDDED_CRACKLIB_TRUE@	$(CDB_LIBS)
 tools_heimdal_strength_CFLAGS = $(AM_CFLAGS)
-tools_heimdal_strength_SOURCES = plugin/cdb.c plugin/config.c		    \
-	plugin/cracklib.c plugin/error.c plugin/general.c plugin/internal.h \
-	plugin/principal.c tools/heimdal-strength.c
+tools_heimdal_strength_SOURCES = plugin/cdb.c plugin/classes.c		  \
+	plugin/config.c plugin/cracklib.c plugin/error.c plugin/general.c \
+	plugin/internal.h plugin/principal.c plugin/vector.c		  \
+	tools/heimdal-strength.c
 
 @EMBEDDED_CRACKLIB_FALSE@tools_heimdal_strength_LDADD =  \
 @EMBEDDED_CRACKLIB_FALSE@	$(CRACKLIB_LIBS) util/libutil.a \
@@ -656,6 +671,10 @@ tests_portable_snprintf_t_SOURCES = tests/portable/snprintf-t.c \
 	tests/portable/snprintf.c
 
 tests_portable_snprintf_t_LDADD = tests/tap/libtap.a portable/libportable.la
+tests_portable_strndup_t_SOURCES = tests/portable/strndup-t.c \
+	tests/portable/strndup.c
+
+tests_portable_strndup_t_LDADD = tests/tap/libtap.a portable/libportable.la
 tests_util_messages_t_LDADD = tests/tap/libtap.a util/libutil.a \
 	portable/libportable.la
 
@@ -829,6 +848,8 @@ plugin/$(DEPDIR)/$(am__dirstamp):
 	@$(MKDIR_P) plugin/$(DEPDIR)
 	@: > plugin/$(DEPDIR)/$(am__dirstamp)
 plugin/cdb.lo: plugin/$(am__dirstamp) plugin/$(DEPDIR)/$(am__dirstamp)
+plugin/classes.lo: plugin/$(am__dirstamp) \
+	plugin/$(DEPDIR)/$(am__dirstamp)
 plugin/config.lo: plugin/$(am__dirstamp) \
 	plugin/$(DEPDIR)/$(am__dirstamp)
 plugin/cracklib.lo: plugin/$(am__dirstamp) \
@@ -841,6 +862,8 @@ plugin/heimdal.lo: plugin/$(am__dirstamp) \
 	plugin/$(DEPDIR)/$(am__dirstamp)
 plugin/mit.lo: plugin/$(am__dirstamp) plugin/$(DEPDIR)/$(am__dirstamp)
 plugin/principal.lo: plugin/$(am__dirstamp) \
+	plugin/$(DEPDIR)/$(am__dirstamp)
+plugin/vector.lo: plugin/$(am__dirstamp) \
 	plugin/$(DEPDIR)/$(am__dirstamp)
 
 plugin/strength.la: $(plugin_strength_la_OBJECTS) $(plugin_strength_la_DEPENDENCIES) $(EXTRA_plugin_strength_la_DEPENDENCIES) plugin/$(am__dirstamp)
@@ -962,6 +985,14 @@ tests/portable/snprintf.$(OBJEXT): tests/portable/$(am__dirstamp) \
 tests/portable/snprintf-t$(EXEEXT): $(tests_portable_snprintf_t_OBJECTS) $(tests_portable_snprintf_t_DEPENDENCIES) $(EXTRA_tests_portable_snprintf_t_DEPENDENCIES) tests/portable/$(am__dirstamp)
 	@rm -f tests/portable/snprintf-t$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(tests_portable_snprintf_t_OBJECTS) $(tests_portable_snprintf_t_LDADD) $(LIBS)
+tests/portable/strndup-t.$(OBJEXT): tests/portable/$(am__dirstamp) \
+	tests/portable/$(DEPDIR)/$(am__dirstamp)
+tests/portable/strndup.$(OBJEXT): tests/portable/$(am__dirstamp) \
+	tests/portable/$(DEPDIR)/$(am__dirstamp)
+
+tests/portable/strndup-t$(EXEEXT): $(tests_portable_strndup_t_OBJECTS) $(tests_portable_strndup_t_DEPENDENCIES) $(EXTRA_tests_portable_strndup_t_DEPENDENCIES) tests/portable/$(am__dirstamp)
+	@rm -f tests/portable/strndup-t$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(tests_portable_strndup_t_OBJECTS) $(tests_portable_strndup_t_LDADD) $(LIBS)
 tests/$(am__dirstamp):
 	@$(MKDIR_P) tests
 	@: > tests/$(am__dirstamp)
@@ -1000,6 +1031,8 @@ tests/util/xmalloc$(EXEEXT): $(tests_util_xmalloc_OBJECTS) $(tests_util_xmalloc_
 	$(AM_V_CCLD)$(LINK) $(tests_util_xmalloc_OBJECTS) $(tests_util_xmalloc_LDADD) $(LIBS)
 plugin/tools_heimdal_strength-cdb.$(OBJEXT): plugin/$(am__dirstamp) \
 	plugin/$(DEPDIR)/$(am__dirstamp)
+plugin/tools_heimdal_strength-classes.$(OBJEXT):  \
+	plugin/$(am__dirstamp) plugin/$(DEPDIR)/$(am__dirstamp)
 plugin/tools_heimdal_strength-config.$(OBJEXT):  \
 	plugin/$(am__dirstamp) plugin/$(DEPDIR)/$(am__dirstamp)
 plugin/tools_heimdal_strength-cracklib.$(OBJEXT):  \
@@ -1009,6 +1042,8 @@ plugin/tools_heimdal_strength-error.$(OBJEXT): plugin/$(am__dirstamp) \
 plugin/tools_heimdal_strength-general.$(OBJEXT):  \
 	plugin/$(am__dirstamp) plugin/$(DEPDIR)/$(am__dirstamp)
 plugin/tools_heimdal_strength-principal.$(OBJEXT):  \
+	plugin/$(am__dirstamp) plugin/$(DEPDIR)/$(am__dirstamp)
+plugin/tools_heimdal_strength-vector.$(OBJEXT):  \
 	plugin/$(am__dirstamp) plugin/$(DEPDIR)/$(am__dirstamp)
 tools/$(am__dirstamp):
 	@$(MKDIR_P) tools
@@ -1083,6 +1118,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@cracklib/$(DEPDIR)/cracklib_libcracklib_la-stringlib.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@cracklib/$(DEPDIR)/packer.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@plugin/$(DEPDIR)/cdb.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@plugin/$(DEPDIR)/classes.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@plugin/$(DEPDIR)/config.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@plugin/$(DEPDIR)/cracklib.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@plugin/$(DEPDIR)/error.Plo@am__quote@
@@ -1091,15 +1127,19 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@plugin/$(DEPDIR)/mit.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@plugin/$(DEPDIR)/principal.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@plugin/$(DEPDIR)/tools_heimdal_strength-cdb.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@plugin/$(DEPDIR)/tools_heimdal_strength-classes.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@plugin/$(DEPDIR)/tools_heimdal_strength-config.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@plugin/$(DEPDIR)/tools_heimdal_strength-cracklib.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@plugin/$(DEPDIR)/tools_heimdal_strength-error.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@plugin/$(DEPDIR)/tools_heimdal_strength-general.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@plugin/$(DEPDIR)/tools_heimdal_strength-principal.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@plugin/$(DEPDIR)/tools_heimdal_strength-vector.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@plugin/$(DEPDIR)/vector.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@portable/$(DEPDIR)/asprintf.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@portable/$(DEPDIR)/dummy.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@portable/$(DEPDIR)/krb5-extra.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@portable/$(DEPDIR)/snprintf.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@portable/$(DEPDIR)/strndup.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@tests/$(DEPDIR)/tests_runtests-runtests.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@tests/plugin/$(DEPDIR)/tests_plugin_heimdal_t-heimdal-t.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@tests/plugin/$(DEPDIR)/tests_plugin_mit_t-mit-t.Po@am__quote@
@@ -1107,6 +1147,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@tests/portable/$(DEPDIR)/asprintf.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@tests/portable/$(DEPDIR)/snprintf-t.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@tests/portable/$(DEPDIR)/snprintf.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@tests/portable/$(DEPDIR)/strndup-t.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@tests/portable/$(DEPDIR)/strndup.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@tests/tap/$(DEPDIR)/tests_tap_libtap_a-basic.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@tests/tap/$(DEPDIR)/tests_tap_libtap_a-kerberos.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@tests/tap/$(DEPDIR)/tests_tap_libtap_a-process.Po@am__quote@
@@ -1283,6 +1325,20 @@ plugin/tools_heimdal_strength-cdb.obj: plugin/cdb.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(tools_heimdal_strength_CFLAGS) $(CFLAGS) -c -o plugin/tools_heimdal_strength-cdb.obj `if test -f 'plugin/cdb.c'; then $(CYGPATH_W) 'plugin/cdb.c'; else $(CYGPATH_W) '$(srcdir)/plugin/cdb.c'; fi`
 
+plugin/tools_heimdal_strength-classes.o: plugin/classes.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(tools_heimdal_strength_CFLAGS) $(CFLAGS) -MT plugin/tools_heimdal_strength-classes.o -MD -MP -MF plugin/$(DEPDIR)/tools_heimdal_strength-classes.Tpo -c -o plugin/tools_heimdal_strength-classes.o `test -f 'plugin/classes.c' || echo '$(srcdir)/'`plugin/classes.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) plugin/$(DEPDIR)/tools_heimdal_strength-classes.Tpo plugin/$(DEPDIR)/tools_heimdal_strength-classes.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='plugin/classes.c' object='plugin/tools_heimdal_strength-classes.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(tools_heimdal_strength_CFLAGS) $(CFLAGS) -c -o plugin/tools_heimdal_strength-classes.o `test -f 'plugin/classes.c' || echo '$(srcdir)/'`plugin/classes.c
+
+plugin/tools_heimdal_strength-classes.obj: plugin/classes.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(tools_heimdal_strength_CFLAGS) $(CFLAGS) -MT plugin/tools_heimdal_strength-classes.obj -MD -MP -MF plugin/$(DEPDIR)/tools_heimdal_strength-classes.Tpo -c -o plugin/tools_heimdal_strength-classes.obj `if test -f 'plugin/classes.c'; then $(CYGPATH_W) 'plugin/classes.c'; else $(CYGPATH_W) '$(srcdir)/plugin/classes.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) plugin/$(DEPDIR)/tools_heimdal_strength-classes.Tpo plugin/$(DEPDIR)/tools_heimdal_strength-classes.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='plugin/classes.c' object='plugin/tools_heimdal_strength-classes.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(tools_heimdal_strength_CFLAGS) $(CFLAGS) -c -o plugin/tools_heimdal_strength-classes.obj `if test -f 'plugin/classes.c'; then $(CYGPATH_W) 'plugin/classes.c'; else $(CYGPATH_W) '$(srcdir)/plugin/classes.c'; fi`
+
 plugin/tools_heimdal_strength-config.o: plugin/config.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(tools_heimdal_strength_CFLAGS) $(CFLAGS) -MT plugin/tools_heimdal_strength-config.o -MD -MP -MF plugin/$(DEPDIR)/tools_heimdal_strength-config.Tpo -c -o plugin/tools_heimdal_strength-config.o `test -f 'plugin/config.c' || echo '$(srcdir)/'`plugin/config.c
 @am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) plugin/$(DEPDIR)/tools_heimdal_strength-config.Tpo plugin/$(DEPDIR)/tools_heimdal_strength-config.Po
@@ -1352,6 +1408,20 @@ plugin/tools_heimdal_strength-principal.obj: plugin/principal.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='plugin/principal.c' object='plugin/tools_heimdal_strength-principal.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(tools_heimdal_strength_CFLAGS) $(CFLAGS) -c -o plugin/tools_heimdal_strength-principal.obj `if test -f 'plugin/principal.c'; then $(CYGPATH_W) 'plugin/principal.c'; else $(CYGPATH_W) '$(srcdir)/plugin/principal.c'; fi`
+
+plugin/tools_heimdal_strength-vector.o: plugin/vector.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(tools_heimdal_strength_CFLAGS) $(CFLAGS) -MT plugin/tools_heimdal_strength-vector.o -MD -MP -MF plugin/$(DEPDIR)/tools_heimdal_strength-vector.Tpo -c -o plugin/tools_heimdal_strength-vector.o `test -f 'plugin/vector.c' || echo '$(srcdir)/'`plugin/vector.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) plugin/$(DEPDIR)/tools_heimdal_strength-vector.Tpo plugin/$(DEPDIR)/tools_heimdal_strength-vector.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='plugin/vector.c' object='plugin/tools_heimdal_strength-vector.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(tools_heimdal_strength_CFLAGS) $(CFLAGS) -c -o plugin/tools_heimdal_strength-vector.o `test -f 'plugin/vector.c' || echo '$(srcdir)/'`plugin/vector.c
+
+plugin/tools_heimdal_strength-vector.obj: plugin/vector.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(tools_heimdal_strength_CFLAGS) $(CFLAGS) -MT plugin/tools_heimdal_strength-vector.obj -MD -MP -MF plugin/$(DEPDIR)/tools_heimdal_strength-vector.Tpo -c -o plugin/tools_heimdal_strength-vector.obj `if test -f 'plugin/vector.c'; then $(CYGPATH_W) 'plugin/vector.c'; else $(CYGPATH_W) '$(srcdir)/plugin/vector.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) plugin/$(DEPDIR)/tools_heimdal_strength-vector.Tpo plugin/$(DEPDIR)/tools_heimdal_strength-vector.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='plugin/vector.c' object='plugin/tools_heimdal_strength-vector.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(tools_heimdal_strength_CFLAGS) $(CFLAGS) -c -o plugin/tools_heimdal_strength-vector.obj `if test -f 'plugin/vector.c'; then $(CYGPATH_W) 'plugin/vector.c'; else $(CYGPATH_W) '$(srcdir)/plugin/vector.c'; fi`
 
 tools/tools_heimdal_strength-heimdal-strength.o: tools/heimdal-strength.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(tools_heimdal_strength_CFLAGS) $(CFLAGS) -MT tools/tools_heimdal_strength-heimdal-strength.o -MD -MP -MF tools/$(DEPDIR)/tools_heimdal_strength-heimdal-strength.Tpo -c -o tools/tools_heimdal_strength-heimdal-strength.o `test -f 'tools/heimdal-strength.c' || echo '$(srcdir)/'`tools/heimdal-strength.c
@@ -1839,6 +1909,21 @@ warnings:
 
 check-local: $(check_PROGRAMS) tests/data/dictionary.pwd
 	cd tests && ./runtests -l $(abs_top_srcdir)/tests/TESTS
+
+# Used by maintainers to run the main test suite under valgrind.  Suppress
+# the xmalloc and pod-spelling tests because the former won't work properly
+# under valgrind (due to increased memory usage) and the latter is pointless
+# to run under valgrind.  Don't try to trace the test for cdbmake-wordlist,
+# since it's pure Perl.
+check-valgrind: $(check_PROGRAMS) tests/data/dictionary.pwd
+	rm -rf $(abs_top_builddir)/tmp-valgrind
+	mkdir $(abs_top_builddir)/tmp-valgrind
+	env RRA_MAINTAINER_TESTS= valgrind --leak-check=full	\
+	    --show-reachable=yes --trace-children=yes		\
+	    --log-file=$(abs_top_builddir)/tmp-valgrind/log.%p	\
+	    --suppressions=tests/data/valgrind.supp		\
+	    --trace-children-skip="/bin/sh,*/cat,*/diff,*/expr,*/grep,*/mkdir,*/rm,*/rmdir,*/sed,*/sleep,*/true,*/wc,*/docs/*-t,*/perl/*-t,*/data/make-krb5-conf,*/tools/cdbmake-wordlist-t" \
+	    tests/runtests -l '$(abs_top_srcdir)/tests/TESTS'
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
