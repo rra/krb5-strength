@@ -165,6 +165,8 @@ parse_class(krb5_context ctx, const char *spec, struct class_rule **rule)
 
     /* Create the basic rule structure. */
     *rule = calloc(1, sizeof(struct class_rule));
+    if (*rule == NULL)
+        return strength_error_system(ctx, "cannot allocate memory");
 
     /*
      * If the rule starts with a digit, it starts with a range of affected
@@ -249,12 +251,12 @@ strength_config_classes(krb5_context ctx, const char *opt,
 
     /* Each word in the list will be a class rule. */
     code = parse_class(ctx, config->strings[0], &rules);
-    if (code != 0)
+    if (code != 0 || rules == NULL)
         goto fail;
     last = rules;
     for (i = 1; i < config->count; i++) {
         code = parse_class(ctx, config->strings[i], &last->next);
-        if (code != 0)
+        if (code != 0 || last->next == NULL)
             goto fail;
         last = last->next;
     }
