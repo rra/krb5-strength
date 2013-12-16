@@ -25,6 +25,7 @@
 /tests/plugin/mit-t
 /tests/portable/asprintf-t
 /tests/portable/snprintf-t
+/tests/portable/strndup-t
 /tests/runtests
 /tests/tap/libtap.a
 /tests/util/messages-krb5-t

@@ -36,7 +36,7 @@ BEGIN {
     # This version should match the corresponding rra-c-util release, but with
     # two digits for the minor version, including a leading zero if necessary,
     # so that it will sort properly.
-    $VERSION = '4.09';
+    $VERSION = '4.12';
 }
 
 # If BUILD or SOURCE are set in the environment, look for data/perl.conf under
@@ -131,7 +131,7 @@ directory names starting with F<tests/>.
 
 =item $LIBRARY_PATH
 
-Add this directory (or a .libs subdirectory) relative to the top of the
+Add this directory (or a F<.libs> subdirectory) relative to the top of the
 source tree to LD_LIBRARY_PATH when checking the syntax of Perl modules.
 This may be required to pick up libraries that are used by in-tree Perl
 modules so that Perl scripts can pass a syntax check.

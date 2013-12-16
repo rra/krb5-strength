@@ -17,6 +17,15 @@ krb5-strength 2.2 (unreleased)
     Close a file descriptor and memory leak in the included version of
     CrackLib.  This problem was already fixed in CrackLib 2.9.0.
 
+    Update to rra-c-util 4.12:
+
+    * Properly check the return status of snprintf and friends.
+
+    Update to C TAP Harness 2.3:
+
+    * Suppress lazy plans and test summaries if the test failed with bail.
+    * Add warn_unused_result gcc attributes to relevant functions.
+
 krb5-strength 2.1 (2013-10-10)
 
     Fix the package build when CDB support is disabled or TinyCDB was not
