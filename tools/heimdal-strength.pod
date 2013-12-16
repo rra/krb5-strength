@@ -1,5 +1,6 @@
 =for stopwords
-heimdal-strength Heimdal CrackLib krb5.conf krb5-strength Allbery
+heimdal-strength Heimdal CrackLib krb5-strength Allbery CDB
+canonicalization cdbmake-wordlist reproducibly
 
 =head1 NAME
 
@@ -12,19 +13,25 @@ B<heimdal-strength> [I<principal>]
 =head1 DESCRIPTION
 
 B<heimdal-strength> is an external password quality check program for
-Heimdal that verifies the strength of a password using an embedded copy of
-CrackLib, with some modifications to increase the aggressiveness of its
-rules.  It is normally run via kpasswdd(8) using the Heimdal password
-quality check interface rather than directly.
+Heimdal that verifies the strength of a password.  Passwords can be tested
+with CrackLib, checked against a CDB database of known weak passwords,
+checked for length, checked for non-printable or non-ASCII characters that
+may be difficult to enter reproducibly, required to contain particular
+character classes, or any combination of these tests.  It is normally run
+via kpasswdd(8) using the Heimdal password quality check interface rather
+than directly.
 
-To use this program, the path to a CrackLib database must be configured in
-krb5.conf via the C<password_dictionary> setting in C<[appdefaults]>.  It
-uses the application name C<krb5-strength> when trying to find this
-setting.  A typical setting would be:
+To use this program, it must be configured in F<krb5.conf> via settings
+in C<[appdefaults]> for the application name C<krb5-strength>.  A typical
+setting would be:
 
     krb5-strength = {
         password_dictionary = /usr/local/lib/kadmind/dictionary
     }
+
+which says to check passwords with CrackLib using the given path as the
+base path of the CrackLib dictionary.  See L</CONFIGURATION> below for
+details on the supported configuration options.
 
 B<heimdal-strength> then expects the Heimdal password quality check
 information on standard input, specifically:
@@ -41,9 +48,106 @@ rejecting the password on standard error and exit with a status of 0.  If
 some fatal error occurs, it will print that error to standard error and
 exit with a non-zero status.
 
+=head1 CONFIGURATION
+
+The following F<krb5.conf> configuration options are supported:
+
+=over 4
+
+=item minimum_length
+
+If set to a numeric value, passwords with fewer than that number of
+characters will be rejected, independent of any length restrictions in
+CrackLib.  Note that this setting does not bypass the minimum length
+requirements in CrackLib itself.
+
+=item password_dictionary
+
+Specifies the base path to a CrackLib dictionary and enables password
+strength testing using CrackLib.  The provided path should be the full
+path to the dictionary files, omitting the trailing F<*.hwm>, F<*.pwd>,
+and F<*.pwi> extensions for the CrackLib dictionary.
+
+=item password_dictionary_cdb
+
+Specifies the base path to a CDB dictionary and enables CDB password
+dictionary lookups.  The path must point to a CDB-format database whose
+keys are the known passwords or dictionary words.  The values are ignored.
+You can use the B<cdbmake-wordlist> utility to generate the CDB database
+from a word list.
+
+The CDB dictionary lookups do not do the complex password mangling that
+CrackLib does.  Instead, the password itself will be checked against the
+dictionary, and then variations of the password formed by removing the
+first character, the last character, the first and last characters, the
+first two characters, and the last two characters.  If any of these
+strings are found in the CDB database, the password will be rejected;
+otherwise, it will be accepted, at least by this check.
+
+Both a CrackLib dictionary and a CDB dictionary may be configured at the
+same time, in which case CrackLib will be run first, followed by the CDB
+checks.
+
+=item require_ascii_printable
+
+If set to a true boolean value, rejects any password that contains
+non-ASCII characters or ASCII control characters.  Spaces are allowed;
+tabs are not (at least assuming the POSIX C locale).  No canonicalization
+or character set is defined for Kerberos passwords in general, so you may
+want to reject non-ASCII characters to avoid interoperability problems
+with computers with different default character sets or Unicode
+normalization forms.
+
+=item require_classes
+
+This option allows specification of more complex character class
+requirements.  The value of this parameter should be one or more
+whitespace-separated rule.  Each rule has the syntax:
+
+    [<min>-<max>:]<class>[,<class>...]
+
+where <class> is one of C<upper>, C<lower>, C<digit>, or C<symbol>.  The
+symbol class includes all characters other than alphanumeric characters,
+including space.  The listed classes must appear in the password.
+Separate multiple required classes with a comma (and no space).
+
+The character class checks will be done in whatever locale the plugin or
+password check program is run in, which will normally be the POSIX C
+locale but may be different depending on local configuration.
+
+A simple example:
+
+    require_classes = upper,lower,digit
+
+This requires all passwords contain at least one uppercase letter, at
+least one lowercase letter, and at least one digit.
+
+If present, <min> and <max> specify the minimum password length and
+maximum password length to which this rule applies.  This allows one to
+specify character class requirements that change with password length.
+So, for example:
+
+    require_classes = 8-19:upper,lower 8-15:digit 8-11:symbol
+
+requires all passwords from 8 to 11 characters long contain all four
+character classes, passwords from 12 to 15 characters long contain upper
+and lower case and a digit, and passwords from 16 to 19 characters long
+contain both upper and lower case.  Passwords longer than 20 characters
+have no character class restrictions.  (This example is probably used in
+conjunction with minimum_length = 8.)
+
+=item require_non_letter
+
+If set to a true boolean value, the password must contain at least one
+character that is not a letter (uppercase or lowercase) or a space.  This
+may be helpful in combination with passphrases; users may choose a stock
+English phrase, and this will force at least some additional complexity.
+
+=back
+
 =head1 SEE ALSO
 
-kadm5-strength(3), kpasswdd(8), krb5.conf(5)
+cdbmake-wordlist(1), kadm5-strength(3), kpasswdd(8), krb5.conf(5)
 
 The "Password changing" section of the Heimdal info documentation
 describes the interface that this program implements and how to configure
@@ -55,7 +159,7 @@ krb5-strength package.
 
 =head1 AUTHOR
 
-Russ Allbery <rra@stanford.edu>
+Russ Allbery <eagle@eyrie.org>
 
 =head1 COPYRIGHT AND LICENSE
 

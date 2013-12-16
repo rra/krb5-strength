@@ -7,10 +7,10 @@
  * wrapped up in those interfaces.
  *
  * Developed by Derrick Brashear and Ken Hornstein of Sine Nomine Associates,
- *     on behalf of Stanford University.
- * Extensive modifications by Russ Allbery <rra@stanford.edu>
+ *     on behalf of Stanford University
+ * Extensive modifications by Russ Allbery <eagle@eyrie.org>
  * Copyright 2006, 2007, 2009, 2012, 2013
- *     The Board of Trustees of the Leland Stanford Junior Unversity
+ *     The Board of Trustees of the Leland Stanford Junior University
  *
  * See LICENSE for licensing terms.
  */
@@ -50,9 +50,14 @@ strength_init(krb5_context ctx, const char *dictionary,
     /* Get minimum length information from krb5.conf. */
     strength_config_number(ctx, "minimum_length", &data->minimum_length);
 
-    /* Get character class restrictions from krb5.conf. */
+    /* Get simple character class restrictions from krb5.conf. */
     strength_config_boolean(ctx, "require_ascii_printable", &data->ascii);
     strength_config_boolean(ctx, "require_non_letter", &data->nonletter);
+
+    /* Get complex character class restrictions from krb5.conf. */
+    code = strength_config_classes(ctx, "require_classes", &data->rules);
+    if (code != 0)
+        goto fail;
 
     /*
      * Try to initialize CDB and CrackLib dictionaries.  Both functions handle
@@ -139,6 +144,14 @@ strength_check(krb5_context ctx UNUSED, krb5_pwqual_moddata data,
     if (data->nonletter && only_alpha_space(password))
         return strength_error_class(ctx, ERROR_LETTER);
 
+    /*
+     * If desired, check that the password satisfies character class
+     * restrictions.
+     */
+    code = strength_check_classes(ctx, data, password);
+    if (code != 0)
+        return code;
+
     /* Check if the password is based on the principal in some way. */
     code = strength_check_principal(ctx, data, principal, password);
     if (code != 0)
@@ -164,9 +177,17 @@ strength_check(krb5_context ctx UNUSED, krb5_pwqual_moddata data,
 void
 strength_close(krb5_context ctx UNUSED, krb5_pwqual_moddata data)
 {
-    if (data != NULL) {
-        strength_close_cdb(ctx, data);
-        free(data->dictionary);
-        free(data);
+    struct class_rule *last, *tmp;
+
+    if (data == NULL)
+        return;
+    strength_close_cdb(ctx, data);
+    last = data->rules;
+    while (last != NULL) {
+        tmp = last;
+        last = last->next;
+        free(tmp);
     }
+    free(data->dictionary);
+    free(data);
 }

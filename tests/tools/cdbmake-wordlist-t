@@ -2,7 +2,7 @@
 #
 # Test suite for the cdbmake-wordlist utility.
 #
-# Written by Russ Allbery <rra@stanford.edu>
+# Written by Russ Allbery <eagle@eyrie.org>
 # Copyright 2013
 #     The Board of Trustees of the Leland Stanford Junior University
 #
@@ -17,7 +17,7 @@ if ! command -v cdb >/dev/null 2>&1 ; then
 fi
 
 # Output the test plan.
-plan 11
+plan 20
 
 # Create a temporary directory and wordlist and ensure it's writable.
 tmpdir=`test_tmpdir`
@@ -60,6 +60,32 @@ ok_program 'Database still contains password' 0 '1' \
     cdb -q "$tmpdir/wordlist.cdb" password
 ok_program 'Database does not contain non-ASCII password' 100 '' \
     cdb -q "$tmpdir/wordlist.cdb" 'عربى'
+
+# Regenerate the database, filtering out long passwords.
+ok_program 'Database generation with no long passwords' 0 '' \
+    "$cdbmake" -L 10 "$tmpdir/wordlist"
+ok_program 'Database still contains bitterbane' 0 '1' \
+    cdb -q "$tmpdir/wordlist.cdb" bitterbane
+ok_program 'Database does not contain happenstance' 100 '' \
+    cdb -q "$tmpdir/wordlist.cdb" happenstance
+
+# Regenerate the database, filtering out words starting with b or ending in d.
+ok_program 'Database generation with no b passwords' 0 '' \
+    "$cdbmake" -x '\Ab' -x '.*d' "$tmpdir/wordlist"
+ok_program 'Database does not contain bitterbane' 100 '' \
+    cdb -q "$tmpdir/wordlist.cdb" bitterbane
+ok_program 'Database still contains happenstance' 0 '1' \
+    cdb -q "$tmpdir/wordlist.cdb" happenstance
+ok_program 'Database does not contain password' 100 '' \
+    cdb -q "$tmpdir/wordlist.cdb" password
+
+# Try filtering the wordlist into a new wordlist.
+ok_program 'Wordlist filtering' 0 '' \
+    "$cdbmake" -a -x '.*d' -l 8 -o "$tmpdir/wordlist.new" "$tmpdir/wordlist"
+( echo 'bitterbane'; echo 'happenstance' ) > "$tmpdir/wordlist.expected"
+ok_program 'Filtered wordlist is correct' 0 '' \
+    cmp "$tmpdir/wordlist.expected" "$tmpdir/wordlist.new"
+rm -f "$tmpdir/wordlist.expected" "$tmpdir/wordlist.new"
 
 # Clean up.
 rm -f "$tmpdir/wordlist.cdb"

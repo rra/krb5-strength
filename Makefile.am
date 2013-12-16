@@ -1,6 +1,6 @@
 # Automake makefile for krb5-strength.
 #
-# Written by Russ Allbery <rra@stanford.edu>
+# Written by Russ Allbery <eagle@eyrie.org>
 # Copyright 2007, 2009, 2010, 2012, 2013
 #     The Board of Trustees of the Leland Stanford Junior University
 #
@@ -11,10 +11,10 @@ EXTRA_DIST = .gitignore LICENSE autogen cracklib/HISTORY cracklib/LICENCE  \
 	cracklib/README cracklib/genrules.pl cracklib/mkdict tests/HOWTO   \
 	tests/TESTS tests/data/krb5.conf tests/data/make-krb5-conf	   \
 	tests/data/passwords tests/data/perl.conf tests/data/perlcriticrc  \
-	tests/data/perltidyrc tests/data/wordlist tests/data/wordlist.cdb  \
-	tests/docs/pod-spelling-t tests/docs/pod-t tests/perl/critic-t	   \
-	tests/perl/minimum-version-t tests/perl/strict-t		   \
-	tests/tap/libtap.sh tests/tap/perl/Test/RRA.pm			   \
+	tests/data/perltidyrc tests/data/valgrind.supp tests/data/wordlist \
+	tests/data/wordlist.cdb tests/docs/pod-spelling-t tests/docs/pod-t \
+	tests/perl/critic-t tests/perl/minimum-version-t		   \
+	tests/perl/strict-t tests/tap/libtap.sh tests/tap/perl/Test/RRA.pm \
 	tests/tap/perl/Test/RRA/Config.pm				   \
 	tests/tap/perl/Test/RRA/Automake.pm tests/tools/cdbmake-wordlist-t \
 	tests/tools/heimdal-strength-t tests/util/xmalloc-t		   \
@@ -55,9 +55,9 @@ moduledir = $(libdir)/krb5/plugins/pwqual
 
 # Rules for building the password strength plugin.
 module_LTLIBRARIES = plugin/strength.la
-plugin_strength_la_SOURCES = plugin/cdb.c plugin/config.c plugin/cracklib.c \
-	plugin/error.c plugin/general.c plugin/heimdal.c plugin/internal.h  \
-	plugin/mit.c plugin/principal.c
+plugin_strength_la_SOURCES = plugin/cdb.c plugin/classes.c plugin/config.c \
+	plugin/cracklib.c plugin/error.c plugin/general.c plugin/heimdal.c \
+	plugin/internal.h plugin/mit.c plugin/principal.c plugin/vector.c
 plugin_strength_la_LDFLAGS = -module -avoid-version
 if EMBEDDED_CRACKLIB
     plugin_strength_la_LIBADD = cracklib/libcracklib.la
@@ -69,9 +69,10 @@ plugin_strength_la_LIBADD += portable/libportable.la $(KRB5_LIBS) $(CDB_LIBS)
 # The Heimdal external check program.
 bin_PROGRAMS = tools/heimdal-strength
 tools_heimdal_strength_CFLAGS = $(AM_CFLAGS)
-tools_heimdal_strength_SOURCES = plugin/cdb.c plugin/config.c		    \
-	plugin/cracklib.c plugin/error.c plugin/general.c plugin/internal.h \
-	plugin/principal.c tools/heimdal-strength.c
+tools_heimdal_strength_SOURCES = plugin/cdb.c plugin/classes.c		  \
+	plugin/config.c plugin/cracklib.c plugin/error.c plugin/general.c \
+	plugin/internal.h plugin/principal.c plugin/vector.c		  \
+	tools/heimdal-strength.c
 if EMBEDDED_CRACKLIB
     tools_heimdal_strength_LDADD = cracklib/libcracklib.la
 else
@@ -120,9 +121,10 @@ warnings:
 	$(MAKE) V=0 CFLAGS='$(WARNINGS)' $(check_PROGRAMS)
 
 # The bits below are for the test suite, not for the main package.
-check_PROGRAMS = tests/runtests tests/plugin/heimdal-t tests/plugin/mit-t   \
-	tests/portable/asprintf-t tests/portable/snprintf-t		    \
-	tests/util/messages-krb5-t tests/util/messages-t tests/util/xmalloc
+check_PROGRAMS = tests/runtests tests/plugin/heimdal-t tests/plugin/mit-t \
+	tests/portable/asprintf-t tests/portable/snprintf-t		  \
+	tests/portable/strndup-t tests/util/messages-krb5-t		  \
+	tests/util/messages-t tests/util/xmalloc
 if EMBEDDED_CRACKLIB
     check_PROGRAMS += cracklib/packer
 endif
@@ -148,6 +150,9 @@ tests_portable_asprintf_t_LDADD = tests/tap/libtap.a portable/libportable.la
 tests_portable_snprintf_t_SOURCES = tests/portable/snprintf-t.c \
 	tests/portable/snprintf.c
 tests_portable_snprintf_t_LDADD = tests/tap/libtap.a portable/libportable.la
+tests_portable_strndup_t_SOURCES = tests/portable/strndup-t.c \
+	tests/portable/strndup.c
+tests_portable_strndup_t_LDADD = tests/tap/libtap.a portable/libportable.la
 tests_util_messages_t_LDADD = tests/tap/libtap.a util/libutil.a \
 	portable/libportable.la
 tests_util_messages_krb5_t_LDADD = tests/tap/libtap.a util/libutil.a \
@@ -170,3 +175,18 @@ endif
 
 check-local: $(check_PROGRAMS) tests/data/dictionary.pwd
 	cd tests && ./runtests -l $(abs_top_srcdir)/tests/TESTS
+
+# Used by maintainers to run the main test suite under valgrind.  Suppress
+# the xmalloc and pod-spelling tests because the former won't work properly
+# under valgrind (due to increased memory usage) and the latter is pointless
+# to run under valgrind.  Don't try to trace the test for cdbmake-wordlist,
+# since it's pure Perl.
+check-valgrind: $(check_PROGRAMS) tests/data/dictionary.pwd
+	rm -rf $(abs_top_builddir)/tmp-valgrind
+	mkdir $(abs_top_builddir)/tmp-valgrind
+	env RRA_MAINTAINER_TESTS= valgrind --leak-check=full	\
+	    --show-reachable=yes --trace-children=yes		\
+	    --log-file=$(abs_top_builddir)/tmp-valgrind/log.%p	\
+	    --suppressions=tests/data/valgrind.supp		\
+	    --trace-children-skip="/bin/sh,*/cat,*/diff,*/expr,*/grep,*/mkdir,*/rm,*/rmdir,*/sed,*/sleep,*/true,*/wc,*/docs/*-t,*/perl/*-t,*/data/make-krb5-conf,*/tools/cdbmake-wordlist-t" \
+	    tests/runtests -l '$(abs_top_srcdir)/tests/TESTS'

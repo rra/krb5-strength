@@ -1,6 +1,6 @@
 dnl Process this file with autoconf to produce a configure script.
 dnl
-dnl Written by Russ Allbery <rra@stanford.edu>
+dnl Written by Russ Allbery <eagle@eyrie.org>
 dnl Copyright 2006, 2007, 2009, 2010, 2012, 2013
 dnl     The Board of Trustees of the Leland Stanford Junior University
 dnl
@@ -8,7 +8,7 @@ dnl See LICENSE for licensing terms.
 
 dnl Basic Autoconf configuration.
 AC_PREREQ([2.64])
-AC_INIT([krb5-strength], [2.1], [rra@stanford.edu])
+AC_INIT([krb5-strength], [2.2], [eagle@eyrie.org])
 AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_LIBOBJ_DIR([portable])
 AC_CONFIG_MACRO_DIR([m4])
@@ -24,7 +24,7 @@ AM_PROG_CC_C_O
 AC_PROG_INSTALL
 m4_ifdef([AM_PROG_AR], [AM_PROG_AR])
 AM_DISABLE_STATIC
-AC_PROG_LIBTOOL
+LT_INIT
 
 dnl External libraries.
 RRA_LIB_CDB_OPTIONAL
@@ -41,9 +41,9 @@ AC_CHECK_HEADERS([krb5/pwqual_plugin.h], [], [], [RRA_INCLUDES_KRB5])
 AC_CHECK_TYPES([krb5_realm], [], [], [RRA_INCLUDES_KRB5])
 AC_CHECK_FUNCS([krb5_free_default_realm \
     krb5_free_string \
-    krb5_principal_get_realm \
     krb5_get_init_creds_opt_alloc \
     krb5_get_init_creds_opt_set_default_flags \
+    krb5_principal_get_realm \
     krb5_xfree])
 AC_CHECK_FUNCS([krb5_get_init_creds_opt_free],
     [RRA_FUNC_KRB5_GET_INIT_CREDS_OPT_FREE_ARGS])
@@ -71,7 +71,7 @@ AC_CHECK_TYPES([ssize_t], [], [],
     [#include <sys/types.h>])
 RRA_FUNC_SNPRINTF
 AC_CHECK_FUNCS([setrlimit])
-AC_REPLACE_FUNCS([asprintf])
+AC_REPLACE_FUNCS([asprintf strndup])
 
 dnl Write out the results.
 AC_CONFIG_FILES([Makefile])

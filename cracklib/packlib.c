@@ -9,21 +9,23 @@
 /*
  * Modified as part of the krb5-strength project as follows:
  *
- * 2007-03-23  Russ Allbery <rra@stanford.edu>
+ * 2007-03-23  Russ Allbery <eagle@eyrie.org>
  *   - Apply Debian patch to improve the search logic.
  *   - Don't crash if the dictionary is corrupt.
  *   - Additional system includes for other functions.
- * 2009-10-14  Russ Allbery <rra@stanford.edu>
+ * 2009-10-14  Russ Allbery <eagle@eyrie.org>
  *   - Add ANSI C protototypes for all functions.
  *   - Tweaks for const cleanliness.
  *   - Add parentheses around assignment used for its truth value.
  *   - Make internal functions static.
  *   - Remove unused variables.
- * 2009-11-18  Russ Allbery <rra@stanford.edu>
+ * 2009-11-18  Russ Allbery <eagle@eyrie.org>
  *   - Fixed the data format output by packer to properly pad the end.
- * 2013-09-24  Russ Allbery <rra@stanford.edu>
+ * 2013-09-24  Russ Allbery <eagle@eyrie.org>
  *   - Add a missing ANSI C prototype.
  *   - Remove last block optimization in GetPW and start fresh each time.
+ * 2013-12-13  Russ Allbery <eagle@eyrie.org>
+ *   - Close the wfp file handle on PWClose if it's open.
  */
 
 #include <stdio.h>
@@ -97,6 +99,10 @@ PWOpen(const char *prefix, const char *mode)
 	    pdesc.header.pih_magic = 0;
 	    fclose(ifp);
 	    fclose(dfp);
+	    if (wfp != NULL)
+	    {
+		fclose(wfp);
+	    }
 	    return ((PWDICT *) 0);
 	}
 
@@ -107,6 +113,10 @@ PWOpen(const char *prefix, const char *mode)
 	    pdesc.header.pih_magic = 0;
 	    fclose(ifp);
 	    fclose(dfp);
+	    if (wfp != NULL)
+	    {
+		fclose(wfp);
+	    }
 	    return ((PWDICT *) 0);
 	}
 
@@ -117,6 +127,10 @@ PWOpen(const char *prefix, const char *mode)
 	    pdesc.header.pih_magic = 0;
 	    fclose(ifp);
 	    fclose(dfp);
+	    if (wfp != NULL)
+	    {
+		fclose(wfp);
+	    }
 	    return ((PWDICT *) 0);
 	}
 
@@ -177,6 +191,10 @@ PWClose(PWDICT *pwp)
 
     fclose(pwp->ifp);
     fclose(pwp->dfp);
+    if (pwp->wfp != NULL)
+    {
+	fclose(pwp->wfp);
+    }
 
     pwp->header.pih_magic = 0;
 

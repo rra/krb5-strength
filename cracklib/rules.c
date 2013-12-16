@@ -9,13 +9,13 @@
 /*
  * Modified as part of the krb5-strength project as follows:
  *
- * 2007-03-22  Russ Allbery <rra@stanford.edu>
+ * 2007-03-22  Russ Allbery <eagle@eyrie.org>
  *   - Cap deletion of leading or trailing characters at one more than half
  *     the length of the password string and no more than five characters.
  *     This goes with a change to fascist.c that adds rules to delete more
  *     leading and trailing characters for longer passwords.
  *   - Additional system includes for other functions.
- * 2009-10-14  Russ Allbery <rra@stanford.edu>
+ * 2009-10-14  Russ Allbery <eagle@eyrie.org>
  *   - Simplify Debug() function for how it's actually called.
  *   - Add ANSI C protototypes for all functions.
  *   - Tweaks for const cleanliness.
