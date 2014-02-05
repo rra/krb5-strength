@@ -1,5 +1,15 @@
                     User-Visible krb5-strength Changes
 
+krb5-strength 3.0 (unreleased)
+
+    A password history implementation for Heimdal is now included.  This
+    is a separate Perl program, heimdal-history, that stacks with the
+    external program implementation of strength checking.  It is not
+    available in the form of a plugin, only as a Heimdal external password
+    quality check.  (MIT Kerberos provides its own password history
+    mechanism.)  This program has more extensive Perl module dependencies
+    than the other programs in this distribution.
+
 krb5-strength 2.2 (2013-12-16)
 
     More complex character class requirements can be specified with the

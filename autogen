@@ -12,6 +12,8 @@ version=`grep '^krb5-strength' NEWS | head -1 | cut -d' ' -f2`
 pod2man --release="$version" --center='krb5-strength' \
     tools/cdbmake-wordlist > tools/cdbmake-wordlist.1
 pod2man --release="$version" --center='krb5-strength' \
+    tools/heimdal-history > tools/heimdal-history.1
+pod2man --release="$version" --center='krb5-strength' \
     tools/heimdal-strength.pod > tools/heimdal-strength.1
 
 # Generate the C version of our password test data.

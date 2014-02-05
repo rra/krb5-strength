@@ -13,13 +13,14 @@
 BLURB
 
   krb5-strength provides a password quality plugin for the MIT Kerberos
-  KDC (specifically the kadmind server) and an external password quality
-  program for use with the Heimdal kpasswdd server.  Passwords can be
-  tested with CrackLib, checked against a CDB database of known weak
-  passwords, checked for length, checked for non-printable or non-ASCII
-  characters that may be difficult to enter reproducibly, required to
-  contain particular character classes, or any combination of these tests.
-  It supports both Heimdal and MIT Kerberos (1.9 or later).
+  KDC (specifically the kadmind server), an external password quality
+  program for use with Heimdal, and a password history implementation for
+  use with Heimdal.  Passwords can be tested with CrackLib, checked
+  against a CDB database of known weak passwords, checked for length,
+  checked for non-printable or non-ASCII characters that may be difficult
+  to enter reproducibly, required to contain particular character classes,
+  or any combination of these tests.  It supports both Heimdal and MIT
+  Kerberos (1.9 or later).
 
 DESCRIPTION
 
@@ -66,6 +67,13 @@ DESCRIPTION
   behavior, at which point this package can likely wither away in favor of
   much simpler plugins that link to the standard CrackLib library.
 
+  krb5-strength also includes a password history implementation for
+  Heimdal.  This is separate from the password strength implementation but
+  can be stacked with it so that both strength and history checks are
+  performed.  This history implementation is available only via the
+  Heimdal external password quality interface.  MIT Kerberos includes its
+  own password history implementation.
+
 REQUIREMENTS
 
   For Heimdal, you may use either the external password quality check
@@ -107,12 +115,22 @@ REQUIREMENTS
   bulky, often covered by murky copyrights, and easily locatable on the
   Internet with a modicum of searching, none are included in this toolkit.
 
-  To run the test suite, you will also need Perl 5.006 or later.  The
-  following additional Perl modules will be used by the test suite if
-  present:
+  The password history program, heimdal-history, requires Perl 5.010 or
+  later plus the following CPAN modules:
 
+      DB_File::Lock
+      Crypt::PBKDF2
+      Getopt::Long::Descriptive
       IPC::Run
       JSON
+      Readonly
+
+  and their dependencies.
+
+  To run the test suite, you will need Perl 5.010 or later and the
+  dependencies of the heimdal-history program.  The following additional
+  Perl modules will be used by the test suite if present:
+
       Perl6::Slurp
       Test::MinimumVersion
       Test::Perl::Critic
@@ -273,6 +291,30 @@ CONFIGURATION
   you may have to omit policy_libraries in your configuration and instead
   pass the --check-library argument to kpasswdd specifying the library to
   load.
+
+  Additional configuration is required to use the history implementation.
+  Ensure that its dependencies are installed, and then examine the local
+  configuration settings at the top of the heimdal-history program.  By
+  default, it requires a _history user and _history group be present on
+  the system, and all history information will be read and written as that
+  user and group.  It also requires a nobody user and nogroup group to be
+  present, and all strength checking will be done as that user and group.
+  It uses various files in /var/lib/heimdal-history to store history and
+  statistical information by default, so if using the defaults, create
+  that directory and ensure it is writable by the _history user.
+
+  Once that setup is done, change your [password_quality] configuration
+  to:
+
+      [password_quality]
+          policies         = external-check
+          external_program = /usr/local/bin/heimdal-history
+
+  The heimdal-history program will automatically also run heimdal-strength
+  as well, looking for it in /usr/local/bin, /usr/bin, and /bin.  Change
+  the PATH setting at the top of the script if you have different
+  requirements.  You should continue to configure heimdal-strength as if
+  you were running it directly.
 
  MIT Kerberos
 

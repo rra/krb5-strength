@@ -1,7 +1,7 @@
 # Automake makefile for krb5-strength.
 #
 # Written by Russ Allbery <eagle@eyrie.org>
-# Copyright 2007, 2009, 2010, 2012, 2013
+# Copyright 2007, 2009, 2010, 2012, 2013, 2014
 #     The Board of Trustees of the Leland Stanford Junior University
 #
 # See LICENSE for licensing terms.
@@ -82,10 +82,11 @@ tools_heimdal_strength_LDADD += util/libutil.a portable/libportable.la \
 	$(KRB5_LIBS) $(CDB_LIBS)
 
 # Other tools.
-dist_bin_SCRIPTS = tools/cdbmake-wordlist
+dist_bin_SCRIPTS = tools/cdbmake-wordlist tools/heimdal-history
 
 # Man pages for all tools.
-dist_man_MANS = tools/heimdal-strength.1 tools/cdbmake-wordlist.1
+dist_man_MANS = tools/heimdal-history.1 tools/heimdal-strength.1 \
+	tools/cdbmake-wordlist.1
 
 # Handle the standard stuff that make maintainer-clean should probably remove
 # but doesn't.  This breaks the GNU coding standard, but in this area the GNU
