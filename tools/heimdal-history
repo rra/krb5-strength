@@ -3,9 +3,9 @@
 # Password history via Heimdal external strength checking.
 #
 # This script is meant to be called via the Heimdal external password strength
-# checking interface and maintains per-user password history that also rejects
-# one-character permutations.  Password history is stored as Crypt::PBKDF2
-# hashes with random salt for each password.
+# checking interface and maintains per-user password history.  Password
+# history is stored as Crypt::PBKDF2 hashes with random salt for each
+# password.
 #
 # Written by Russ Allbery <eagle@eyrie.org>
 # Copyright 2013, 2014
@@ -37,7 +37,7 @@ use Sys::Syslog qw(openlog syslog LOG_AUTH LOG_INFO LOG_WARNING);
 # The number of PBKDF2 iterations to use when hashing passwords.  This number
 # should be chosen so as to force the hash operation to take approximately 0.1
 # seconds on current hardware.
-Readonly my $HASH_ITERATIONS => 65536;
+Readonly my $HASH_ITERATIONS => 14592;
 
 # Path to the history database.  Currently, this must be a Berkeley DB file in
 # the old DB_HASH format.  Keys will be principal names, and values will be a
@@ -213,14 +213,16 @@ sub log_result {
 # PBKDF2 using SHA-2 as the underlying hash function.  As of version 0.133330,
 # this uses SHA-256.
 #
-# $password - Password to hash
+# $password   - Password to hash
+# $iterations - Optional iteration count, defaulting to $HASH_ITERATIONS
 #
 # Returns: Hash encoded in the LDAP-compatible Crypt::PBKDF2 format
 sub password_hash {
-    my ($password) = @_;
+    my ($password, $iterations) = @_;
+    $iterations //= $HASH_ITERATIONS;
     my $hasher = Crypt::PBKDF2->new(
         hash_class => 'HMACSHA2',
-        iterations => $HASH_ITERATIONS,
+        iterations => $iterations,
     );
     return $hasher->generate($password);
 }
@@ -260,6 +262,85 @@ sub is_in_history {
 
     # No match.
     return;
+}
+
+##############################################################################
+# Benchmarking
+##############################################################################
+
+# Perform a binary search for a number of hash iterations that makes password
+# hashing take the given target time on the current system.
+#
+# Assumptions:
+#
+# * The system load is low enough that this benchmark result is meaningful
+#   and not heavily influenced by other programs running on the system.  The
+#   binary search may be unstable if the system load is too variable.
+#
+# * The static "password" string used for benchmarking will exhibit similar
+#   performance to the statistically average password.
+#
+# Information about the iteration search process is printed to standard output
+# while the search runs.
+#
+# $target - The elapsed time, in real seconds, we're aiming for
+# $delta  - The permissible delta around the target time
+#
+# Returns: The number of hash iterations with that performance characteristic
+#  Throws: Text exception on failure to write to standard output
+sub find_iteration_count {
+    my ($target, $delta) = @_;
+    my $high = 0;
+    my $low  = 0;
+
+    # A static password to use for benchmarking.
+    my $password = 'this is a benchmark';
+
+    # Start at the current configured iteration count.  If this doesn't take
+    # long enough, it becomes the new low mark and we try double that
+    # iteration count.  Otherwise, do binary search.
+    #
+    # We time twenty iterations each time, chosen because it avoids the
+    # warnings from Benchmark about too few iterations for a reliable count.
+    require Benchmark;
+    my $iterations = $HASH_ITERATIONS;
+    while (1) {
+        my $hash = sub { password_hash($password, $iterations) };
+        my $times = Benchmark::timethis(20, $hash, q{}, 'none');
+
+        # Extract the CPU time from the formatted time string.  This will be
+        # the total time for all of the iterations, so divide by the iteration
+        # count to recover the time per iteration.
+        my $report = Benchmark::timestr($times);
+        my ($time) = ($report =~ m{ ([\d.]+) [ ] CPU }xms);
+        $time = $time / 20;
+
+        # Tell the user what we discovered.
+        say {*STDOUT} "Performing $iterations iterations takes $time seconds"
+          or die "$0: cannot write to standard output: $!\n";
+
+        # If this is what we're looking for, we're done.
+        if (abs($time - $target) < $delta) {
+            last;
+        }
+
+        # Determine the new iteration target.
+        if ($time > $target) {
+            $high = $iterations;
+        } else {
+            $low = $iterations;
+        }
+        if ($time < $target && $high == 0) {
+            $iterations = $iterations * 2;
+        } else {
+            $iterations = int(($high + $low) / 2);
+        }
+    }
+
+    # Report the result and return it.
+    say {*STDOUT} "Use $iterations iterations"
+      or die "$0: cannot write to standard output: $!\n";
+    return $iterations;
 }
 
 ##############################################################################
@@ -386,10 +467,10 @@ sub update_length_counts {
 }
 
 ##############################################################################
-# Heimdal password strength protocol
+# Heimdal password quality protocol
 ##############################################################################
 
-# Run another external password strength checker and return the results.  This
+# Run another external password quality checker and return the results.  This
 # allows us to chain to another program that handles the actual strength
 # checking prior to handling history.
 #
@@ -398,14 +479,14 @@ sub update_length_counts {
 #
 # Returns: Scalar context: true if the password was accepted, false otherwise
 #          List context: whether the password is okay, the exit status of the
-#            strength checking program, and the error message if the first
+#            quality checking program, and the error message if the first
 #            element is false
 #  Throws: Text exception on failure to execute the program, or read or write
 #          from it or to it, or if it fails without an error
 sub strength_check {
     my ($principal, $password) = @_;
 
-    # Run the external strength checking program.  If we're root, we'll run it
+    # Run the external quality checking program.  If we're root, we'll run it
     # as the strength checking user and group.
     my $in = "principal: $principal\nnew-password: $password\nend\n";
     my $init = sub { drop_privileges($STRENGTH_USER, $STRENGTH_GROUP) };
@@ -429,7 +510,7 @@ sub strength_check {
     return wantarray ? ($okay, $err, $status) : $okay;
 }
 
-# Read a Heimdal external password strength checking request from the provided
+# Read a Heimdal external password quality checking request from the provided
 # file handle and return the principal (ignored for our application) and the
 # password.
 #
@@ -497,11 +578,12 @@ local $0 = basename($0);
 # Parse the argument list.
 my ($opt, $usage) = describe_options(
     '%c %o',
-    ['database|d=s', 'Path to the history database, overriding the default'],
-    ['help|h',       'Print usage message and exit'],
-    ['manual|man|m', 'Print full manual and exit'],
-    ['stats|S=s',    'Path to hash of length statistics'],
-    ['strength|s=s', 'Path to strength checking program to run'],
+    ['benchmark|b=f', 'Benchmark hash iterations for this target time'],
+    ['database|d=s',  'Path to the history database, overriding the default'],
+    ['help|h',        'Print usage message and exit'],
+    ['manual|man|m',  'Print full manual and exit'],
+    ['stats|S=s',     'Path to hash of length statistics'],
+    ['strength|s=s',  'Path to strength checking program to run'],
 );
 if ($opt->help) {
     print {*STDOUT} $usage->text
@@ -514,6 +596,13 @@ if ($opt->help) {
 }
 my $database = $opt->database || $HISTORY_PATH;
 my $stats_db = $opt->stats    || $LENGTH_STATS_PATH;
+
+# If asked to do benchmarking, ignore other arguments and just do that.
+# Currently, we hard-code a 0.005-second granularity on our binary search.
+if ($opt->benchmark) {
+    find_iteration_count($opt->benchmark, 0.005);
+    exit(0);
+}
 
 # Open syslog for result reporting.
 openlog($0, 'pid', LOG_AUTH);
@@ -565,8 +654,8 @@ heimdal-history - Password history via Heimdal external strength checking
 
 =head1 SYNOPSIS
 
-B<heimdal-history> [B<-hm>] [B<-d> I<database>] [B<-S> I<length-stats-db>]
-    [B<-s> I<strength-program>] [B<principal>]
+B<heimdal-history> [B<-hm>] [B<-b> I<target-time>] [B<-d> I<database>]
+    [B<-S> I<length-stats-db>] [B<-s> I<strength-program>] [B<principal>]
 
 =head1 DESCRIPTION
 
@@ -649,6 +738,16 @@ becomes C<"">.
 =head1 OPTIONS
 
 =over 4
+
+=item B<-b> I<target-time>, B<--benchmark>=I<target-time>
+
+Do not do a password history check.  Instead, benchmark the hash algorithm
+with various possible iteration counts and find an iteration count that
+results in I<target-time> seconds of computation time required to hash a
+password (which should be a real number).  A result will be considered
+acceptable if it is within 0.005 seconds of the target time.  The results
+will be printed to standard output and then B<heimdal-history> will exit
+successfully.
 
 =item B<-d> I<database>, B<--database>=I<database>
 
