@@ -71,13 +71,13 @@ strength_init_cdb(krb5_context ctx, krb5_pwqual_moddata data UNUSED)
         if (found)                                              \
             goto found;                                         \
     } while (0)
-# define CHECK_PASSWORD_EDIT(ctx, data, template, p)                    \
-    do {                                                                \
-        code = edit_in_cdb_dictionary(ctx, data, template, p, &found);  \
-        if (code != 0)                                                  \
-            goto fail;                                                  \
-        if (found)                                                      \
-            goto found;                                                 \
+# define CHECK_PASSWORD_VARIANT(ctx, data, template, p)                   \
+    do {                                                                  \
+        code = variant_in_cdb_dictionary(ctx, data, template, p, &found); \
+        if (code != 0)                                                    \
+            goto fail;                                                    \
+        if (found)                                                        \
+            goto found;                                                   \
     } while (0)
 
 
@@ -111,22 +111,20 @@ in_cdb_dictionary(krb5_context ctx, krb5_pwqual_moddata data,
  * of the template is found, false otherwise.  Returns a Kerberos status code.
  */
 static krb5_error_code
-edit_in_cdb_dictionary(krb5_context ctx, krb5_pwqual_moddata data,
-                       char *template, char *permute, bool *found)
+variant_in_cdb_dictionary(krb5_context ctx, krb5_pwqual_moddata data,
+                          char *template, char *permute, bool *found)
 {
-    int c, save;
+    int c;
     krb5_error_code code;
 
     *found = false;
-    save = *permute;
     for (c = 0; c <= 127; c++)
         if (isprint(c)) {
             *permute = c;
             code = in_cdb_dictionary(ctx, data, template, found);
-            if (code != 0 || *found)
+            if (code != 0 || found)
                 return code;
         }
-    *permute = save;
     return 0;
 }
 
@@ -209,7 +207,7 @@ strength_check_cdb(krb5_context ctx, krb5_pwqual_moddata data,
     /* Check all one-character permutations. */
     memcpy(variant, password, length + 1);
     for (p = variant; *p != '\0'; p++)
-        CHECK_PASSWORD_EDIT(ctx, data, variant, p);
+        CHECK_PASSWORD_VARIANT(ctx, data, variant, p);
 
     /* Check all one-character additions. */
     for (i = 0; i <= length; i++) {
@@ -218,7 +216,7 @@ strength_check_cdb(krb5_context ctx, krb5_pwqual_moddata data,
         if (i < length)
             memcpy(variant + i + 1, password + i, length - i);
         variant[length + 1] = '\0';
-        CHECK_PASSWORD_EDIT(ctx, data, variant, variant + i);
+        CHECK_PASSWORD_VARIANT(ctx, data, variant, variant + i);
     }
 
     /*
