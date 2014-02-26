@@ -3,8 +3,8 @@
 
                Maintained by Russ Allbery <eagle@eyrie.org>
 
-  Copyright 2006, 2007, 2009, 2010, 2012, 2013, 2014 The Board of Trustees
-  of the Leland Stanford Junior University.  Portions copyright 1993 Alec
+  Copyright 2006, 2007, 2009, 2010, 2012, 2013 The Board of Trustees of
+  the Leland Stanford Junior University.  Portions copyright 1993 Alec
   Muffett.  Developed by Derrick Brashear and Ken Hornstein of Sine Nomine
   Associates, on behalf of Stanford University.  This software is
   distributed under a BSD-style license and under the Artistic License.
@@ -257,10 +257,10 @@ CONFIGURATION
   files, omitting the trailing *.hwm, *.pwd, and *.pwi extensions for the
   CrackLib dictionary.  You can use either or both settings.  If you use
   both, CrackLib will be checked first, and then CDB.  When checking a CDB
-  database, the password, all printable ASCII passwords within edit
-  distance one of the password, and the password with the first and last
-  characters removed, the first two characters removed, and the last two
-  characters removed will all be checked against the dictionary.
+  database, the password, the password with the first character removed,
+  the last character removed, the first and last characters removed, the
+  first two characters removed, and the last two characters removed will
+  all be checked against the dictionary.
 
   Then, for the external password checking program, add a new section (or
   modify the existing [password_quality] section) to look like the
@@ -343,10 +343,10 @@ CONFIGURATION
   files, omitting the trailing *.hwm, *.pwd, and *.pwi extensions for the
   CrackLib dictionary.  You can use either or both settings.  If you use
   both, CrackLib will be checked first, and then CDB.  When checking a CDB
-  database, the password, all printable ASCII passwords within edit
-  distance one of the password, and the password with the first and last
-  characters removed, the first two characters removed, and the last two
-  characters removed will all be checked against the dictionary.
+  database, the password, the password with the first character removed,
+  the last character removed, the first and last characters removed, the
+  first two characters removed, and the last two characters removed will
+  all be checked against the dictionary.
 
   The second option is to use the normal dict_path setting.  In the
   [realms] section of your krb5.conf kdc.conf, under the appropriate realm
@@ -394,10 +394,7 @@ CONFIGURATION
       canonicalization or character set is defined for Kerberos passwords
       in general, so you may want to reject non-ASCII characters to avoid
       interoperability problems with computers with different default
-      character sets or Unicode normalization forms.  Also be aware that,
-      when testing passwords within edit distance one against a CDB
-      database, only characters in the printable ASCII character set will
-      be attempted.
+      character sets or Unicode normalization forms.
 
   require_classes
 
@@ -486,7 +483,7 @@ LICENSE
   The krb5-strength package as a whole is covered by the following
   copyright statement and license:
 
-    Copyright 2006, 2007, 2009, 2010, 2012, 2013, 2014
+    Copyright 2006, 2007, 2009, 2010, 2012, 2013
         The Board of Trustees of the Leland Stanford Junior University
 
     Permission is hereby granted, free of charge, to any person obtaining

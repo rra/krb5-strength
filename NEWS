@@ -10,11 +10,6 @@ krb5-strength 3.0 (unreleased)
     mechanism.)  This program has more extensive Perl module dependencies
     than the other programs in this distribution.
 
-    When checking a password against a CDB dictionary, the dictionary will
-    be checked for all printable ASCII passwords within edit distance one,
-    in addition to checking the password with first and last characters,
-    first two characters, and last two characters removed.
-
 krb5-strength 2.2 (2013-12-16)
 
     More complex character class requirements can be specified with the

@@ -9,7 +9,7 @@
  * character from both start and end.
  *
  * Written by Russ Allbery <eagle@eyrie.org>
- * Copyright 2013, 2014
+ * Copyright 2013
  *     The Board of Trustees of the Leland Stanford Junior University
  *
  * See LICENSE for licensing terms.
@@ -23,7 +23,6 @@
 #ifdef HAVE_CDB_H
 # include <cdb.h>
 #endif
-#include <ctype.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <sys/stat.h>
@@ -59,7 +58,7 @@ strength_init_cdb(krb5_context ctx, krb5_pwqual_moddata data UNUSED)
 #ifdef HAVE_CDB
 
 /*
- * Macros used to make password checks more readable.  Assumes that the found
+ * Macro used to make password checks more readable.  Assumes that the found
  * and fail labels are available for the abort cases of finding a password or
  * failing to look it up.
  */
@@ -70,14 +69,6 @@ strength_init_cdb(krb5_context ctx, krb5_pwqual_moddata data UNUSED)
             goto fail;                                          \
         if (found)                                              \
             goto found;                                         \
-    } while (0)
-# define CHECK_PASSWORD_VARIANT(ctx, data, template, p)                   \
-    do {                                                                  \
-        code = variant_in_cdb_dictionary(ctx, data, template, p, &found); \
-        if (code != 0)                                                    \
-            goto fail;                                                    \
-        if (found)                                                        \
-            goto found;                                                   \
     } while (0)
 
 
@@ -100,32 +91,6 @@ in_cdb_dictionary(krb5_context ctx, krb5_pwqual_moddata data,
         *found = (status == 1);
         return 0;
     }
-}
-
-
-/*
- * Given a password template and a pointer to the character to change, check
- * all versions of that template with that character replaced by all possible
- * printable ASCII characters.  The template will be modified in place to try
- * the various characters.  Sets the found parameter to true if some variation
- * of the template is found, false otherwise.  Returns a Kerberos status code.
- */
-static krb5_error_code
-variant_in_cdb_dictionary(krb5_context ctx, krb5_pwqual_moddata data,
-                          char *template, char *permute, bool *found)
-{
-    int c;
-    krb5_error_code code;
-
-    *found = false;
-    for (c = 0; c <= 127; c++)
-        if (isprint(c)) {
-            *permute = c;
-            code = in_cdb_dictionary(ctx, data, template, found);
-            if (code != 0 || found)
-                return code;
-        }
-    return 0;
 }
 
 
@@ -177,8 +142,6 @@ strength_check_cdb(krb5_context ctx, krb5_pwqual_moddata data,
 {
     krb5_error_code code;
     bool found;
-    size_t length, i;
-    char *p;
     char *variant = NULL;
 
     /* If we have no dictionary, there is nothing to do. */
@@ -188,50 +151,31 @@ strength_check_cdb(krb5_context ctx, krb5_pwqual_moddata data,
     /* Check the basic password. */
     CHECK_PASSWORD(ctx, data, password);
 
-    /* Allocate memory for password variations. */
-    length = strlen(password);
-    variant = malloc(length + 2);
-    if (variant == NULL)
-        return strength_error_system(ctx, "cannot allocate memory");
-
-    /* Check all one-character deletions. */
-    for (i = 0; i < length; i++) {
-        if (i > 0)
-            memcpy(variant, password, i);
-        if (i < length - 1)
-            memcpy(variant + i, password + i + 1, length - i - 1);
-        variant[length - 1] = '\0';
-        CHECK_PASSWORD(ctx, data, variant);
-    }
-
-    /* Check all one-character permutations. */
-    memcpy(variant, password, length + 1);
-    for (p = variant; *p != '\0'; p++)
-        CHECK_PASSWORD_VARIANT(ctx, data, variant, p);
-
-    /* Check all one-character additions. */
-    for (i = 0; i <= length; i++) {
-        if (i > 0)
-            memcpy(variant, password, i);
-        if (i < length)
-            memcpy(variant + i + 1, password + i, length - i);
-        variant[length + 1] = '\0';
-        CHECK_PASSWORD_VARIANT(ctx, data, variant, variant + i);
+    /* Check with one or two characters removed from the start. */
+    if (password[0] != '\0') {
+        CHECK_PASSWORD(ctx, data, password + 1);
+        if (password[1] != '\0')
+            CHECK_PASSWORD(ctx, data, password + 2);
     }
 
     /*
-     * Check the password with first and last, two leading, or two trailing
-     * characters removed.
+     * Strip a character from the end and then check both that password and
+     * the one with a character taken from the start as well.
      */
-    if (length > 2) {
-        memcpy(variant, password + 2, length - 1);
+    if (strlen(password) > 0) {
+        variant = strdup(password);
+        if (variant == NULL)
+            return strength_error_system(ctx, "cannot allocate memory");
+        variant[strlen(variant) - 1] = '\0';
         CHECK_PASSWORD(ctx, data, variant);
-        memcpy(variant, password + 1, length - 2);
-        variant[length - 2] = '\0';
-        CHECK_PASSWORD(ctx, data, variant);
-        memcpy(variant, password, length - 2);
-        variant[length - 2] = '\0';
-        CHECK_PASSWORD(ctx, data, variant);
+        if (variant[0] != '\0')
+            CHECK_PASSWORD(ctx, data, variant + 1);
+
+        /* Check the password with two characters removed. */
+        if (strlen(password) > 1) {
+            variant[strlen(variant) - 1] = '\0';
+            CHECK_PASSWORD(ctx, data, variant);
+        }
     }
 
     /* Password not found. */
