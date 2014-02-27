@@ -72,6 +72,10 @@ Readonly my $STRENGTH_PROGRAM => '/usr/bin/heimdal-strength';
 Readonly my $STRENGTH_USER  => 'nobody';
 Readonly my $STRENGTH_GROUP => 'nogroup';
 
+# Global boolean variable saying whether to log with syslog.  This is set
+# based on the presence of the -q (--quiet) command-line option.
+my $SYSLOG = 1;
+
 ##############################################################################
 # Utility functions
 ##############################################################################
@@ -152,7 +156,8 @@ sub encode_log_message {
 # - error:     an error message explaining the anomalous situation
 #
 # Values containing whitespace are quoted with double quotes, with any
-# internal double quotes doubled.
+# internal double quotes doubled.  No logging will be done if $SYSLOG is
+# false.
 #
 # $principal - Principal for which we checked a password
 # $error     - The error message
@@ -160,6 +165,9 @@ sub encode_log_message {
 # Returns: undef
 sub log_error {
     my ($principal, $error) = @_;
+    if (!$SYSLOG) {
+        return;
+    }
     my $message = encode_log_message(
         action    => 'check',
         principal => $principal,
@@ -179,7 +187,8 @@ sub log_error {
 # - reason:    the reason for a rejection
 #
 # Values containing whitespace are quoted with double quotes, with any
-# internal double quotes doubled.
+# internal double quotes doubled.  No logging will be done if $SYSLOG is
+# false.
 #
 # $principal - Principal for which we checked a password
 # $result    - "accepted" or "rejected" per above
@@ -188,6 +197,9 @@ sub log_error {
 # Returns: undef
 sub log_result {
     my ($principal, $result, $reason) = @_;
+    if (!$SYSLOG) {
+        return;
+    }
 
     # Create the message.
     my %message = (
@@ -582,6 +594,7 @@ my ($opt, $usage) = describe_options(
     ['database|d=s',  'Path to the history database, overriding the default'],
     ['help|h',        'Print usage message and exit'],
     ['manual|man|m',  'Print full manual and exit'],
+    ['quiet|q',       'Suppress logging to syslog'],
     ['stats|S=s',     'Path to hash of length statistics'],
     ['strength|s=s',  'Path to strength checking program to run'],
 );
@@ -605,7 +618,11 @@ if ($opt->benchmark) {
 }
 
 # Open syslog for result reporting.
-openlog($0, 'pid', LOG_AUTH);
+if ($opt->quiet) {
+    $SYSLOG = 0;
+} else {
+    openlog($0, 'pid', LOG_AUTH);
+}
 
 # Read the principal and password that we're supposed to check.
 my ($password, $principal) = read_change_data(\*STDIN);
@@ -654,7 +671,7 @@ heimdal-history - Password history via Heimdal external strength checking
 
 =head1 SYNOPSIS
 
-B<heimdal-history> [B<-hm>] [B<-b> I<target-time>] [B<-d> I<database>]
+B<heimdal-history> [B<-hmq>] [B<-b> I<target-time>] [B<-d> I<database>]
     [B<-S> I<length-stats-db>] [B<-s> I<strength-program>] [B<principal>]
 
 =head1 DESCRIPTION
@@ -762,6 +779,12 @@ Print a short usage message and exit.
 =item B<-m>, B<--manual>, B<--man>
 
 Display this manual and exit.
+
+=item B<-q>, B<--quiet>
+
+Suppress logging to syslog and only return the results on standard output
+and standard error.  Primarily used for testing, since Heimdal won't pass
+this argument.
 
 =item B<-S> I<length-stats-db>, B<--stats>=I<length-stats-db>
 
