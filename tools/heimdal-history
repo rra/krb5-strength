@@ -486,6 +486,7 @@ sub update_length_counts {
 # allows us to chain to another program that handles the actual strength
 # checking prior to handling history.
 #
+# $path      - Password quality check program to run
 # $principal - Principal attempting to change their password
 # $password  - The new password
 #
@@ -496,14 +497,14 @@ sub update_length_counts {
 #  Throws: Text exception on failure to execute the program, or read or write
 #          from it or to it, or if it fails without an error
 sub strength_check {
-    my ($principal, $password) = @_;
+    my ($path, $principal, $password) = @_;
 
     # Run the external quality checking program.  If we're root, we'll run it
     # as the strength checking user and group.
     my $in = "principal: $principal\nnew-password: $password\nend\n";
     my $init = sub { drop_privileges($STRENGTH_USER, $STRENGTH_GROUP) };
     my ($out, $err);
-    run([$STRENGTH_PROGRAM, $principal], \$in, \$out, \$err, init => $init);
+    run([$path, $principal], \$in, \$out, \$err, init => $init);
     my $status = ($? >> 8);
 
     # Check the results.
@@ -609,6 +610,7 @@ if ($opt->help) {
 }
 my $database = $opt->database || $HISTORY_PATH;
 my $stats_db = $opt->stats    || $LENGTH_STATS_PATH;
+my $strength = $opt->strength || $STRENGTH_PROGRAM;
 
 # If asked to do benchmarking, ignore other arguments and just do that.
 # Currently, we hard-code a 0.005-second granularity on our binary search.
@@ -628,7 +630,7 @@ if ($opt->quiet) {
 my ($password, $principal) = read_change_data(\*STDIN);
 
 # Delegate to the external strength checking program.
-my ($okay, $error, $status) = strength_check($principal, $password);
+my ($okay, $error, $status) = strength_check($strength, $principal, $password);
 if (!$okay) {
     log_result($principal, 'rejected', $error);
     warn "$error\n";
