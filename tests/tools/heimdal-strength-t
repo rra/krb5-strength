@@ -3,7 +3,7 @@
 # Test suite for basic Heimdal external strength checking functionality.
 #
 # Written by Russ Allbery <eagle@eyrie.org>
-# Copyright 2009, 2012, 2013
+# Copyright 2009, 2012, 2013, 2014
 #     The Board of Trustees of the Leland Stanford Junior University
 #
 # See LICENSE for licensing terms.
@@ -192,6 +192,7 @@ for my $test (@{ $tests{length} }) {
 # Install the krb5.conf file for simple character class restrictions.
 $krb5_conf = create_krb5_conf(
     {
+        minimum_different       => 8,
         require_ascii_printable => 'true',
         require_non_letter      => 'true',
     }

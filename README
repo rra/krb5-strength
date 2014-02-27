@@ -378,6 +378,14 @@ CONFIGURATION
   The following additional settings are supported in the [appdefaults]
   section of krb5.conf when running under either Heimdal or MIT Kerberos.
 
+  minimum_different
+
+      If set to a numeric value, passwords with fewer than this number of
+      unique characters will be rejected.  This can be used to reject, for
+      example, passwords that are long strings of the same character or
+      repetitions of small numbers of characters, which may be too easy to
+      guess.
+
   minimum_length
 
       If set to a numeric value, passwords with fewer than that number of

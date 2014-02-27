@@ -10,6 +10,11 @@ krb5-strength 3.0 (unreleased)
     mechanism.)  This program has more extensive Perl module dependencies
     than the other programs in this distribution.
 
+    A new configuration option, minimum_different, can be set to require
+    that passwords contain at least that many unique characters.  This can
+    be used to reject long strings of identical characters or short
+    patterns, which may pass other checks but still be too easy to guess.
+
 krb5-strength 2.2 (2013-12-16)
 
     More complex character class requirements can be specified with the

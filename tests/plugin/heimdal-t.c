@@ -2,7 +2,7 @@
  * Test for the Heimdal shared module API.
  *
  * Written by Russ Allbery <eagle@eyrie.org>
- * Copyright 2009, 2013
+ * Copyright 2009, 2013, 2014
  *     The Board of Trustees of the Leland Stanford Junior University
  *
  * See LICENSE for licensing terms.
@@ -138,7 +138,7 @@ int
 main(void)
 {
     char *path, *krb5_config, *krb5_config_empty, *tmpdir;
-    char *setup_argv[10];
+    char *setup_argv[12];
     size_t i, count;
     struct kadm5_pw_policy_verifier *verifier;
     void *handle;
@@ -190,11 +190,13 @@ main(void)
         is_password_test(verifier, &principal_tests[i]);
 
     /* Add simple character class restrictions. */
-    setup_argv[5] = (char *) "require_ascii_printable";
-    setup_argv[6] = (char *) "true";
-    setup_argv[7] = (char *) "require_non_letter";
+    setup_argv[5] = (char *) "minimum_different";
+    setup_argv[6] = (char *) "8";
+    setup_argv[7] = (char *) "require_ascii_printable";
     setup_argv[8] = (char *) "true";
-    setup_argv[9] = NULL;
+    setup_argv[9] = (char *) "require_non_letter";
+    setup_argv[10] = (char *) "true";
+    setup_argv[11] = NULL;
     run_setup((const char **) setup_argv);
 
     /* Run the simple character class tests. */

@@ -2,7 +2,7 @@
  * Test for the MIT Kerberos shared module API.
  *
  * Written by Russ Allbery <eagle@eyrie.org>
- * Copyright 2010, 2013
+ * Copyright 2010, 2013, 2014
  *     The Board of Trustees of the Leland Stanford Junior University
  *
  * See LICENSE for licensing terms.
@@ -148,7 +148,7 @@ int
 main(void)
 {
     char *path, *dictionary, *krb5_config, *krb5_config_empty, *tmpdir;
-    char *setup_argv[10];
+    char *setup_argv[12];
     const char*build;
     size_t i, count;
     krb5_context ctx;
@@ -243,11 +243,13 @@ main(void)
     vtable->close(ctx, data);
 
     /* Add simple character class configuration to krb5.conf. */
-    setup_argv[5] = (char *) "require_ascii_printable";
-    setup_argv[6] = (char *) "true";
-    setup_argv[7] = (char *) "require_non_letter";
+    setup_argv[5] = (char *) "minimum_different";
+    setup_argv[6] = (char *) "8";
+    setup_argv[7] = (char *) "require_ascii_printable";
     setup_argv[8] = (char *) "true";
-    setup_argv[9] = NULL;
+    setup_argv[9] = (char *) "require_non_letter";
+    setup_argv[10] = (char *) "true";
+    setup_argv[11] = NULL;
     run_setup((const char **) setup_argv);
 
     /* Obtain a new Kerberos context with that krb5.conf file. */

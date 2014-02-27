@@ -4,7 +4,7 @@
  * Developed by Derrick Brashear and Ken Hornstein of Sine Nomine Associates,
  *     on behalf of Stanford University
  * Extensive modifications by Russ Allbery <eagle@eyrie.org>
- * Copyright 2006, 2007, 2009, 2012, 2013
+ * Copyright 2006, 2007, 2009, 2012, 2013, 2014
  *     The Board of Trustees of the Leland Stanford Junior University
  *
  * See LICENSE for licensing terms.
@@ -32,6 +32,7 @@ typedef struct krb5_pwqual_moddata_st *krb5_pwqual_moddata;
 #define ERROR_ASCII    "password contains non-ASCII or control characters"
 #define ERROR_DICT     "password found in list of common passwords"
 #define ERROR_LETTER   "password is only letters and spaces"
+#define ERROR_MINDIFF  "password does not contain enough unique characters"
 #define ERROR_SHORT    "password is too short"
 #define ERROR_USERNAME "password based on username or principal"
 
@@ -65,6 +66,7 @@ struct vector {
  * checking for at least the MIT plugin.
  */
 struct krb5_pwqual_moddata_st {
+    long minimum_different;     /* Minimum number of different characters */
     long minimum_length;        /* Minimum password length */
     bool ascii;                 /* Whether to require printable ASCII */
     bool nonletter;             /* Whether to require a non-letter */
