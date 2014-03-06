@@ -6,6 +6,7 @@ perl/critic
 perl/minimum-version
 perl/strict
 portable/asprintf
+portable/mkstemp
 portable/snprintf
 portable/strndup
 tools/cdbmake-wordlist

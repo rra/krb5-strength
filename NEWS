@@ -15,6 +15,15 @@ krb5-strength 3.0 (unreleased)
     be used to reject long strings of identical characters or short
     patterns, which may pass other checks but still be too easy to guess.
 
+    Update to rra-c-util 5.3:
+
+    * Fix portable/krb5.h build with a C++ compiler.
+
+    Update to C TAP Harness 3.0:
+
+    * Reopen standard input to /dev/null when running a test list.
+    * Don't leak extraneous file descriptors to tests.
+
 krb5-strength 2.2 (2013-12-16)
 
     More complex character class requirements can be specified with the

@@ -122,10 +122,10 @@ warnings:
 	$(MAKE) V=0 CFLAGS='$(WARNINGS)' $(check_PROGRAMS)
 
 # The bits below are for the test suite, not for the main package.
-check_PROGRAMS = tests/runtests tests/plugin/heimdal-t tests/plugin/mit-t \
-	tests/portable/asprintf-t tests/portable/snprintf-t		  \
-	tests/portable/strndup-t tests/util/messages-krb5-t		  \
-	tests/util/messages-t tests/util/xmalloc
+check_PROGRAMS = tests/runtests tests/plugin/heimdal-t tests/plugin/mit-t   \
+	tests/portable/asprintf-t tests/portable/mkstemp-t		    \
+	tests/portable/snprintf-t tests/portable/strndup-t		    \
+	tests/util/messages-krb5-t tests/util/messages-t tests/util/xmalloc
 if EMBEDDED_CRACKLIB
     check_PROGRAMS += cracklib/packer
 endif
@@ -148,6 +148,9 @@ tests_plugin_mit_t_LDADD = tests/tap/libtap.a portable/libportable.la \
 tests_portable_asprintf_t_SOURCES = tests/portable/asprintf-t.c \
 	tests/portable/asprintf.c
 tests_portable_asprintf_t_LDADD = tests/tap/libtap.a portable/libportable.la
+tests_portable_mkstemp_t_SOURCES = tests/portable/mkstemp-t.c \
+	tests/portable/mkstemp.c
+tests_portable_mkstemp_t_LDADD = tests/tap/libtap.a portable/libportable.la
 tests_portable_snprintf_t_SOURCES = tests/portable/snprintf-t.c \
 	tests/portable/snprintf.c
 tests_portable_snprintf_t_LDADD = tests/tap/libtap.a portable/libportable.la

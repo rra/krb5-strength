@@ -1,7 +1,7 @@
 dnl Process this file with autoconf to produce a configure script.
 dnl
 dnl Written by Russ Allbery <eagle@eyrie.org>
-dnl Copyright 2006, 2007, 2009, 2010, 2012, 2013
+dnl Copyright 2006, 2007, 2009, 2010, 2012, 2013, 2014
 dnl     The Board of Trustees of the Leland Stanford Junior University
 dnl
 dnl See LICENSE for licensing terms.
@@ -59,7 +59,7 @@ AC_SUBST([DL_LIBS])
 
 dnl Checks for basic C functionality.
 AC_HEADER_STDBOOL
-AC_CHECK_HEADERS([sys/bittypes.h syslog.h])
+AC_CHECK_HEADERS([sys/bittypes.h sys/select.h syslog.h])
 AC_CHECK_DECLS([snprintf, vsnprintf])
 RRA_C_C99_VAMACROS
 RRA_C_GNU_VAMACROS
@@ -71,7 +71,7 @@ AC_CHECK_TYPES([ssize_t], [], [],
     [#include <sys/types.h>])
 RRA_FUNC_SNPRINTF
 AC_CHECK_FUNCS([setrlimit])
-AC_REPLACE_FUNCS([asprintf strndup])
+AC_REPLACE_FUNCS([asprintf mkstemp strndup])
 
 dnl Write out the results.
 AC_CONFIG_FILES([Makefile])
