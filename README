@@ -157,8 +157,8 @@ REQUIREMENTS
   later.  For bootstrap or if you change configure.ac or any of the m4
   files it includes and need to regenerate configure or config.h.in, you
   will need Autoconf 2.64 or later.  You will also need Perl 5.010 or
-  later and the JSON, Perl6::Slurp, and Readonly modules (from CPAN) to
-  bootstrap the test suite data from a Git checkout.
+  later and the DBI, DBD::SQLite, JSON, Perl6::Slurp, and Readonly modules
+  (from CPAN) to bootstrap the test suite data from a Git checkout.
 
 COMPILING AND INSTALLING
 
