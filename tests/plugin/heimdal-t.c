@@ -254,7 +254,7 @@ main(void)
 
 #endif /* !HAVE_CDB */
 
-#ifdef HAVE_SQLITE3
+#ifdef HAVE_SQLITE
 
     /*
      * If built with SQLite, set up krb5.conf to use a SQLite dictionary
@@ -276,13 +276,13 @@ main(void)
     for (i = 0; i < ARRAY_SIZE(principal_tests); i++)
         is_password_test(verifier, &principal_tests[i]);
 
-#else /* !HAVE_SQLITE3 */
+#else /* !HAVE_SQLITE */
 
     /* Otherwise, mark the SQLite tests as skipped. */
     count = ARRAY_SIZE(sqlite_tests) + ARRAY_SIZE(principal_tests);
     skip_block(count * 2 + 1, "not built with SQLite support");
 
-#endif /* !HAVE_SQLITE3 */
+#endif /* !HAVE_SQLITE */
 
     /* Manually clean up after the results of make-krb5-conf. */
     basprintf(&path, "%s/krb5.conf", tmpdir);

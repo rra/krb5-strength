@@ -22,10 +22,12 @@ EXTRA_DIST = .gitignore LICENSE autogen cracklib/HISTORY cracklib/LICENCE  \
 	tests/util/xmalloc-t tools/heimdal-strength.pod
 
 # Do this globally.  Everything needs to find the Kerberos headers and
-# libraries, and if we're using the system CrackLib or libcdb, add its
-# location unconditionally as well.
-AM_CPPFLAGS = $(CRACKLIB_CPPFLAGS) $(KRB5_CPPFLAGS) $(CDB_CPPFLAGS)
-AM_LDFLAGS = $(CRACKLIB_LDFLAGS) $(KRB5_LDFLAGS) $(CDB_LDFLAGS)
+# libraries, and if we're using the system CrackLib, TinyCDB, or SQLite, add
+# its location unconditionally as well.
+AM_CPPFLAGS = $(CRACKLIB_CPPFLAGS) $(KRB5_CPPFLAGS) $(CDB_CPPFLAGS) \
+	$(SQLITE_CPPFLAGS)
+AM_LDFLAGS = $(CRACKLIB_LDFLAGS) $(KRB5_LDFLAGS) $(CDB_LDFLAGS) \
+	$(SQLITE_LDFLAGS)
 
 # Build our portability library.
 noinst_LTLIBRARIES = portable/libportable.la
@@ -66,7 +68,8 @@ if EMBEDDED_CRACKLIB
 else
     plugin_strength_la_LIBADD = $(CRACKLIB_LIBS)
 endif
-plugin_strength_la_LIBADD += portable/libportable.la $(KRB5_LIBS) $(CDB_LIBS)
+plugin_strength_la_LIBADD += portable/libportable.la $(KRB5_LIBS) \
+	$(CDB_LIBS) $(SQLITE_LIBS)
 
 # The Heimdal external check program.
 bin_PROGRAMS = tools/heimdal-strength
@@ -81,7 +84,7 @@ else
     tools_heimdal_strength_LDADD = $(CRACKLIB_LIBS)
 endif
 tools_heimdal_strength_LDADD += util/libutil.a portable/libportable.la \
-	$(KRB5_LIBS) $(CDB_LIBS)
+	$(KRB5_LIBS) $(CDB_LIBS) $(SQLITE_LIBS)
 
 # Other tools.
 dist_bin_SCRIPTS = tools/heimdal-history tools/krb5-strength-wordlist

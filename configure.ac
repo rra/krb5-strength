@@ -50,11 +50,7 @@ AC_CHECK_FUNCS([krb5_get_init_creds_opt_free],
 AC_CHECK_DECLS([krb5_kt_free_entry], [], [], [RRA_INCLUDES_KRB5])
 AC_LIBOBJ([krb5-extra])
 RRA_LIB_KRB5_RESTORE
-
-dnl Temporary hack to force building with SQLite.
-AC_CHECK_HEADERS([sqlite3.h])
-AC_DEFINE([HAVE_SQLITE3], 1, [Define if SQLite 3 is available.])
-LIBS="$LIBS -lsqlite3"
+RRA_LIB_SQLITE_OPTIONAL
 
 dnl Probe for libdl, which is used for the test suite.
 save_LIBS="$LIBS"

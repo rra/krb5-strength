@@ -145,7 +145,7 @@ krb5_error_code strength_check_cracklib(krb5_context, krb5_pwqual_moddata,
  * requested and not available.
  */
 krb5_error_code strength_init_sqlite(krb5_context, krb5_pwqual_moddata);
-#ifdef HAVE_SQLITE3
+#ifdef HAVE_SQLITE
 krb5_error_code strength_check_sqlite(krb5_context, krb5_pwqual_moddata,
                                       const char *password);
 void strength_close_sqlite(krb5_context, krb5_pwqual_moddata);

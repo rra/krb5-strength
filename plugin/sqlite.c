@@ -62,7 +62,7 @@
 /*
  * Stub for strength_init_sqlite if not built with SQLite support.
  */
-#ifndef HAVE_SQLITE3
+#ifndef HAVE_SQLITE
 krb5_error_code
 strength_init_sqlite(krb5_context ctx, krb5_pwqual_moddata data UNUSED)
 {
@@ -83,7 +83,7 @@ strength_init_sqlite(krb5_context ctx, krb5_pwqual_moddata data UNUSED)
 
 
 /* Skip the rest of this file if SQLite is not available. */
-#ifdef HAVE_SQLITE3
+#ifdef HAVE_SQLITE
 
 /*
  * Report a SQLite error.  Takes the SQLite error code and the Kerberos
@@ -393,4 +393,4 @@ strength_close_sqlite(krb5_context ctx UNUSED, krb5_pwqual_moddata data)
         sqlite3_close_v2(data->sqlite);
 }
 
-#endif /* HAVE_CDB */
+#endif /* HAVE_SQLITE */
