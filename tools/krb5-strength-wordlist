@@ -22,6 +22,7 @@ use Getopt::Long qw(GetOptions);
 my $CDB = 'cdb';
 
 # The SQL used to create the SQLite database.
+## no critic (ValuesAndExpressions::ProhibitImplicitNewlines)
 my $SQLITE_CREATE = q{
     CREATE TABLE passwords (
         password TEXT UNIQUE NOT NULL,
@@ -33,6 +34,7 @@ my $SQLITE_CREATE = q{
 my $SQLITE_INSERT = q{
     INSERT OR IGNORE INTO passwords (password, drowssap) values (?, ?)
 };
+## use critic
 
 # print with error checking and an explicit file handle.
 #
@@ -246,7 +248,7 @@ __END__
 =for stopwords
 krb5-strength-wordlist krb5-strength cdb whitespace lookups lookup
 sublicense MERCHANTABILITY NONINFRINGEMENT krb5-strength --ascii Allbery
-regexes output-wordlist
+regexes output-wordlist heimdal-strength
 
 =head1 NAME
 
