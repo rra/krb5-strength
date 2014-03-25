@@ -2,6 +2,15 @@
 
 krb5-strength 3.0 (unreleased)
 
+    The krb5-strength plugin and heimdal-strength program now support a
+    SQLite password dictionary.  This format of dictionary can detect any
+    password within edit distance one of a dictionary word, meaning that
+    the dictionary word can be formed by adding, removing, or changing a
+    single character in the password.  A SQLite password dictionary can be
+    used alone or in combination with any of the other supported
+    dictionary types.  SQLite dictionary support is based on work by David
+    Mazières.
+
     cdbmake-wordlist has been renamed to krb5-strength-wordlist.
     Generating CDB dictionaries now requires the -c option; see the
     documentation for more information.  A SQLite database of dictionary

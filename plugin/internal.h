@@ -20,6 +20,9 @@
 #ifdef HAVE_CDB_H
 # include <cdb.h>
 #endif
+#ifdef HAVE_SQLITE3_H
+# include <sqlite3.h>
+#endif
 #include <stddef.h>
 
 #ifdef HAVE_KRB5_PWQUAL_PLUGIN_H
@@ -77,6 +80,11 @@ struct krb5_pwqual_moddata_st {
 #ifdef HAVE_CDB_H
     struct cdb cdb;             /* Open CDB dictionary data */
 #endif
+#ifdef HAVE_SQLITE3_H
+    sqlite3 *sqlite;            /* Open SQLite database handle */
+    sqlite3_stmt *prefix_query; /* Query using the password prefix */
+    sqlite3_stmt *suffix_query; /* Query using the reversed password suffix */
+#endif
 };
 
 BEGIN_DECLS
@@ -105,7 +113,7 @@ void strength_close(krb5_context, krb5_pwqual_moddata);
  *
  * If not built with CDB support, provide some stubs for check and close.
  * init is always a real function, which reports an error if CDB is
- * requested.
+ * requested and not available.
  */
 krb5_error_code strength_init_cdb(krb5_context, krb5_pwqual_moddata);
 #ifdef HAVE_CDB
@@ -126,6 +134,25 @@ krb5_error_code strength_init_cracklib(krb5_context, krb5_pwqual_moddata,
                                        const char *dictionary);
 krb5_error_code strength_check_cracklib(krb5_context, krb5_pwqual_moddata,
                                         const char *password);
+
+/*
+ * SQLite handling.  strength_init_sqlite gets the database configuration and
+ * sets up the SQLite internal data, strength_check_sqlite checks a password,
+ * and strength_close_sqlite handles freeing resources.
+ *
+ * If not built with SQLite support, provide some stubs for check and close.
+ * init is always a real function, which reports an error if SQLite is
+ * requested and not available.
+ */
+krb5_error_code strength_init_sqlite(krb5_context, krb5_pwqual_moddata);
+#ifdef HAVE_SQLITE3
+krb5_error_code strength_check_sqlite(krb5_context, krb5_pwqual_moddata,
+                                      const char *password);
+void strength_close_sqlite(krb5_context, krb5_pwqual_moddata);
+#else
+# define strength_check_sqlite(c, d, p) 0
+# define strength_close_sqlite(c, d)    /* empty */
+#endif
 
 /* Check whether the password statisfies character class requirements. */
 krb5_error_code strength_check_classes(krb5_context, krb5_pwqual_moddata,

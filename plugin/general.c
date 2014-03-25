@@ -61,14 +61,17 @@ strength_init(krb5_context ctx, const char *dictionary,
         goto fail;
 
     /*
-     * Try to initialize CDB and CrackLib dictionaries.  Both functions handle
-     * their own configuration parsing and will do nothing if the
-     * corresponding dictionary is not configured.
+     * Try to initialize CDB, CrackLib, and SQLite dictionaries.  These
+     * functions handle their own configuration parsing and will do nothing if
+     * the corresponding dictionary is not configured.
      */
     code = strength_init_cracklib(ctx, data, dictionary);
     if (code != 0)
         goto fail;
     code = strength_init_cdb(ctx, data);
+    if (code != 0)
+        goto fail;
+    code = strength_init_sqlite(ctx, data);
     if (code != 0)
         goto fail;
 
@@ -196,11 +199,14 @@ strength_check(krb5_context ctx UNUSED, krb5_pwqual_moddata data,
     if (code != 0)
         return code;
 
-    /* Check the password against CDB and CrackLib if configured. */
+    /* Check the password against CDB, CrackLib, and SQLite if configured. */
     code = strength_check_cracklib(ctx, data, password);
     if (code != 0)
         return code;
     code = strength_check_cdb(ctx, data, password);
+    if (code != 0)
+        return code;
+    code = strength_check_sqlite(ctx, data, password);
     if (code != 0)
         return code;
 
@@ -221,6 +227,7 @@ strength_close(krb5_context ctx UNUSED, krb5_pwqual_moddata data)
     if (data == NULL)
         return;
     strength_close_cdb(ctx, data);
+    strength_close_sqlite(ctx, data);
     last = data->rules;
     while (last != NULL) {
         tmp = last;

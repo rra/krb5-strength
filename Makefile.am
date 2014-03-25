@@ -58,7 +58,8 @@ moduledir = $(libdir)/krb5/plugins/pwqual
 module_LTLIBRARIES = plugin/strength.la
 plugin_strength_la_SOURCES = plugin/cdb.c plugin/classes.c plugin/config.c \
 	plugin/cracklib.c plugin/error.c plugin/general.c plugin/heimdal.c \
-	plugin/internal.h plugin/mit.c plugin/principal.c plugin/vector.c
+	plugin/internal.h plugin/mit.c plugin/principal.c plugin/sqlite.c  \
+	plugin/vector.c
 plugin_strength_la_LDFLAGS = -module -avoid-version
 if EMBEDDED_CRACKLIB
     plugin_strength_la_LIBADD = cracklib/libcracklib.la
@@ -72,8 +73,8 @@ bin_PROGRAMS = tools/heimdal-strength
 tools_heimdal_strength_CFLAGS = $(AM_CFLAGS)
 tools_heimdal_strength_SOURCES = plugin/cdb.c plugin/classes.c		  \
 	plugin/config.c plugin/cracklib.c plugin/error.c plugin/general.c \
-	plugin/internal.h plugin/principal.c plugin/vector.c		  \
-	tools/heimdal-strength.c
+	plugin/internal.h plugin/principal.c plugin/sqlite.c		  \
+	plugin/vector.c tools/heimdal-strength.c
 if EMBEDDED_CRACKLIB
     tools_heimdal_strength_LDADD = cracklib/libcracklib.la
 else

@@ -248,19 +248,28 @@ CONFIGURATION
   file is located):
 
       krb5-strength = {
-          password_dictionary     = /path/to/cracklib/dictionary
-          password_dictionary_cdb = /path/to/cdb/dictionary.cdb
+          password_dictionary        = /path/to/cracklib/dictionary
+          password_dictionary_cdb    = /path/to/cdb/dictionary.cdb
+          password_dictionary_sqlite = /path/to/sqlite/dictionary.sqlite
       }
 
-  The first setting configures a CrackLib dictionary and the second a CDB
-  dictionary.  The provided path should be the full path to the dictionary
-  files, omitting the trailing *.hwm, *.pwd, and *.pwi extensions for the
-  CrackLib dictionary.  You can use either or both settings.  If you use
-  both, CrackLib will be checked first, and then CDB.  When checking a CDB
-  database, the password, the password with the first character removed,
-  the last character removed, the first and last characters removed, the
-  first two characters removed, and the last two characters removed will
-  all be checked against the dictionary.
+  The first setting configures a CrackLib dictionary, the second a CDB
+  dictionary, and the third a SQLite dictionary.  The provided path should
+  be the full path to the dictionary files, omitting the trailing *.hwm,
+  *.pwd, and *.pwi extensions for the CrackLib dictionary.  You can use
+  any combination of the three settings.  If you use more than one,
+  CrackLib will be checked first, then CDB, and then SQLite as
+  appropriate.
+
+  When checking against a CDB database, the password, the password with
+  the first character removed, the last character removed, the first and
+  last characters removed, the first two characters removed, and the last
+  two characters removed will all be checked against the dictionary.
+
+  When checking a SQLite database, the password will be rejected if it is
+  within edit distance one of any word in the dictionary, meaning that the
+  database word can be formed from the password by deleting, adding, or
+  changing a single character.
 
   Then, for the external password checking program, add a new section (or
   modify the existing [password_quality] section) to look like the
@@ -334,19 +343,28 @@ CONFIGURATION
   [appdefaults] section:
 
       krb5-strength = {
-          password_dictionary     = /path/to/cracklib/dictionary
-          password_dictionary_cdb = /path/to/cdb/dictionary.cdb
+          password_dictionary        = /path/to/cracklib/dictionary
+          password_dictionary_cdb    = /path/to/cdb/dictionary.cdb
+          password_dictionary_sqlite = /path/to/sqlite/dictionary.sqlite
       }
 
-  The first setting configures a CrackLib dictionary and the second a CDB
-  dictionary.  The provided path should be the full path to the dictionary
-  files, omitting the trailing *.hwm, *.pwd, and *.pwi extensions for the
-  CrackLib dictionary.  You can use either or both settings.  If you use
-  both, CrackLib will be checked first, and then CDB.  When checking a CDB
-  database, the password, the password with the first character removed,
-  the last character removed, the first and last characters removed, the
-  first two characters removed, and the last two characters removed will
-  all be checked against the dictionary.
+  The first setting configures a CrackLib dictionary, the second a CDB
+  dictionary, and the third a SQLite dictionary.  The provided path should
+  be the full path to the dictionary files, omitting the trailing *.hwm,
+  *.pwd, and *.pwi extensions for the CrackLib dictionary.  You can use
+  any combination of the three settings.  If you use more than one,
+  CrackLib will be checked first, then CDB, and then SQLite as
+  appropriate.
+
+  When checking against a CDB database, the password, the password with
+  the first character removed, the last character removed, the first and
+  last characters removed, the first two characters removed, and the last
+  two characters removed will all be checked against the dictionary.
+
+  When checking a SQLite database, the password will be rejected if it is
+  within edit distance one of any word in the dictionary, meaning that the
+  database word can be formed from the password by deleting, adding, or
+  changing a single character.
 
   The second option is to use the normal dict_path setting.  In the
   [realms] section of your krb5.conf kdc.conf, under the appropriate realm
@@ -368,10 +386,11 @@ CONFIGURATION
   dictionary matching.
 
   You can also mix and match these settings, by using dict_path for the
-  CrackLib dictionary path and krb5.conf for the CDB dictionary path.  If
-  both settings are used, krb5.conf overrides the dict_path setting (so
-  that dict_path can be used for other password quality modules).  There
-  is no way to specify a CDB dictionary via the dict_path setting.
+  CrackLib dictionary path and krb5.conf for the CDB or SQLite dictionary
+  paths.  If both settings are used for the CrackLib path, krb5.conf
+  overrides the dict_path setting (so that dict_path can be used for other
+  password quality modules).  There is no way to specify a CDB or SQLite
+  dictionary via the dict_path setting.
 
  Other Settings
 
