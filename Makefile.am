@@ -19,8 +19,8 @@ EXTRA_DIST = .gitignore LICENSE autogen cracklib/HISTORY cracklib/LICENCE  \
 	tests/tap/perl/Test/RRA/Config.pm				   \
 	tests/tap/perl/Test/RRA/Automake.pm tests/tools/heimdal-history-t  \
 	tests/tools/heimdal-strength-t tests/tools/wordlist-cdb-t	   \
-	tests/tools/wordlist-t tests/util/xmalloc-t			   \
-	tools/heimdal-strength.pod
+	tests/tools/wordlist-sqlite-t tests/tools/wordlist-t		   \
+	tests/util/xmalloc-t tools/heimdal-strength.pod
 
 # Do this globally.  Everything needs to find the Kerberos headers and
 # libraries, and if we're using the system CrackLib, TinyCDB, or SQLite, add

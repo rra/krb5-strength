@@ -13,6 +13,7 @@ tools/heimdal-history
 tools/heimdal-strength
 tools/wordlist
 tools/wordlist-cdb
+tools/wordlist-sqlite
 util/messages
 util/messages-krb5
 util/xmalloc
