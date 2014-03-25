@@ -84,7 +84,7 @@ ok(defined($dbh), 'Opening SQLite database succeeded');
 # Walk through every row in the passwords table and ensure that the drowssap
 # column is the reverse of the password column.  Accumulate the passwords so
 # that we can check against the contents of the word list.
-my $sql = 'SELECT PASSWORD, DROWSSAP FROM PASSWORDS';
+my $sql      = 'SELECT PASSWORD, DROWSSAP FROM PASSWORDS';
 my $data_ref = $dbh->selectall_arrayref($sql);
 my @got;
 for my $row (@{$data_ref}) {
