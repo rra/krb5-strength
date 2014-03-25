@@ -47,6 +47,7 @@ ok_program 'Database contains non-ASCII password' 0 '1' \
     cdb -q "$tmpdir/wordlist.cdb" 'عربى'
 
 # Regenerate the database, filtering out short passwords.
+rm "$tmpdir/wordlist.cdb"
 ok_program 'Database generation with no short passwords' 0 '' \
     "$makelist" -c "$tmpdir/wordlist.cdb" -l 8 "$tmpdir/wordlist"
 ok_program 'Database still contains password' 0 '1' \
@@ -55,6 +56,7 @@ ok_program 'Database does not contain one' 100 '' \
     cdb -q "$tmpdir/wordlist.cdb" one
 
 # Regenerate the database, filtering out non-ASCII words.
+rm "$tmpdir/wordlist.cdb"
 ok_program 'Database generation with no non-ASCII' 0 '' \
     "$makelist" -c "$tmpdir/wordlist.cdb" -a "$tmpdir/wordlist"
 ok_program 'Database still contains password' 0 '1' \
@@ -63,6 +65,7 @@ ok_program 'Database does not contain non-ASCII password' 100 '' \
     cdb -q "$tmpdir/wordlist.cdb" 'عربى'
 
 # Regenerate the database, filtering out long passwords.
+rm "$tmpdir/wordlist.cdb"
 ok_program 'Database generation with no long passwords' 0 '' \
     "$makelist" -c "$tmpdir/wordlist.cdb" -L 10 "$tmpdir/wordlist"
 ok_program 'Database still contains bitterbane' 0 '1' \
@@ -71,6 +74,7 @@ ok_program 'Database does not contain happenstance' 100 '' \
     cdb -q "$tmpdir/wordlist.cdb" happenstance
 
 # Regenerate the database, filtering out words starting with b or ending in d.
+rm "$tmpdir/wordlist.cdb"
 ok_program 'Database generation with no b passwords' 0 '' \
     "$makelist" -c "$tmpdir/wordlist.cdb" -x '\Ab' -x '.*d' "$tmpdir/wordlist"
 ok_program 'Database does not contain bitterbane' 100 '' \
