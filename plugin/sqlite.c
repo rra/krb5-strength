@@ -154,25 +154,52 @@ common_prefix_length(const char *a, const char *b)
  * the first two column texts, determine whether this password is a match
  * within edit distance one.
  *
- * It will be a match if the length of the common prefix of the passwod and
+ * It will be a match if the length of the common prefix of the password and
  * word plus the length of the common prefix of the reversed password and the
- * reversed word (which is the length of the common suffix) is within 1 of the
- * length of the password.
+ * reversed word (which is the length of the common suffix) is greater than or
+ * equal to the length of the password minus one.
+ *
+ * To see why the sum of the prefix and suffix length can be longer than the
+ * length of the password when the password doesn't match the word, consider
+ * the password "aaaa" and the word "aaaaaaaaa"
+ * (The prefix length plus the
+ * suffix length may be greater than the length of the password if the
+ * password is an exact match for the word or 
  */
 static bool
 match(size_t length, const char *password, const char *drowssap,
       sqlite3_stmt *query)
 {
     const char *word, *drow;
-    size_t prefix_length, suffix_length;
+    size_t prefix_length, suffix_length, match_length, word_length;
 
+    /* Discard all words whose length is too different. */
     word = (const char *) sqlite3_column_text(query, 0);
-    drow = (const char *) sqlite3_column_text(query, 1);
+    word_length = strlen(word);
+    if (length > word_length + 1 || length + 1 < word_length)
+        return false;
+
+    /*
+     * Get the common prefix length and check if the password is an exact
+     * match.
+     */
     prefix_length = common_prefix_length(password, word);
     if (prefix_length == length)
         return true;
+
+    /*
+     * Ensure there aren't too many different characters for this to be a
+     * match.  If the common prefix and the common suffix together have a
+     * length that's more than one character shorter than the password length,
+     * this is different by at least edit distance two.  The sum of the
+     * lengths of the common prefix and suffix can be greater than length in
+     * cases of an edit in the middle of repeated passwords, such as the
+     * password "baaab" and the word "baab", but those are all matches.
+     */
+    drow = (const char *) sqlite3_column_text(query, 1);
     suffix_length = common_prefix_length(drowssap, drow);
-    return (length - prefix_length - suffix_length <= 1);
+    match_length = prefix_length + suffix_length;
+    return (match_length > length || length - match_length <= 1);
 }
 
 
