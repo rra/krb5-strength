@@ -131,11 +131,17 @@ sub write_sqlite {
     require DBD::SQLite;
 
     # Open and create the database.
-    my $options = { PrintError => 0, RaiseError => 1, AutoCommit => 0 };
+    my $options = { PrintError => 0, RaiseError => 1, AutoCommit => 1 };
     my $dbh = DBI->connect("dbi:SQLite:dbname=$output", q{}, q{}, $options);
     $dbh->do($SQLITE_CREATE);
 
-    # Prepare the insert statement for each word.
+    # Tune SQLite to improve the speed of bulk inserts.  Use unsafe insert
+    # processing and increase the index cache to 500MB.
+    $dbh->do('PRAGMA synchronous = 0');
+    $dbh->do('PRAGMA cache_size = 500000');
+
+    # Start a transaction and prepare the insert statement for each word.
+    $dbh->begin_work();
     my $sth = $dbh->prepare($SQLITE_INSERT);
 
     # Walk through the input word list and add each word that passes the
