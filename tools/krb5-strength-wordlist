@@ -1,14 +1,16 @@
 #!/usr/bin/perl
 #
-# Turn a wordlist into a cdb file.
+# Turn a wordlist into a CDB or SQLite database.
 #
-# cdb is a format invented by Dan Bernstein for fast, constant databases.  The
-# database is fixed during creation and cannot be changed without rebuilding
-# it, and is optimized for very fast access.  This program takes as input a
-# wordlist file (a set of words separated by newlines) and turns it into a cdb
-# file with the words as keys and the constant "1" as a value.  The resulting
-# database is suitable for fast existence lookups in the wordlist, such as for
-# password dictionary checks.
+# This program takes as input a word list (a file of words separated by
+# newlines) and turns it into either a CDB or a SQLite database that can be
+# used by the krb5-strength plugin or heimdal-strength program to check
+# passwords against a password dictionary.  It can also filter a word list in
+# various ways to create a new word list.
+
+##############################################################################
+# Declarations and configuration
+##############################################################################
 
 require 5.006;
 use strict;
@@ -36,6 +38,10 @@ my $SQLITE_INSERT = q{
 };
 ## use critic
 
+##############################################################################
+# Utility functions
+##############################################################################
+
 # print with error checking and an explicit file handle.
 #
 # $fh   - Output file handle
@@ -48,6 +54,10 @@ sub print_fh {
     print {$fh} @args or croak('print failed');
     return;
 }
+
+##############################################################################
+# Database output
+##############################################################################
 
 # Filter the given input file and write it to a CDB data file, and then use
 # cdb to turn that into a database.
@@ -169,6 +179,59 @@ sub write_wordlist {
     return;
 }
 
+##############################################################################
+# Filtering
+##############################################################################
+
+# Given the parsed command-line options as a hash, construct a filter for the
+# word list and return it.  The filter will, given a word, return true if the
+# word should be included in the dictionary and false otherwise.
+#
+# $config_ref - Hash of configuration options
+#   ascii      - Strip non-printable or non-ASCII words
+#   exclude    - Reference to array of regex patterns to exclude
+#   min_length - Minimum word length
+#   max_length - Maximum word length
+#
+# Returns: Filter function to check a word.
+sub build_filter {
+    my ($config_ref) = @_;
+
+    # Build a filter from our command-line parameters.  This is an anonymous
+    # sub that returns true to keep a word and false otherwise.
+    my $filter = sub {
+        my ($word)     = @_;
+        my $length     = length($word);
+        my $min_length = $config_ref->{'min-length'};
+        my $max_length = $config_ref->{'max-length'};
+
+        # Check length.
+        return if (defined($min_length) && $length < $min_length);
+        return if (defined($max_length) && $length > $max_length);
+
+        # Check character classes.
+        if ($config_ref->{ascii}) {
+            return if $word =~ m{ [^[:ascii:]] }xms;
+            return if $word =~ m{ [[:cntrl:]] }xms;
+        }
+
+        # Check regex exclusions.
+        if ($config_ref->{exclude}) {
+            for my $pattern (@{ $config_ref->{exclude} }) {
+                return if $word =~ m{ $pattern }xms;
+            }
+        }
+
+        # Word passes.  Return success.
+        return 1;
+    };
+    return $filter;
+}
+
+##############################################################################
+# Main routine
+##############################################################################
+
 # Always flush output.
 STDOUT->autoflush;
 
@@ -177,67 +240,39 @@ my $fullpath = $0;
 local $0 = basename($0);
 
 # Parse the argument list.
-my ($ascii, $cdb, @exclude, $max_length, $min_length, $manual, $output,
-    $sqlite);
-Getopt::Long::config('bundling', 'no_ignore_case');
-GetOptions(
-    'ascii|a'        => \$ascii,
-    'cdb|c=s'        => \$cdb,
-    'max-length|L=i' => \$max_length,
-    'min-length|l=i' => \$min_length,
-    'manual|man|m'   => \$manual,
-    'output|o=s'     => \$output,
-    'sqlite|s=s'     => \$sqlite,
-    'exclude|x=s'    => \@exclude,
+my %config;
+my @options = (
+    'ascii|a',      'cdb|c=s',    'max-length|L=i', 'min-length|l=i',
+    'manual|man|m', 'output|o=s', 'sqlite|s=s',     'exclude|x=s@',
 );
-if ($manual) {
+Getopt::Long::config('bundling', 'no_ignore_case');
+GetOptions(\%config, @options);
+if ($config{manual}) {
     print_fh(\*STDOUT, "Feeding myself to perldoc, please wait...\n");
     exec('perldoc', '-t', $fullpath);
 }
 if (@ARGV != 1) {
-    die "Usage: cdbmake-wordlist <wordlist>\n";
+    die "Usage: krb5-strength-wordlist <wordlist>\n";
 }
-if (defined($cdb) && (defined($output) || defined($sqlite))) {
+if ($config{cdb} && ($config{output} || $config{sqlite})) {
     die "$0: -c cannot be used with -o or -s\n";
-} elsif (defined($output) && defined($sqlite)) {
+} elsif ($config{output} && $config{sqlite}) {
     die "$0: -o cannot be used with -c or -s\n";
 }
 my $input = $ARGV[0];
 
-# Build a filter from our command-line parameters.  This is an anonymous sub
-# that returns true to keep a word and false otherwise.
-my $filter = sub {
-    my ($word) = @_;
-    my $length = length($word);
-
-    # Check length.
-    return if (defined($min_length) && $length < $min_length);
-    return if (defined($max_length) && $length > $max_length);
-
-    # Check character classes.
-    if ($ascii) {
-        return if $word =~ m{ [^[:ascii:]] }xms;
-        return if $word =~ m{ [[:cntrl:]] }xms;
-    }
-
-    # Check regex exclusions.
-    for my $pattern (@exclude) {
-        return if $word =~ m{ $pattern }xms;
-    }
-
-    # Word passes.  Return success.
-    return 1;
-};
+# Build the filter closure.
+my $filter = build_filter(\%config);
 
 # Process the input file into either wordlist output or a CDB file.
 open(my $in_fh, '<', $input)
   or die "$0: cannot open input file $input: $!\n";
-if (defined($output)) {
-    write_wordlist($in_fh, $output, $filter);
-} elsif (defined($cdb)) {
-    write_cdb($in_fh, $cdb, $filter);
-} elsif (defined($sqlite)) {
-    write_sqlite($in_fh, $sqlite, $filter);
+if ($config{output}) {
+    write_wordlist($in_fh, $config{output}, $filter);
+} elsif ($config{cdb}) {
+    write_cdb($in_fh, $config{cdb}, $filter);
+} elsif ($config{sqlite}) {
+    write_sqlite($in_fh, $config{sqlite}, $filter);
 }
 close($in_fh) or die "$0: cannot read all of input file $input: $!\n";
 
@@ -245,14 +280,19 @@ close($in_fh) or die "$0: cannot read all of input file $input: $!\n";
 exit(0);
 __END__
 
+##############################################################################
+# Documentation
+##############################################################################
+
 =for stopwords
 krb5-strength-wordlist krb5-strength cdb whitespace lookups lookup
 sublicense MERCHANTABILITY NONINFRINGEMENT krb5-strength --ascii Allbery
-regexes output-wordlist heimdal-strength
+regexes output-wordlist heimdal-strength SQLite output-wordlist
+output-sqlite DBI wordlist
 
 =head1 NAME
 
-krb5-strength-wordlist - Create a krb5-strength database from a wordlist
+krb5-strength-wordlist - Create a krb5-strength database from a word list
 
 =head1 SYNOPSIS
 
@@ -278,8 +318,8 @@ rebuilding it, and is optimized for very fast access.  For cdb, the
 database generated by this program will have keys for each word in the
 word list and the constant C<1> as the value.
 
-SQLite stores the word list in a single SQL table containing both each
-word and each word reversed.  This allows the krb5-strength plugin or
+SQLite stores the word list in a single table containing both each word
+and each word reversed.  This allows the krb5-strength plugin or
 B<heimdal-strength> command to reject passwords within edit distance one
 of any word in the word list.  (Edit distance one means that the word list
 entry can be formed by changing a single character of the password, either
@@ -287,11 +327,11 @@ by adding one character, removing one character, or changing one character
 to a different character.)  However, the SQLite database will be much
 larger and lookups may be somewhat slower.
 
-B<krb5-strength-wordlist> takes one argument, the input wordlist file.
+B<krb5-strength-wordlist> takes one argument, the input word list file.
 Use the B<-c> option to specify an output CDB file, B<-s> to specify an
 output SQLite file, or B<-o> to just filter the word list against the
 criteria given on the command line and generate a new word list.
-The input wordlist file does not have to be sorted.  See the individual
+The input word list file does not have to be sorted.  See the individual
 option descriptions for more information.
 
 =head1 OPTIONS
@@ -319,8 +359,8 @@ This option cannot be used with B<-o> or B<-s>.
 
 Filter all words of length greater than I<maximum> from the resulting cdb
 database.  The length of each line (minus the separating newline) in the
-input wordlist will be checked against I<minimum> and will be filtered out
-of the resulting database if it is shorter.  Useful for generating
+input word list will be checked against I<minimum> and will be filtered
+out of the resulting database if it is shorter.  Useful for generating
 password dictionaries from word lists that contain random noise that's
 highly unlikely to be used as a password.
 
@@ -330,11 +370,11 @@ The default is to not filter out any words for maximum length.
 
 Filter all words of length less than I<minimum> from the resulting cdb
 database.  The length of each line (minus the separating newline) in the
-input wordlist will be checked against I<minimum> and will be filtered out
-of the resulting database if it is shorter.  Useful for generating password
-dictionaries where shorter passwords will be rejected by a generic length
-check and no dictionary lookup will be done for a transform of the password
-shorter than the specified minimum.
+input word list will be checked against I<minimum> and will be filtered
+out of the resulting database if it is shorter.  Useful for generating
+password dictionaries where shorter passwords will be rejected by a
+generic length check and no dictionary lookup will be done for a transform
+of the password shorter than the specified minimum.
 
 The default is not to filter out any words for minimum length.
 
@@ -346,9 +386,9 @@ C<perldoc -t>).
 =item B<-o> I<wordlist>, B<--output>=I<wordlist>
 
 Rather than creating a database, apply the filter rules given by the other
-command-line arguments and generate a new wordlist in the file name given
+command-line arguments and generate a new word list in the file name given
 by the I<wordlist> option.  This can be used to reduce the size of a raw
-wordlist file (such as one taken from Internet sources) by removing the
+word list file (such as one taken from Internet sources) by removing the
 words that will be filtered out of the dictionary anyway, thus reducing
 the size of the source required to regenerate the dictionary.
 
@@ -371,7 +411,7 @@ This option cannot be used with B<-c> or B<-o>.
 
 Filter all words matching the regular expression I<exclude> from the
 resulting cdb database.  This regular expression will be matched against
-each line of the source wordlist after the trailing newline is removed.
+each line of the source word list after the trailing newline is removed.
 This option may be given repeatedly to add multiple exclusion regexes.
 
 =back
