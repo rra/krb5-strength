@@ -1,6 +1,6 @@
 =for stopwords
 heimdal-strength Heimdal CrackLib krb5-strength Allbery CDB
-canonicalization cdbmake-wordlist reproducibly
+canonicalization krb5-strength-wordlist reproducibly
 
 =head1 NAME
 
