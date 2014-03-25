@@ -238,12 +238,13 @@ COMPILING AND INSTALLING
 CONFIGURATION
 
   First, build and install either a CrackLib dictionary as described in
-  REQUIREMENTS above, or build a CDB dictionary with cdbmake-wordlist.
-  (Or both.)  The CrackLib dictionary will consist of three files, one
-  each ending in *.hwm, *.pwd, and *.pwi.  The CDB dictionary will consist
-  of a single file ending in *.cdb.  Install those files somewhere on your
-  system.  Then, follow the relevant instructions below for either Heimdal
-  or MIT Kerberos.
+  REQUIREMENTS above, or build a CDB or SQLite dictionary with
+  krb5-strength-wordlist.  (Or any combination thereof.)  The CrackLib
+  dictionary will consist of three files, one each ending in *.hwm, *.pwd,
+  and *.pwi.  The CDB and SQLite dictionaries will be single files,
+  conventionally ending in *.cdb and *.sqlite respectively.  Install those
+  files somewhere on your system.  Then, follow the relevant instructions
+  below for either Heimdal or MIT Kerberos.
 
   See "Other Settings" below for additional krb5.conf setting supported by
   both Heimdal and MIT Kerberos.

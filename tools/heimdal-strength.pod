@@ -168,7 +168,7 @@ English phrase, and this will force at least some additional complexity.
 
 =head1 SEE ALSO
 
-cdbmake-wordlist(1), kadm5-strength(3), kpasswdd(8), krb5.conf(5)
+krb5-strength-wordlist(1), kadm5-strength(3), kpasswdd(8), krb5.conf(5)
 
 The "Password changing" section of the Heimdal info documentation
 describes the interface that this program implements and how to configure
