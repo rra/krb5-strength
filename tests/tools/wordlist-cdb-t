@@ -17,7 +17,7 @@ if ! command -v cdb >/dev/null 2>&1 ; then
 fi
 
 # Output the test plan.
-plan 20
+plan 18
 
 # Create a temporary directory and wordlist and ensure it's writable.
 tmpdir=`test_tmpdir`
@@ -83,14 +83,6 @@ ok_program 'Database still contains happenstance' 0 '1' \
     cdb -q "$tmpdir/wordlist.cdb" happenstance
 ok_program 'Database does not contain password' 100 '' \
     cdb -q "$tmpdir/wordlist.cdb" password
-
-# Try filtering the wordlist into a new wordlist.
-ok_program 'Wordlist filtering' 0 '' \
-    "$makelist" -a -x '.*d' -l 8 -o "$tmpdir/wordlist.new" "$tmpdir/wordlist"
-( echo 'bitterbane'; echo 'happenstance' ) > "$tmpdir/wordlist.expected"
-ok_program 'Filtered wordlist is correct' 0 '' \
-    cmp "$tmpdir/wordlist.expected" "$tmpdir/wordlist.new"
-rm -f "$tmpdir/wordlist.expected" "$tmpdir/wordlist.new"
 
 # Clean up.
 rm -f "$tmpdir/wordlist.cdb"

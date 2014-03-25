@@ -11,6 +11,7 @@ portable/snprintf
 portable/strndup
 tools/heimdal-history
 tools/heimdal-strength
+tools/wordlist
 tools/wordlist-cdb
 util/messages
 util/messages-krb5
