@@ -95,7 +95,10 @@ REQUIREMENTS
 
   You can also optionally build against the TinyCDB library, which
   provides support for simpler and faster password checking against a CDB
-  dictionary file.
+  dictionary file, and the SQLite library (a version new enough to support
+  the sqlite3_open_v2 API; 3.7 should be more than sufficient), which
+  provides support for checking whether passwords are within edit distance
+  one of a dictionary word.
 
   For this module to be effective for either Heimdal or MIT Kerberos, you
   will also need to construct a dictionary.  The mkdict and packer
@@ -105,9 +108,10 @@ REQUIREMENTS
   that come with the stock CrackLib package (often already packaged in a
   Linux distribution); the database format is compatible.
 
-  For building a CDB dictionary, use the provided cdbmake-wordlist
-  program.  The CDB utility must be on your PATH.  cdbmake-wordlist
-  requires Perl 5.006 or later.
+  For building a CDB or SQLite dictionary, use the provided
+  krb5-strength-wordlist program.  For CDB dictionries, the cdb utility
+  must be on your PATH.  For SQLite, the DBI and DBD::SQLite Perl modules
+  are required.  krb5-strength-wordlist requires Perl 5.006 or later.
 
   For a word list to use as source for the dictionary, you can use
   /usr/share/dict/words if it's available on your system, but it would be
@@ -180,6 +184,11 @@ COMPILING AND INSTALLING
   specify the installation path of TinyCDB, use --with-tinycdb.  You can
   also separately set the include and library path with
   --with-tinycdb-include and --with-tinycdb-lib.
+
+  Similarly, krb5-strength will automatically build with SQLite if it is
+  found.  To specify the installation path of SQLite, use --with-sqlite.
+  You can also separately set the include and library path with
+  --with-sqlite-include and --with-sqlite-lib.
 
   Normally, configure will use krb5-config to determine the flags to use
   to compile with your Kerberos libraries.  If krb5-config isn't found, it
