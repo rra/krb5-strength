@@ -10,11 +10,11 @@ autoreconf -i --force
 # Generate manual pages.
 version=`grep '^krb5-strength' NEWS | head -1 | cut -d' ' -f2`
 pod2man --release="$version" --center='krb5-strength' \
-    tools/cdbmake-wordlist > tools/cdbmake-wordlist.1
-pod2man --release="$version" --center='krb5-strength' \
     tools/heimdal-history > tools/heimdal-history.1
 pod2man --release="$version" --center='krb5-strength' \
     tools/heimdal-strength.pod > tools/heimdal-strength.1
+pod2man --release="$version" --center='krb5-strength' \
+    tools/krb5-strength-wordlist > tools/krb5-strength-wordlist.1
 
 # Generate the C version of our password test data.
 for data in tests/data/passwords/*.json ; do
@@ -23,4 +23,6 @@ for data in tests/data/passwords/*.json ; do
 done
 
 # Generate the CDB database from the test wordlist for plugin tests.
-tools/cdbmake-wordlist tests/data/wordlist
+rm -f tests/data/wordlist.cdb tests/data/wordlist.sqlite
+tools/krb5-strength-wordlist -c tests/data/wordlist.cdb tests/data/wordlist
+tools/krb5-strength-wordlist -s tests/data/wordlist.sqlite tests/data/wordlist

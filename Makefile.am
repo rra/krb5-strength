@@ -12,12 +12,13 @@ EXTRA_DIST = .gitignore LICENSE autogen cracklib/HISTORY cracklib/LICENCE  \
 	tests/TESTS tests/data/krb5.conf tests/data/make-krb5-conf	   \
 	tests/data/passwords tests/data/perl.conf tests/data/perlcriticrc  \
 	tests/data/perltidyrc tests/data/valgrind.supp tests/data/wordlist \
-	tests/data/wordlist.cdb tests/docs/pod-spelling-t tests/docs/pod-t \
-	tests/perl/critic-t tests/perl/minimum-version-t		   \
-	tests/perl/strict-t tests/tap/libtap.sh tests/tap/perl/Test/RRA.pm \
+	tests/data/wordlist.cdb tests/data/wordlist.sqlite		   \
+	tests/docs/pod-spelling-t tests/docs/pod-t tests/perl/critic-t	   \
+	tests/perl/minimum-version-t tests/perl/strict-t		   \
+	tests/tap/libtap.sh tests/tap/perl/Test/RRA.pm			   \
 	tests/tap/perl/Test/RRA/Config.pm				   \
-	tests/tap/perl/Test/RRA/Automake.pm tests/tools/cdbmake-wordlist-t \
-	tests/tools/heimdal-history-t tests/tools/heimdal-strength-t	   \
+	tests/tap/perl/Test/RRA/Automake.pm tests/tools/heimdal-history-t  \
+	tests/tools/heimdal-strength-t tests/tools/wordlist-cdb-t	   \
 	tests/util/xmalloc-t tools/heimdal-strength.pod
 
 # Do this globally.  Everything needs to find the Kerberos headers and
@@ -82,11 +83,11 @@ tools_heimdal_strength_LDADD += util/libutil.a portable/libportable.la \
 	$(KRB5_LIBS) $(CDB_LIBS)
 
 # Other tools.
-dist_bin_SCRIPTS = tools/cdbmake-wordlist tools/heimdal-history
+dist_bin_SCRIPTS = tools/heimdal-history tools/krb5-strength-wordlist
 
 # Man pages for all tools.
 dist_man_MANS = tools/heimdal-history.1 tools/heimdal-strength.1 \
-	tools/cdbmake-wordlist.1
+	tools/krb5-strength-wordlist.1
 
 # Handle the standard stuff that make maintainer-clean should probably remove
 # but doesn't.  This breaks the GNU coding standard, but in this area the GNU
@@ -98,7 +99,15 @@ MAINTAINERCLEANFILES = Makefile.in aclocal.m4 build-aux/compile		 \
 	build-aux/config.guess build-aux/config.sub build-aux/depcomp	 \
 	build-aux/install-sh build-aux/ltmain.sh build-aux/missing	 \
 	config.h.in config.h.in~ configure m4/libtool.m4 m4/ltoptions.m4 \
-	m4/ltsugar.m4 m4/ltversion.m4 m4/lt~obsolete.m4
+	m4/ltsugar.m4 m4/ltversion.m4 m4/lt~obsolete.m4			 \
+	tests/data/wordlist.cdb tests/data/wordlist.sqlite		 \
+	tools/heimdal-history.1 tools/heimdal-strength.1		 \
+	tools/krb5-strength-wordlist.1
+
+# Also remove the generated *.c files from our JSON test data on
+# maintainer-clean.
+maintainer-clean-local:
+	rm -f tests/data/passwords/*.c
 
 # A set of flags for warnings.  Add -O because gcc won't find some warnings
 # without optimization turned on.  Desirable warnings that can't be turned
@@ -183,8 +192,8 @@ check-local: $(check_PROGRAMS) tests/data/dictionary.pwd
 # Used by maintainers to run the main test suite under valgrind.  Suppress
 # the xmalloc and pod-spelling tests because the former won't work properly
 # under valgrind (due to increased memory usage) and the latter is pointless
-# to run under valgrind.  Don't try to trace the test for cdbmake-wordlist,
-# since it's pure Perl.
+# to run under valgrind.  Don't try to trace the test for
+# krb5-strength-wordlist, since it's pure Perl.
 check-valgrind: $(check_PROGRAMS) tests/data/dictionary.pwd
 	rm -rf $(abs_top_builddir)/tmp-valgrind
 	mkdir $(abs_top_builddir)/tmp-valgrind
@@ -192,5 +201,5 @@ check-valgrind: $(check_PROGRAMS) tests/data/dictionary.pwd
 	    --show-reachable=yes --trace-children=yes		\
 	    --log-file=$(abs_top_builddir)/tmp-valgrind/log.%p	\
 	    --suppressions=tests/data/valgrind.supp		\
-	    --trace-children-skip="/bin/sh,*/cat,*/diff,*/expr,*/grep,*/mkdir,*/rm,*/rmdir,*/sed,*/sleep,*/true,*/wc,*/docs/*-t,*/perl/*-t,*/data/make-krb5-conf,*/tools/cdbmake-wordlist-t" \
+	    --trace-children-skip="/bin/sh,*/cat,*/diff,*/expr,*/grep,*/mkdir,*/rm,*/rmdir,*/sed,*/sleep,*/true,*/wc,*/docs/*-t,*/perl/*-t,*/data/make-krb5-conf,*/tools/wordlist-*-t" \
 	    tests/runtests -l '$(abs_top_srcdir)/tests/TESTS'

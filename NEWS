@@ -2,6 +2,11 @@
 
 krb5-strength 3.0 (unreleased)
 
+    cdbmake-wordlist has been renamed to krb5-strength-wordlist.
+    Generating CDB dictionaries now requires the -c option; see the
+    documentation for more information.  A SQLite database of dictionary
+    words can now be created instead, using the -s option.
+
     A password history implementation for Heimdal is now included.  This
     is a separate Perl program, heimdal-history, that stacks with the
     external program implementation of strength checking.  It is not

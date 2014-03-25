@@ -21,6 +21,7 @@
 /tests/data/dictionary.*
 /tests/data/passwords/*.c
 /tests/data/wordlist.cdb
+/tests/data/wordlist.sqlite
 /tests/plugin/heimdal-t
 /tests/plugin/mit-t
 /tests/portable/asprintf-t
