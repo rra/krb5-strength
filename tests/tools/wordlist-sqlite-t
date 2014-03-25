@@ -45,7 +45,7 @@ sub run_wordlist {
 
     # Ensure the output file does not exist.
     if (-f $output) {
-        unlnk($output) or BAIL_OUT("cannot delete $output: $!");
+        unlink($output) or BAIL_OUT("cannot delete $output: $!");
     }
 
     # Run the program, capturing its output and status.
