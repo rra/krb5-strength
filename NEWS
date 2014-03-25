@@ -29,9 +29,11 @@ krb5-strength 3.0 (unreleased)
     be used to reject long strings of identical characters or short
     patterns, which may pass other checks but still be too easy to guess.
 
-    Update to rra-c-util 5.3:
+    Update to rra-c-util 5.4:
 
     * Fix portable/krb5.h build with a C++ compiler.
+    * Use Lancaster Consensus environment variables to control tests.
+    * Work around perltidy bug that leaves behind stray log files.
 
     Update to C TAP Harness 3.0:
 
