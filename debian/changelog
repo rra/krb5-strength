@@ -1,4 +1,4 @@
-krb5-strength (3.0-1) UNRELEASED; urgency=medium
+krb5-strength (3.0-1) unstable; urgency=medium
 
   * New upstream release.
     - SQLite password dictionaries are now supported and can be used to
