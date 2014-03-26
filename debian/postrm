@@ -1,0 +1,23 @@
+#!/bin/sh
+
+set -e
+
+# Purge the password history database and remove the _history user and group
+# on package purge.  This user should not be used for any other purpose.
+if [ "$1" = purge ] ; then
+    for file in history.db history.db.lock lengths.db lengths.db.lock ; do
+        rm -f "/var/lib/heimdal-history/$file"
+    done
+    deluser --quiet --system _history >/dev/null || true
+fi
+
+# Remove the directory for the password history database on remove if empty.
+if [ "$1" = purge ] || [ "$1" = remove ] ; then
+    if [ -d /var/lib/heimdal-history ] ; then
+        rmdir --ignore-fail-on-non-empty /var/lib/heimdal-history
+    fi
+fi
+
+#DEBHELPER#
+
+exit 0

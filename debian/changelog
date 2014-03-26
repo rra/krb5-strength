@@ -1,10 +1,33 @@
-krb5-strength (2.2-1~sbp60+1) squeeze-backports; urgency=low
+krb5-strength (3.0-1~sbp60+1) squeeze-backports; urgency=medium
 
   * Special Stanford-only local backport that builds the package against
     Heimdal instead of MIT Kerberos.  We only need the heimdal-strength
     program and the MIT API isn't supported until wheezy.
 
  -- Russ Allbery <rra@debian.org>  Mon, 16 Dec 2013 15:56:00 -0800
+
+krb5-strength (3.0-1) unstable; urgency=medium
+
+  * New upstream release.
+    - SQLite password dictionaries are now supported and can be used to
+      reject passwords within edit distance one of any dictionary word.
+    - cdbmake-wordlist has been renamed to krb5-strength-wordlist and can
+      also generate SQLite databases compatible with this plugin and
+      Heimdal quality check program.
+    - heimdal-history, a password history implementation for Heimdal, has
+      been added and can be stacked with heimdal-strength to check both
+      history and password strength.
+    - New configuration option, minimum_different, which sets the minimum
+      number of different characters required in a password.
+  * Add the upstream signing key to debian/upstream/signing-key.asc and
+    configure uscan to do signature validation.  Configure uscan to
+    download the xz tarball instead of the gz tarball.
+  * Create a _history user and group and a /var/lib/heimdal-history
+    directory on package installation for the use of heimdal-history,
+    remove the user and the standard database on purge, and remove the
+    directory if empty on package purge or removal.
+
+ -- Russ Allbery <rra@debian.org>  Wed, 26 Mar 2014 00:04:13 -0700
 
 krb5-strength (2.2-1) unstable; urgency=low
 

@@ -109,11 +109,20 @@
 /* Define to 1 if you have the <memory.h> header file. */
 #undef HAVE_MEMORY_H
 
+/* Define to 1 if you have the `mkstemp' function. */
+#undef HAVE_MKSTEMP
+
 /* Define to 1 if you have the `setrlimit' function. */
 #undef HAVE_SETRLIMIT
 
 /* Define if your system has a working snprintf function. */
 #undef HAVE_SNPRINTF
+
+/* Define if SQLite is available. */
+#undef HAVE_SQLITE
+
+/* Define to 1 if you have the <sqlite3.h> header file. */
+#undef HAVE_SQLITE3_H
 
 /* Define to 1 if the system has the type `ssize_t'. */
 #undef HAVE_SSIZE_T
@@ -141,6 +150,9 @@
 
 /* Define to 1 if you have the <sys/bittypes.h> header file. */
 #undef HAVE_SYS_BITTYPES_H
+
+/* Define to 1 if you have the <sys/select.h> header file. */
+#undef HAVE_SYS_SELECT_H
 
 /* Define to 1 if you have the <sys/stat.h> header file. */
 #undef HAVE_SYS_STAT_H

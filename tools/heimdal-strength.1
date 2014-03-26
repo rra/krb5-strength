@@ -133,7 +133,7 @@
 .\" ========================================================================
 .\"
 .IX Title "HEIMDAL-STRENGTH 1"
-.TH HEIMDAL-STRENGTH 1 "2013-12-16" "2.2" "krb5-strength"
+.TH HEIMDAL-STRENGTH 1 "2014-03-25" "3.0" "krb5-strength"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -187,6 +187,12 @@ exit with a non-zero status.
 .SH "CONFIGURATION"
 .IX Header "CONFIGURATION"
 The following \fIkrb5.conf\fR configuration options are supported:
+.IP "minimum_different" 4
+.IX Item "minimum_different"
+If set to a numeric value, passwords with fewer than this number of unique
+characters will be rejected.  This can be used to reject, for example,
+passwords that are long strings of the same character or repetitions of
+small numbers of characters, which may be too easy to guess.
 .IP "minimum_length" 4
 .IX Item "minimum_length"
 If set to a numeric value, passwords with fewer than that number of
@@ -204,8 +210,8 @@ and \fI*.pwi\fR extensions for the CrackLib dictionary.
 Specifies the base path to a \s-1CDB\s0 dictionary and enables \s-1CDB\s0 password
 dictionary lookups.  The path must point to a CDB-format database whose
 keys are the known passwords or dictionary words.  The values are ignored.
-You can use the \fBcdbmake-wordlist\fR utility to generate the \s-1CDB\s0 database
-from a word list.
+You can use the \fBkrb5\-strength\-wordlist\fR utility to generate the \s-1CDB\s0
+database from a word list.
 .Sp
 The \s-1CDB\s0 dictionary lookups do not do the complex password mangling that
 CrackLib does.  Instead, the password itself will be checked against the
@@ -215,9 +221,29 @@ first two characters, and the last two characters.  If any of these
 strings are found in the \s-1CDB\s0 database, the password will be rejected;
 otherwise, it will be accepted, at least by this check.
 .Sp
-Both a CrackLib dictionary and a \s-1CDB\s0 dictionary may be configured at the
-same time, in which case CrackLib will be run first, followed by the \s-1CDB\s0
-checks.
+A CrackLib dictionary, a \s-1CDB\s0 dictionary, and a SQLite dictionary may all
+be configured at the same time or in any combination, in which case
+CrackLib will be run first, followed by \s-1CDB\s0 and then SQLite as
+appropriate.
+.IP "password_dictionary_sqlite" 4
+.IX Item "password_dictionary_sqlite"
+Specifies the base path to a SQLite dictionary and enables SQLite password
+dictionary lookups.  The path must point to a SQLite 3 database with a
+table named \f(CW\*(C`passwords\*(C'\fR.  This table should have two columns, \f(CW\*(C`password\*(C'\fR
+and \f(CW\*(C`drowssap\*(C'\fR, which, for each dictionary word, holds the word and the
+reversed form of the word.  You can use the \fBkrb5\-strength\-wordlist\fR
+utility to generate the SQLite database from a word list.
+.Sp
+The SQLite dictionary lookups do not do the complex password mangling that
+CrackLib does, but they will detect and reject any password that is within
+edit distance one of a word in the dictionary, meaning that the dictionary
+word can be formed from the password by adding, deleting, or modifying a
+single character.
+.Sp
+A CrackLib dictionary, a \s-1CDB\s0 dictionary, and a SQLite dictionary may all
+be configured at the same time or in any combination, in which case
+CrackLib will be run first, followed by \s-1CDB\s0 and then SQLite as
+appropriate.
 .IP "require_ascii_printable" 4
 .IX Item "require_ascii_printable"
 If set to a true boolean value, rejects any password that contains
@@ -278,7 +304,7 @@ may be helpful in combination with passphrases; users may choose a stock
 English phrase, and this will force at least some additional complexity.
 .SH "SEE ALSO"
 .IX Header "SEE ALSO"
-\&\fIcdbmake\-wordlist\fR\|(1), \fIkadm5\-strength\fR\|(3), \fIkpasswdd\fR\|(8), \fIkrb5.conf\fR\|(5)
+\&\fIkrb5\-strength\-wordlist\fR\|(1), \fIkadm5\-strength\fR\|(3), \fIkpasswdd\fR\|(8), \fIkrb5.conf\fR\|(5)
 .PP
 The \*(L"Password changing\*(R" section of the Heimdal info documentation
 describes the interface that this program implements and how to configure
@@ -292,8 +318,8 @@ krb5\-strength package.
 Russ Allbery <eagle@eyrie.org>
 .SH "COPYRIGHT AND LICENSE"
 .IX Header "COPYRIGHT AND LICENSE"
-Copyright 2010, 2013 The Board of Trustees of the Leland Stanford Junior
-University
+Copyright 2010, 2013, 2014 The Board of Trustees of the Leland Stanford
+Junior University
 .PP
 Copying and distribution of this file, with or without modification, are
 permitted in any medium without royalty provided the copyright notice and
