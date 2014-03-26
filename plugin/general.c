@@ -9,7 +9,7 @@
  * Developed by Derrick Brashear and Ken Hornstein of Sine Nomine Associates,
  *     on behalf of Stanford University
  * Extensive modifications by Russ Allbery <eagle@eyrie.org>
- * Copyright 2006, 2007, 2009, 2012, 2013
+ * Copyright 2006, 2007, 2009, 2012, 2013, 2014
  *     The Board of Trustees of the Leland Stanford Junior University
  *
  * See LICENSE for licensing terms.
@@ -47,7 +47,8 @@ strength_init(krb5_context ctx, const char *dictionary,
         return strength_error_system(ctx, "cannot allocate memory");
     data->cdb_fd = -1;
 
-    /* Get minimum length information from krb5.conf. */
+    /* Get minimum length and character information from krb5.conf. */
+    strength_config_number(ctx, "minimum_different", &data->minimum_different);
     strength_config_number(ctx, "minimum_length", &data->minimum_length);
 
     /* Get simple character class restrictions from krb5.conf. */
@@ -60,14 +61,17 @@ strength_init(krb5_context ctx, const char *dictionary,
         goto fail;
 
     /*
-     * Try to initialize CDB and CrackLib dictionaries.  Both functions handle
-     * their own configuration parsing and will do nothing if the
-     * corresponding dictionary is not configured.
+     * Try to initialize CDB, CrackLib, and SQLite dictionaries.  These
+     * functions handle their own configuration parsing and will do nothing if
+     * the corresponding dictionary is not configured.
      */
     code = strength_init_cracklib(ctx, data, dictionary);
     if (code != 0)
         goto fail;
     code = strength_init_cdb(ctx, data);
+    if (code != 0)
+        goto fail;
+    code = strength_init_sqlite(ctx, data);
     if (code != 0)
         goto fail;
 
@@ -114,6 +118,39 @@ only_alpha_space(const char *password)
 
 
 /*
+ * Check if a password has a sufficient number of unique characters.  Takes
+ * the password and the required number of characters.
+ */
+static bool
+has_minimum_different(const char *password, long minimum)
+{
+    size_t unique;
+    const char *p;
+
+    /* Special cases for passwords of length 0 and a minimum <= 1. */
+    if (password == NULL || password[0] == '\0')
+        return minimum <= 0;
+    if (minimum <= 1)
+        return true;
+
+    /*
+     * Count the number of unique characters by incrementing the count if each
+     * subsequent character is not found in the previous password characters.
+     * This algorithm is O(n^2), but passwords are short enough it shouldn't
+     * matter.
+     */
+    unique = 1;
+    for (p = password + 1; *p != '\0'; p++)
+        if (memchr(password, *p, p - password) == NULL) {
+            unique++;
+            if (unique >= (size_t) minimum)
+                return true;
+        }
+    return false;
+}
+
+
+/*
  * Check a given password.  Takes a Kerberos context, our module data, the
  * password, the principal the password is for, and a buffer and buffer length
  * into which to put any failure message.
@@ -144,6 +181,11 @@ strength_check(krb5_context ctx UNUSED, krb5_pwqual_moddata data,
     if (data->nonletter && only_alpha_space(password))
         return strength_error_class(ctx, ERROR_LETTER);
 
+    /* If desired, check for enough unique characters. */
+    if (data->minimum_different > 0)
+        if (!has_minimum_different(password, data->minimum_different))
+            return strength_error_class(ctx, ERROR_MINDIFF);
+
     /*
      * If desired, check that the password satisfies character class
      * restrictions.
@@ -157,11 +199,14 @@ strength_check(krb5_context ctx UNUSED, krb5_pwqual_moddata data,
     if (code != 0)
         return code;
 
-    /* Check the password against CDB and CrackLib if configured. */
+    /* Check the password against CDB, CrackLib, and SQLite if configured. */
     code = strength_check_cracklib(ctx, data, password);
     if (code != 0)
         return code;
     code = strength_check_cdb(ctx, data, password);
+    if (code != 0)
+        return code;
+    code = strength_check_sqlite(ctx, data, password);
     if (code != 0)
         return code;
 
@@ -182,6 +227,7 @@ strength_close(krb5_context ctx UNUSED, krb5_pwqual_moddata data)
     if (data == NULL)
         return;
     strength_close_cdb(ctx, data);
+    strength_close_sqlite(ctx, data);
     last = data->rules;
     while (last != NULL) {
         tmp = last;

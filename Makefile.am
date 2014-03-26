@@ -1,7 +1,7 @@
 # Automake makefile for krb5-strength.
 #
 # Written by Russ Allbery <eagle@eyrie.org>
-# Copyright 2007, 2009, 2010, 2012, 2013
+# Copyright 2007, 2009, 2010, 2012, 2013, 2014
 #     The Board of Trustees of the Leland Stanford Junior University
 #
 # See LICENSE for licensing terms.
@@ -12,19 +12,23 @@ EXTRA_DIST = .gitignore LICENSE autogen cracklib/HISTORY cracklib/LICENCE  \
 	tests/TESTS tests/data/krb5.conf tests/data/make-krb5-conf	   \
 	tests/data/passwords tests/data/perl.conf tests/data/perlcriticrc  \
 	tests/data/perltidyrc tests/data/valgrind.supp tests/data/wordlist \
-	tests/data/wordlist.cdb tests/docs/pod-spelling-t tests/docs/pod-t \
-	tests/perl/critic-t tests/perl/minimum-version-t		   \
-	tests/perl/strict-t tests/tap/libtap.sh tests/tap/perl/Test/RRA.pm \
+	tests/data/wordlist.cdb tests/data/wordlist.sqlite		   \
+	tests/docs/pod-spelling-t tests/docs/pod-t tests/perl/critic-t	   \
+	tests/perl/minimum-version-t tests/perl/strict-t		   \
+	tests/tap/libtap.sh tests/tap/perl/Test/RRA.pm			   \
 	tests/tap/perl/Test/RRA/Config.pm				   \
-	tests/tap/perl/Test/RRA/Automake.pm tests/tools/cdbmake-wordlist-t \
-	tests/tools/heimdal-strength-t tests/util/xmalloc-t		   \
-	tools/heimdal-strength.pod
+	tests/tap/perl/Test/RRA/Automake.pm tests/tools/heimdal-history-t  \
+	tests/tools/heimdal-strength-t tests/tools/wordlist-cdb-t	   \
+	tests/tools/wordlist-sqlite-t tests/tools/wordlist-t		   \
+	tests/util/xmalloc-t tools/heimdal-strength.pod
 
 # Do this globally.  Everything needs to find the Kerberos headers and
-# libraries, and if we're using the system CrackLib or libcdb, add its
-# location unconditionally as well.
-AM_CPPFLAGS = $(CRACKLIB_CPPFLAGS) $(KRB5_CPPFLAGS) $(CDB_CPPFLAGS)
-AM_LDFLAGS = $(CRACKLIB_LDFLAGS) $(KRB5_LDFLAGS) $(CDB_LDFLAGS)
+# libraries, and if we're using the system CrackLib, TinyCDB, or SQLite, add
+# its location unconditionally as well.
+AM_CPPFLAGS = $(CRACKLIB_CPPFLAGS) $(KRB5_CPPFLAGS) $(CDB_CPPFLAGS) \
+	$(SQLITE_CPPFLAGS)
+AM_LDFLAGS = $(CRACKLIB_LDFLAGS) $(KRB5_LDFLAGS) $(CDB_LDFLAGS) \
+	$(SQLITE_LDFLAGS)
 
 # Build our portability library.
 noinst_LTLIBRARIES = portable/libportable.la
@@ -57,35 +61,38 @@ moduledir = $(libdir)/krb5/plugins/pwqual
 module_LTLIBRARIES = plugin/strength.la
 plugin_strength_la_SOURCES = plugin/cdb.c plugin/classes.c plugin/config.c \
 	plugin/cracklib.c plugin/error.c plugin/general.c plugin/heimdal.c \
-	plugin/internal.h plugin/mit.c plugin/principal.c plugin/vector.c
+	plugin/internal.h plugin/mit.c plugin/principal.c plugin/sqlite.c  \
+	plugin/vector.c
 plugin_strength_la_LDFLAGS = -module -avoid-version
 if EMBEDDED_CRACKLIB
     plugin_strength_la_LIBADD = cracklib/libcracklib.la
 else
     plugin_strength_la_LIBADD = $(CRACKLIB_LIBS)
 endif
-plugin_strength_la_LIBADD += portable/libportable.la $(KRB5_LIBS) $(CDB_LIBS)
+plugin_strength_la_LIBADD += portable/libportable.la $(KRB5_LIBS) \
+	$(CDB_LIBS) $(SQLITE_LIBS)
 
 # The Heimdal external check program.
 bin_PROGRAMS = tools/heimdal-strength
 tools_heimdal_strength_CFLAGS = $(AM_CFLAGS)
 tools_heimdal_strength_SOURCES = plugin/cdb.c plugin/classes.c		  \
 	plugin/config.c plugin/cracklib.c plugin/error.c plugin/general.c \
-	plugin/internal.h plugin/principal.c plugin/vector.c		  \
-	tools/heimdal-strength.c
+	plugin/internal.h plugin/principal.c plugin/sqlite.c		  \
+	plugin/vector.c tools/heimdal-strength.c
 if EMBEDDED_CRACKLIB
     tools_heimdal_strength_LDADD = cracklib/libcracklib.la
 else
     tools_heimdal_strength_LDADD = $(CRACKLIB_LIBS)
 endif
 tools_heimdal_strength_LDADD += util/libutil.a portable/libportable.la \
-	$(KRB5_LIBS) $(CDB_LIBS)
+	$(KRB5_LIBS) $(CDB_LIBS) $(SQLITE_LIBS)
 
 # Other tools.
-dist_bin_SCRIPTS = tools/cdbmake-wordlist
+dist_bin_SCRIPTS = tools/heimdal-history tools/krb5-strength-wordlist
 
 # Man pages for all tools.
-dist_man_MANS = tools/heimdal-strength.1 tools/cdbmake-wordlist.1
+dist_man_MANS = tools/heimdal-history.1 tools/heimdal-strength.1 \
+	tools/krb5-strength-wordlist.1
 
 # Handle the standard stuff that make maintainer-clean should probably remove
 # but doesn't.  This breaks the GNU coding standard, but in this area the GNU
@@ -97,7 +104,15 @@ MAINTAINERCLEANFILES = Makefile.in aclocal.m4 build-aux/compile		 \
 	build-aux/config.guess build-aux/config.sub build-aux/depcomp	 \
 	build-aux/install-sh build-aux/ltmain.sh build-aux/missing	 \
 	config.h.in config.h.in~ configure m4/libtool.m4 m4/ltoptions.m4 \
-	m4/ltsugar.m4 m4/ltversion.m4 m4/lt~obsolete.m4
+	m4/ltsugar.m4 m4/ltversion.m4 m4/lt~obsolete.m4			 \
+	tests/data/wordlist.cdb tests/data/wordlist.sqlite		 \
+	tools/heimdal-history.1 tools/heimdal-strength.1		 \
+	tools/krb5-strength-wordlist.1
+
+# Also remove the generated *.c files from our JSON test data on
+# maintainer-clean.
+maintainer-clean-local:
+	rm -f tests/data/passwords/*.c
 
 # A set of flags for warnings.  Add -O because gcc won't find some warnings
 # without optimization turned on.  Desirable warnings that can't be turned
@@ -121,10 +136,10 @@ warnings:
 	$(MAKE) V=0 CFLAGS='$(WARNINGS)' $(check_PROGRAMS)
 
 # The bits below are for the test suite, not for the main package.
-check_PROGRAMS = tests/runtests tests/plugin/heimdal-t tests/plugin/mit-t \
-	tests/portable/asprintf-t tests/portable/snprintf-t		  \
-	tests/portable/strndup-t tests/util/messages-krb5-t		  \
-	tests/util/messages-t tests/util/xmalloc
+check_PROGRAMS = tests/runtests tests/plugin/heimdal-t tests/plugin/mit-t   \
+	tests/portable/asprintf-t tests/portable/mkstemp-t		    \
+	tests/portable/snprintf-t tests/portable/strndup-t		    \
+	tests/util/messages-krb5-t tests/util/messages-t tests/util/xmalloc
 if EMBEDDED_CRACKLIB
     check_PROGRAMS += cracklib/packer
 endif
@@ -147,6 +162,9 @@ tests_plugin_mit_t_LDADD = tests/tap/libtap.a portable/libportable.la \
 tests_portable_asprintf_t_SOURCES = tests/portable/asprintf-t.c \
 	tests/portable/asprintf.c
 tests_portable_asprintf_t_LDADD = tests/tap/libtap.a portable/libportable.la
+tests_portable_mkstemp_t_SOURCES = tests/portable/mkstemp-t.c \
+	tests/portable/mkstemp.c
+tests_portable_mkstemp_t_LDADD = tests/tap/libtap.a portable/libportable.la
 tests_portable_snprintf_t_SOURCES = tests/portable/snprintf-t.c \
 	tests/portable/snprintf.c
 tests_portable_snprintf_t_LDADD = tests/tap/libtap.a portable/libportable.la
@@ -179,14 +197,14 @@ check-local: $(check_PROGRAMS) tests/data/dictionary.pwd
 # Used by maintainers to run the main test suite under valgrind.  Suppress
 # the xmalloc and pod-spelling tests because the former won't work properly
 # under valgrind (due to increased memory usage) and the latter is pointless
-# to run under valgrind.  Don't try to trace the test for cdbmake-wordlist,
-# since it's pure Perl.
+# to run under valgrind.  Don't try to trace several of the tests that are
+# written in Perl or shell and test Perl programs.
 check-valgrind: $(check_PROGRAMS) tests/data/dictionary.pwd
 	rm -rf $(abs_top_builddir)/tmp-valgrind
 	mkdir $(abs_top_builddir)/tmp-valgrind
-	env RRA_MAINTAINER_TESTS= valgrind --leak-check=full	\
-	    --show-reachable=yes --trace-children=yes		\
-	    --log-file=$(abs_top_builddir)/tmp-valgrind/log.%p	\
-	    --suppressions=tests/data/valgrind.supp		\
-	    --trace-children-skip="/bin/sh,*/cat,*/diff,*/expr,*/grep,*/mkdir,*/rm,*/rmdir,*/sed,*/sleep,*/true,*/wc,*/docs/*-t,*/perl/*-t,*/data/make-krb5-conf,*/tools/cdbmake-wordlist-t" \
+	env RRA_MAINTAINER_TESTS= valgrind --leak-check=full		\
+	    --show-reachable=yes --trace-children=yes			\
+	    --log-file=$(abs_top_builddir)/tmp-valgrind/log.%p		\
+	    --suppressions=$(abs_top_srcdir)/tests/data/valgrind.supp	\
+	    --trace-children-skip="/bin/sh,*/cat,*/diff,*/expr,*/grep,*/mkdir,*/rm,*/rmdir,*/sed,*/sleep,*/true,*/wc,*/docs/*-t,*/perl/*-t,*/data/make-krb5-conf,*/tools/heimdal-history-t,*/tools/wordlist*-t" \
 	    tests/runtests -l '$(abs_top_srcdir)/tests/TESTS'

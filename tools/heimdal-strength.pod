@@ -1,6 +1,6 @@
 =for stopwords
 heimdal-strength Heimdal CrackLib krb5-strength Allbery CDB
-canonicalization cdbmake-wordlist reproducibly
+canonicalization krb5-strength-wordlist reproducibly
 
 =head1 NAME
 
@@ -54,6 +54,13 @@ The following F<krb5.conf> configuration options are supported:
 
 =over 4
 
+=item minimum_different
+
+If set to a numeric value, passwords with fewer than this number of unique
+characters will be rejected.  This can be used to reject, for example,
+passwords that are long strings of the same character or repetitions of
+small numbers of characters, which may be too easy to guess.
+
 =item minimum_length
 
 If set to a numeric value, passwords with fewer than that number of
@@ -73,8 +80,8 @@ and F<*.pwi> extensions for the CrackLib dictionary.
 Specifies the base path to a CDB dictionary and enables CDB password
 dictionary lookups.  The path must point to a CDB-format database whose
 keys are the known passwords or dictionary words.  The values are ignored.
-You can use the B<cdbmake-wordlist> utility to generate the CDB database
-from a word list.
+You can use the B<krb5-strength-wordlist> utility to generate the CDB
+database from a word list.
 
 The CDB dictionary lookups do not do the complex password mangling that
 CrackLib does.  Instead, the password itself will be checked against the
@@ -84,9 +91,30 @@ first two characters, and the last two characters.  If any of these
 strings are found in the CDB database, the password will be rejected;
 otherwise, it will be accepted, at least by this check.
 
-Both a CrackLib dictionary and a CDB dictionary may be configured at the
-same time, in which case CrackLib will be run first, followed by the CDB
-checks.
+A CrackLib dictionary, a CDB dictionary, and a SQLite dictionary may all
+be configured at the same time or in any combination, in which case
+CrackLib will be run first, followed by CDB and then SQLite as
+appropriate.
+
+=item password_dictionary_sqlite
+
+Specifies the base path to a SQLite dictionary and enables SQLite password
+dictionary lookups.  The path must point to a SQLite 3 database with a
+table named C<passwords>.  This table should have two columns, C<password>
+and C<drowssap>, which, for each dictionary word, holds the word and the
+reversed form of the word.  You can use the B<krb5-strength-wordlist>
+utility to generate the SQLite database from a word list.
+
+The SQLite dictionary lookups do not do the complex password mangling that
+CrackLib does, but they will detect and reject any password that is within
+edit distance one of a word in the dictionary, meaning that the dictionary
+word can be formed from the password by adding, deleting, or modifying a
+single character.
+
+A CrackLib dictionary, a CDB dictionary, and a SQLite dictionary may all
+be configured at the same time or in any combination, in which case
+CrackLib will be run first, followed by CDB and then SQLite as
+appropriate.
 
 =item require_ascii_printable
 
@@ -147,7 +175,7 @@ English phrase, and this will force at least some additional complexity.
 
 =head1 SEE ALSO
 
-cdbmake-wordlist(1), kadm5-strength(3), kpasswdd(8), krb5.conf(5)
+krb5-strength-wordlist(1), kadm5-strength(3), kpasswdd(8), krb5.conf(5)
 
 The "Password changing" section of the Heimdal info documentation
 describes the interface that this program implements and how to configure
@@ -163,8 +191,8 @@ Russ Allbery <eagle@eyrie.org>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright 2010, 2013 The Board of Trustees of the Leland Stanford Junior
-University
+Copyright 2010, 2013, 2014 The Board of Trustees of the Leland Stanford
+Junior University
 
 Copying and distribution of this file, with or without modification, are
 permitted in any medium without royalty provided the copyright notice and

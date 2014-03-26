@@ -2,7 +2,7 @@
  * Test for the MIT Kerberos shared module API.
  *
  * Written by Russ Allbery <eagle@eyrie.org>
- * Copyright 2010, 2013
+ * Copyright 2010, 2013, 2014
  *     The Board of Trustees of the Leland Stanford Junior University
  *
  * See LICENSE for licensing terms.
@@ -26,8 +26,8 @@
 #include <util/macros.h>
 
 /*
- * The password test data, generated from the JSON source.  Defines an arrays
- * named cdb_tests, cracklib_tests, and principal_tests.
+ * The password test data, generated from the JSON source.  Defines arrays
+ * named *_tests, where * is the file name without the ".c" suffix.
  */
 #include <tests/data/passwords/cdb.c>
 #include <tests/data/passwords/classes.c>
@@ -35,6 +35,7 @@
 #include <tests/data/passwords/length.c>
 #include <tests/data/passwords/letter.c>
 #include <tests/data/passwords/principal.c>
+#include <tests/data/passwords/sqlite.c>
 
 
 #ifndef HAVE_KRB5_PWQUAL_PLUGIN_H
@@ -148,7 +149,7 @@ int
 main(void)
 {
     char *path, *dictionary, *krb5_config, *krb5_config_empty, *tmpdir;
-    char *setup_argv[10];
+    char *setup_argv[12];
     const char*build;
     size_t i, count;
     krb5_context ctx;
@@ -159,20 +160,21 @@ main(void)
 
     /*
      * Calculate how many tests we have.  There are two tests for the module
-     * metadata, six more tests for initializing the plugin, and two tests per
-     * password test.
+     * metadata, seven more tests for initializing the plugin, and two tests
+     * per password test.
      *
      * We run all the CrackLib tests twice, once with an explicit dictionary
      * path and once from krb5.conf configuration.  We run the principal tests
-     * with both CrackLib and CDB configurations.
+     * with CrackLib, CDB, and SQLite configurations.
      */
     count = 2 * ARRAY_SIZE(cracklib_tests);
     count += ARRAY_SIZE(cdb_tests);
+    count += ARRAY_SIZE(sqlite_tests);
     count += ARRAY_SIZE(classes_tests);
     count += ARRAY_SIZE(length_tests);
     count += ARRAY_SIZE(letter_tests);
-    count += 2 * ARRAY_SIZE(principal_tests);
-    plan(2 + 6 + count * 2);
+    count += 3 * ARRAY_SIZE(principal_tests);
+    plan(2 + 7 + count * 2);
 
     /* Start with the krb5.conf that contains no dictionary configuration. */
     path = test_file_path("data/krb5.conf");
@@ -243,11 +245,13 @@ main(void)
     vtable->close(ctx, data);
 
     /* Add simple character class configuration to krb5.conf. */
-    setup_argv[5] = (char *) "require_ascii_printable";
-    setup_argv[6] = (char *) "true";
-    setup_argv[7] = (char *) "require_non_letter";
+    setup_argv[5] = (char *) "minimum_different";
+    setup_argv[6] = (char *) "8";
+    setup_argv[7] = (char *) "require_ascii_printable";
     setup_argv[8] = (char *) "true";
-    setup_argv[9] = NULL;
+    setup_argv[9] = (char *) "require_non_letter";
+    setup_argv[10] = (char *) "true";
+    setup_argv[11] = NULL;
     run_setup((const char **) setup_argv);
 
     /* Obtain a new Kerberos context with that krb5.conf file. */
@@ -324,8 +328,6 @@ main(void)
     setup_argv[4] = dictionary;
     setup_argv[5] = NULL;
     run_setup((const char **) setup_argv);
-    test_file_path_free(setup_argv[0]);
-    test_file_path_free(path);
 
     /* Obtain a new Kerberos context with that krb5.conf file. */
     krb5_free_context(ctx);
@@ -351,6 +353,48 @@ main(void)
     skip_block(count * 2 + 1, "not built with CDB support");
 
 #endif /* !HAVE_CDB */
+
+#ifdef HAVE_SQLITE
+
+    /*
+     * If built with SQLite, set up krb5.conf to use a SQLite dictionary
+     * instead.
+     */
+    test_file_path_free(dictionary);
+    dictionary = test_file_path("data/wordlist.sqlite");
+    if (dictionary == NULL)
+        bail("cannot find data/wordlist.sqlite in the test suite");
+    setup_argv[3] = (char *) "password_dictionary_sqlite";
+    setup_argv[4] = dictionary;
+    setup_argv[5] = NULL;
+    run_setup((const char **) setup_argv);
+    test_file_path_free(setup_argv[0]);
+    test_file_path_free(path);
+
+    /* Obtain a new Kerberos context with that krb5.conf file. */
+    krb5_free_context(ctx);
+    code = krb5_init_context(&ctx);
+    if (code != 0)
+        bail_krb5(ctx, code, "cannot initialize Kerberos context");
+
+    /* Run the SQLite and principal tests. */
+    code = vtable->open(ctx, NULL, &data);
+    is_int(0, code, "Plugin initialization (SQLite dictionary)");
+    if (code != 0)
+        bail("cannot continue after plugin initialization failure");
+    for (i = 0; i < ARRAY_SIZE(sqlite_tests); i++)
+        is_password_test(ctx, vtable, data, &sqlite_tests[i]);
+    for (i = 0; i < ARRAY_SIZE(principal_tests); i++)
+        is_password_test(ctx, vtable, data, &principal_tests[i]);
+    vtable->close(ctx, data);
+
+#else /* !HAVE_SQLITE */
+
+    /* Otherwise, mark the SQLite tests as skipped. */
+    count = ARRAY_SIZE(sqlite_tests) + ARRAY_SIZE(principal_tests);
+    skip_block(count * 2 + 1, "not built with SQLite support");
+
+#endif /* !HAVE_SQLITE */
 
     /* Manually clean up after the results of make-krb5-conf. */
     basprintf(&path, "%s/krb5.conf", tmpdir);
