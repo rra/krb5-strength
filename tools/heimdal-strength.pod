@@ -54,6 +54,13 @@ The following F<krb5.conf> configuration options are supported:
 
 =over 4
 
+=item minimum_different
+
+If set to a numeric value, passwords with fewer than this number of unique
+characters will be rejected.  This can be used to reject, for example,
+passwords that are long strings of the same character or repetitions of
+small numbers of characters, which may be too easy to guess.
+
 =item minimum_length
 
 If set to a numeric value, passwords with fewer than that number of
