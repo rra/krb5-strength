@@ -17,7 +17,7 @@ Vcs-Browser: http://git.eyrie.org/?p=kerberos/krb5-strength.git
 Package: krb5-strength
 Architecture: any
 Pre-Depends: ${misc:Pre-Depends}
-Depends: ${shlibs:Depends}, ${misc:Depends}, ${perl:Depends}
+Depends: ${shlibs:Depends}, ${misc:Depends}, ${perl:Depends}, adduser
 Recommends: cracklib-runtime, libcrypt-pbkdf2-perl, libdb-file-lock-perl,
  libdbd-sqlite3-perl, libdbi-perl, libgetopt-long-descriptive-perl,
  libipc-run-perl, libjson-perl, libreadonly-perl, tinycdb
