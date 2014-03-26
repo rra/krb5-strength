@@ -13,7 +13,9 @@ fi
 
 # Remove the directory for the password history database on remove if empty.
 if [ "$1" = purge ] || [ "$1" = remove ] ; then
-    rmdir --ignore-fail-on-non-empty /var/lib/heimdal-history
+    if [ -d /var/lib/heimdal-history ] ; then
+        rmdir --ignore-fail-on-non-empty /var/lib/heimdal-history
+    fi
 fi
 
 #DEBHELPER#
