@@ -1,10 +1,10 @@
-                            krb5-strength 2.2
+                            krb5-strength 3.0
                (Kerberos password strength checking plugin)
 
                Maintained by Russ Allbery <eagle@eyrie.org>
 
-  Copyright 2006, 2007, 2009, 2010, 2012, 2013 The Board of Trustees of
-  the Leland Stanford Junior University.  Portions copyright 1993 Alec
+  Copyright 2006, 2007, 2009, 2010, 2012, 2013, 2014 The Board of Trustees
+  of the Leland Stanford Junior University.  Portions copyright 1993 Alec
   Muffett.  Developed by Derrick Brashear and Ken Hornstein of Sine Nomine
   Associates, on behalf of Stanford University.  This software is
   distributed under a BSD-style license and under the Artistic License.
@@ -523,7 +523,7 @@ LICENSE
   The krb5-strength package as a whole is covered by the following
   copyright statement and license:
 
-    Copyright 2006, 2007, 2009, 2010, 2012, 2013
+    Copyright 2006, 2007, 2009, 2010, 2012, 2013, 2014
         The Board of Trustees of the Leland Stanford Junior University
 
     Permission is hereby granted, free of charge, to any person obtaining
