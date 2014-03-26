@@ -86,26 +86,27 @@ strength_init_sqlite(krb5_context ctx, krb5_pwqual_moddata data UNUSED)
 #ifdef HAVE_SQLITE
 
 /*
- * Report a SQLite error.  Takes the SQLite error code and the Kerberos
- * context, stores the resulting error in the Kerberos context, and returns
- * the generic KADM5_FAILURE code, since there doesn't appear to be anything
- * better.
+ * Report a SQLite error.  Takes the module data (used to access the SQLite
+ * object) and the Kerberos context, stores the SQLite error in the Kerberos
+ * context, and returns the generic KADM5_FAILURE code, since there doesn't
+ * appear to be anything better.
  */
 static krb5_error_code
-error_sqlite(krb5_context ctx, int status, const char *format, ...)
+error_sqlite(krb5_context ctx, krb5_pwqual_moddata data, const char *format,
+             ...)
 {
     va_list args;
     ssize_t length;
     char *message;
-    const char *errstr;
+    const char *errmsg;
     
-    errstr = sqlite3_errstr(status);
+    errmsg = sqlite3_errmsg(data->sqlite);
     va_start(args, format);
     length = vasprintf(&message, format, args);
     va_end(args);
     if (length < 0)
         return strength_error_system(ctx, "cannot allocate memory");
-    krb5_set_error_message(ctx, KADM5_FAILURE, "%s: %s", message, errstr);
+    krb5_set_error_message(ctx, KADM5_FAILURE, "%s: %s", message, errmsg);
     free(message);
     return KADM5_FAILURE;
 }
@@ -224,17 +225,17 @@ strength_init_sqlite(krb5_context ctx, krb5_pwqual_moddata data)
     /* Open the database. */
     status = sqlite3_open_v2(path, &data->sqlite, SQLITE_OPEN_READONLY, NULL);
     if (status != 0)
-        return error_sqlite(ctx, status, "cannot open dictionary %s", path);
+        return error_sqlite(ctx, data, "cannot open dictionary %s", path);
 
     /* Precompile the queries we'll use. */
     status = sqlite3_prepare_v2(data->sqlite, PREFIX_QUERY, -1,
                                 &data->prefix_query, NULL);
     if (status != 0)
-        return error_sqlite(ctx, status, "cannot prepare prefix query");
+        return error_sqlite(ctx, data, "cannot prepare prefix query");
     status = sqlite3_prepare_v2(data->sqlite, SUFFIX_QUERY, -1,
                                 &data->suffix_query, NULL);
     if (status != 0)
-        return error_sqlite(ctx, status, "cannot prepare suffix query");
+        return error_sqlite(ctx, data, "cannot prepare suffix query");
 
     /* Finished.  Return success. */
     return 0;
@@ -288,14 +289,14 @@ strength_check_sqlite(krb5_context ctx, krb5_pwqual_moddata data,
     status = sqlite3_bind_text(data->prefix_query, 1, password, prefix_length,
                                NULL);
     if (status != SQLITE_OK) {
-        code = error_sqlite(ctx, status, "cannot bind prefix start");
+        code = error_sqlite(ctx, data, "cannot bind prefix start");
         goto fail;
     }
     prefix[prefix_length - 1]++;
     status = sqlite3_bind_text(data->prefix_query, 2, prefix, prefix_length,
                                NULL);
     if (status != SQLITE_OK) {
-        code = error_sqlite(ctx, status, "cannot bind prefix end");
+        code = error_sqlite(ctx, data, "cannot bind prefix end");
         goto fail;
     }
 
@@ -310,12 +311,12 @@ strength_check_sqlite(krb5_context ctx, krb5_pwqual_moddata data,
             break;
         }
     if (status != SQLITE_DONE && status != SQLITE_ROW) {
-        code = error_sqlite(ctx, status, "error searching by password prefix");
+        code = error_sqlite(ctx, data, "error searching by password prefix");
         goto fail;
     }
     status = sqlite3_reset(data->prefix_query);
     if (status != SQLITE_OK) {
-        code = error_sqlite(ctx, status, "error resetting prefix query");
+        code = error_sqlite(ctx, data, "error resetting prefix query");
         goto fail;
     }
     if (found)
@@ -325,7 +326,7 @@ strength_check_sqlite(krb5_context ctx, krb5_pwqual_moddata data,
     status = sqlite3_bind_text(data->suffix_query, 1, drowssap, suffix_length,
                                SQLITE_TRANSIENT);
     if (status != SQLITE_OK) {
-        code = error_sqlite(ctx, status, "cannot bind suffix start");
+        code = error_sqlite(ctx, data, "cannot bind suffix start");
         goto fail;
     }
     drowssap[prefix_length - 1]++;
@@ -333,7 +334,7 @@ strength_check_sqlite(krb5_context ctx, krb5_pwqual_moddata data,
                                SQLITE_TRANSIENT);
     drowssap[prefix_length - 1]--;
     if (status != SQLITE_OK) {
-        code = error_sqlite(ctx, status, "cannot bind suffix end");
+        code = error_sqlite(ctx, data, "cannot bind suffix end");
         goto fail;
     }
 
@@ -348,12 +349,12 @@ strength_check_sqlite(krb5_context ctx, krb5_pwqual_moddata data,
             break;
         }
     if (status != SQLITE_DONE && status != SQLITE_ROW) {
-        code = error_sqlite(ctx, status, "error searching by password suffix");
+        code = error_sqlite(ctx, data, "error searching by password suffix");
         goto fail;
     }
     status = sqlite3_reset(data->suffix_query);
     if (status != SQLITE_OK) {
-        code = error_sqlite(ctx, status, "error resetting suffix query");
+        code = error_sqlite(ctx, data, "error resetting suffix query");
         goto fail;
     }
     if (found)
@@ -390,7 +391,7 @@ strength_close_sqlite(krb5_context ctx UNUSED, krb5_pwqual_moddata data)
     if (data->suffix_query != NULL)
         sqlite3_finalize(data->suffix_query);
     if (data->sqlite != NULL)
-        sqlite3_close_v2(data->sqlite);
+        sqlite3_close(data->sqlite);
 }
 
 #endif /* HAVE_SQLITE */
