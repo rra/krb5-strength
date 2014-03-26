@@ -238,6 +238,7 @@ strength_init_sqlite(krb5_context ctx, krb5_pwqual_moddata data)
         return error_sqlite(ctx, data, "cannot prepare suffix query");
 
     /* Finished.  Return success. */
+    free(path);
     return 0;
 }
 
