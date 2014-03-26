@@ -14,13 +14,13 @@ BLURB
 
   krb5-strength provides a password quality plugin for the MIT Kerberos
   KDC (specifically the kadmind server), an external password quality
-  program for use with Heimdal, and a password history implementation for
-  use with Heimdal.  Passwords can be tested with CrackLib, checked
-  against a CDB database of known weak passwords, checked for length,
-  checked for non-printable or non-ASCII characters that may be difficult
-  to enter reproducibly, required to contain particular character classes,
-  or any combination of these tests.  It supports both Heimdal and MIT
-  Kerberos (1.9 or later).
+  program for use with Heimdal, and a per-principal password history
+  implementation for Heimdal.  Passwords can be tested with CrackLib,
+  checked against a CDB or SQLite database of known weak passwords with
+  some transformations, checked for length, checked for non-printable or
+  non-ASCII characters that may be difficult to enter reproducibly,
+  required to contain particular character classes, or any combination of
+  these tests.  It supports both Heimdal and MIT Kerberos (1.9 or later).
 
 DESCRIPTION
 
@@ -38,8 +38,9 @@ DESCRIPTION
   that only passes passwords that resist attacks from both Crack and Jack
   the Ripper using the same rule sets.  It also supports doing simpler
   dictionary checks against a CDB database, which is fast with very large
-  dictionaries, and imposing other programmatic checks on passwords such
-  as character class requirements.
+  dictionaries, or a SQLite database, which can reject all passwords
+  within edit distance one of a dictionary word.  It can also impose other
+  programmatic checks on passwords such as character class requirements.
 
   For Heimdal, it includes both a program usable as an external password
   quality check and a plugin that implements the dynamic module API.  For
@@ -133,7 +134,7 @@ REQUIREMENTS
 
   To run the test suite, you will need Perl 5.010 or later and the
   dependencies of the heimdal-history program.  The following additional
-  Perl modules will be used by the test suite if present:
+  Perl modules will also be used by the test suite if present:
 
       Perl6::Slurp
       Test::MinimumVersion
@@ -142,7 +143,7 @@ REQUIREMENTS
       Test::Spelling
       Test::Strict
 
-  All are available on CPAN.  Those tests will be skipped if the modules
+  All are available on CPAN.  Some tests will be skipped if the modules
   are not available.
 
   To enable tests that don't detect functionality problems but are used to
