@@ -3,9 +3,11 @@ Section: net
 Priority: extra
 Maintainer: Russ Allbery <rra@debian.org>
 Build-Depends: debhelper (>= 9), cracklib-runtime, dh-autoreconf,
- libcdb-dev, libcrack2-dev, libfile-slurp-perl, libipc-run-perl,
- libjson-perl, libkrb5-dev (>= 1.9), libperl6-slurp-perl,
- libreadonly-perl, libtest-pod-perl, libtest-minimumversion-perl,
+ libcdb-dev, libcrack2-dev, libcrypt-pbkdf2-perl, libdb-file-lock-perl,
+ libdbd-sqlite-perl, libdbi-perl, libfile-slurp-perl,
+ libgetopt-long-descriptive-perl, libipc-run-perl, libjson-perl,
+ libkrb5-dev (>= 1.9), libperl6-slurp-perl, libreadonly-perl,
+ libsqlite3-dev, libtest-pod-perl, libtest-minimumversion-perl,
  libtest-strict-perl, perl, tinycdb
 Standards-Version: 3.9.5
 Homepage: http://www.eyrie.org/~eagle/software/krb5-strength/
@@ -16,18 +18,24 @@ Package: krb5-strength
 Architecture: any
 Pre-Depends: ${misc:Pre-Depends}
 Depends: ${shlibs:Depends}, ${misc:Depends}, ${perl:Depends}
-Recommends: cracklib-runtime, tinycdb
+Recommends: cracklib-runtime, libcrypt-pbkdf2-perl, libdb-file-lock-perl,
+ libdbd-sqlite-perl, libdbi-perl, libgetopt-long-descriptive-perl,
+ libipc-run-perl, libjson-perl, libreadonly-perl, tinycdb
 Enhances: krb5-admin-server, heimdal-kdc
 Description: Password strength checking for Kerberos KDCs
  krb5-strength provides a password quality plugin for the MIT Kerberos KDC
- (specifically the kadmind server) and an external password quality
- program for use with the Heimdal kpasswdd server.  Passwords can be
- tested with CrackLib, checked against a CDB database of known weak
- passwords, checked for length, checked for non-printable or non-ASCII
- characters that may be difficult to enter reproducibly, required to
- contain a non-alphabetic character, or any combination of these tests.
+ (specifically the kadmind server), an external password quality program
+ for use with Heimdal, and a per-principal password history implementation
+ for Heimdal.  Passwords can be tested with CrackLib, checked against a
+ CDB or SQLite database of known weak passwords with some transformations,
+ checked for length, checked for non-printable or non-ASCII characters
+ that may be difficult to enter reproducibly, required to contain
+ particular character classes, or any combination of these tests.
  .
  No dictionary is shipped with this package.  A CrackLib dictionary can be
- created with the tools in cracklib-runtime, a CDB database can be created
- from a password list (obtained separately) using the tools included in
- this package, or both.
+ created with the tools in cracklib-runtime, a CDB or SQLite database can
+ be created from a password list (obtained separately) using the tools
+ included in this package, or both.
+ .
+ The recommended packages are needed to generate CDB or SQLite databases
+ and for the password history implementation for Heimdal.
