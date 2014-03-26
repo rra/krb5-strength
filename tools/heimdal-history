@@ -6,10 +6,6 @@
 # checking interface and maintains per-user password history.  Password
 # history is stored as Crypt::PBKDF2 hashes with random salt for each
 # password.
-#
-# Written by Russ Allbery <eagle@eyrie.org>
-# Copyright 2013, 2014
-#     The Board of Trustees of the Leland Stanford Junior University
 
 ##############################################################################
 # Declarations and configuration
