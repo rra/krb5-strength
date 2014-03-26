@@ -70,4 +70,76 @@ const struct password_test letter_tests[] = {
         0,
         NULL,
     },
+    {
+
+        "mindiff (1 character)",
+        "test@EXAMPLE.ORG",
+        "11111111111111111111",
+        KADM5_PASS_Q_CLASS,
+        "password does not contain enough unique characters",
+    },
+    {
+
+        "mindiff (2 characters)",
+        "test@EXAMPLE.ORG",
+        "1b1b1b1b1b1b1b1b1b1b",
+        KADM5_PASS_Q_CLASS,
+        "password does not contain enough unique characters",
+    },
+    {
+
+        "mindiff (3 characters)",
+        "test@EXAMPLE.ORG",
+        "1bc1bc1bc1bc1bc1bc1b",
+        KADM5_PASS_Q_CLASS,
+        "password does not contain enough unique characters",
+    },
+    {
+
+        "mindiff (4 characters)",
+        "test@EXAMPLE.ORG",
+        "1bcd1bcd1bcd1bcd1bcd",
+        KADM5_PASS_Q_CLASS,
+        "password does not contain enough unique characters",
+    },
+    {
+
+        "mindiff (5 characters)",
+        "test@EXAMPLE.ORG",
+        "1bcde1bcde1bcde1bcde",
+        KADM5_PASS_Q_CLASS,
+        "password does not contain enough unique characters",
+    },
+    {
+
+        "mindiff (6 characters)",
+        "test@EXAMPLE.ORG",
+        "1bcdef1bcdef1bcdef1b",
+        KADM5_PASS_Q_CLASS,
+        "password does not contain enough unique characters",
+    },
+    {
+
+        "mindiff (7 characters)",
+        "test@EXAMPLE.ORG",
+        "1cdbfge1cdbeg1fcdbef",
+        KADM5_PASS_Q_CLASS,
+        "password does not contain enough unique characters",
+    },
+    {
+
+        "mindiff (8 characters)",
+        "test@EXAMPLE.ORG",
+        "1dbegchf1cdbfgh1ebcd",
+        0,
+        NULL,
+    },
+    {
+
+        "mindiff (9 characters)",
+        "test@EXAMPLE.ORG",
+        "bcd1fgei1bhdefchig1b",
+        0,
+        NULL,
+    },
 };

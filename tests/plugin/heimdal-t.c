@@ -2,7 +2,7 @@
  * Test for the Heimdal shared module API.
  *
  * Written by Russ Allbery <eagle@eyrie.org>
- * Copyright 2009, 2013
+ * Copyright 2009, 2013, 2014
  *     The Board of Trustees of the Leland Stanford Junior University
  *
  * See LICENSE for licensing terms.
@@ -25,8 +25,8 @@
 #include <util/macros.h>
 
 /*
- * The password test data, generated from the JSON source.  Defines an arrays
- * named cdb_tests, cracklib_tests, and principal_tests.
+ * The password test data, generated from the JSON source.  Defines arrays
+ * named *_tests, where * is the file name without the ".c" suffix.
  */
 #include <tests/data/passwords/cdb.c>
 #include <tests/data/passwords/classes.c>
@@ -34,6 +34,7 @@
 #include <tests/data/passwords/length.c>
 #include <tests/data/passwords/letter.c>
 #include <tests/data/passwords/principal.c>
+#include <tests/data/passwords/sqlite.c>
 
 
 #ifndef HAVE_KADM5_KADM5_PWCHECK_H
@@ -138,7 +139,7 @@ int
 main(void)
 {
     char *path, *krb5_config, *krb5_config_empty, *tmpdir;
-    char *setup_argv[10];
+    char *setup_argv[12];
     size_t i, count;
     struct kadm5_pw_policy_verifier *verifier;
     void *handle;
@@ -146,14 +147,15 @@ main(void)
     /*
      * Calculate how many tests we have.  There are five tests for the module
      * metadata and two tests per password test.  We run the principal tests
-     * twice, once with CrackLib and once with CDB.
+     * three times, once each with CrackLib, CDB, and SQLite.
      */
     count = ARRAY_SIZE(cracklib_tests);
     count += ARRAY_SIZE(cdb_tests);
+    count += ARRAY_SIZE(sqlite_tests);
     count += ARRAY_SIZE(classes_tests);
     count += ARRAY_SIZE(length_tests);
     count += ARRAY_SIZE(letter_tests);
-    count += ARRAY_SIZE(principal_tests) * 2;
+    count += ARRAY_SIZE(principal_tests) * 3;
     plan(5 + count * 2);
 
     /* Start with the krb5.conf that contains no dictionary configuration. */
@@ -190,11 +192,13 @@ main(void)
         is_password_test(verifier, &principal_tests[i]);
 
     /* Add simple character class restrictions. */
-    setup_argv[5] = (char *) "require_ascii_printable";
-    setup_argv[6] = (char *) "true";
-    setup_argv[7] = (char *) "require_non_letter";
+    setup_argv[5] = (char *) "minimum_different";
+    setup_argv[6] = (char *) "8";
+    setup_argv[7] = (char *) "require_ascii_printable";
     setup_argv[8] = (char *) "true";
-    setup_argv[9] = NULL;
+    setup_argv[9] = (char *) "require_non_letter";
+    setup_argv[10] = (char *) "true";
+    setup_argv[11] = NULL;
     run_setup((const char **) setup_argv);
 
     /* Run the simple character class tests. */
@@ -234,9 +238,7 @@ main(void)
         bail("cannot find data/wordlist.cdb in the test suite");
     setup_argv[5] = NULL;
     run_setup((const char **) setup_argv);
-    test_file_path_free(setup_argv[0]);
     test_file_path_free(setup_argv[4]);
-    test_file_path_free(path);
 
     /* Run the CDB tests. */
     for (i = 0; i < ARRAY_SIZE(cdb_tests); i++)
@@ -251,6 +253,36 @@ main(void)
     skip_block(count * 2, "not built with CDB support");
 
 #endif /* !HAVE_CDB */
+
+#ifdef HAVE_SQLITE
+
+    /*
+     * If built with SQLite, set up krb5.conf to use a SQLite dictionary
+     * instead.
+     */
+    setup_argv[3] = (char *) "password_dictionary_sqlite";
+    setup_argv[4] = test_file_path("data/wordlist.sqlite");
+    if (setup_argv[4] == NULL)
+        bail("cannot find data/wordlist.sqlite in the test suite");
+    setup_argv[5] = NULL;
+    run_setup((const char **) setup_argv);
+    test_file_path_free(setup_argv[0]);
+    test_file_path_free(setup_argv[4]);
+    test_file_path_free(path);
+
+    /* Run the SQLite tests. */
+    for (i = 0; i < ARRAY_SIZE(sqlite_tests); i++)
+        is_password_test(verifier, &sqlite_tests[i]);
+    for (i = 0; i < ARRAY_SIZE(principal_tests); i++)
+        is_password_test(verifier, &principal_tests[i]);
+
+#else /* !HAVE_SQLITE */
+
+    /* Otherwise, mark the SQLite tests as skipped. */
+    count = ARRAY_SIZE(sqlite_tests) + ARRAY_SIZE(principal_tests);
+    skip_block(count * 2, "not built with SQLite support");
+
+#endif /* !HAVE_SQLITE */
 
     /* Manually clean up after the results of make-krb5-conf. */
     basprintf(&path, "%s/krb5.conf", tmpdir);
