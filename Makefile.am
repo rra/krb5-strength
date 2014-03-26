@@ -197,14 +197,14 @@ check-local: $(check_PROGRAMS) tests/data/dictionary.pwd
 # Used by maintainers to run the main test suite under valgrind.  Suppress
 # the xmalloc and pod-spelling tests because the former won't work properly
 # under valgrind (due to increased memory usage) and the latter is pointless
-# to run under valgrind.  Don't try to trace the test for
-# krb5-strength-wordlist, since it's pure Perl.
+# to run under valgrind.  Don't try to trace several of the tests that are
+# written in Perl or shell and test Perl programs.
 check-valgrind: $(check_PROGRAMS) tests/data/dictionary.pwd
 	rm -rf $(abs_top_builddir)/tmp-valgrind
 	mkdir $(abs_top_builddir)/tmp-valgrind
-	env RRA_MAINTAINER_TESTS= valgrind --leak-check=full	\
-	    --show-reachable=yes --trace-children=yes		\
-	    --log-file=$(abs_top_builddir)/tmp-valgrind/log.%p	\
-	    --suppressions=tests/data/valgrind.supp		\
-	    --trace-children-skip="/bin/sh,*/cat,*/diff,*/expr,*/grep,*/mkdir,*/rm,*/rmdir,*/sed,*/sleep,*/true,*/wc,*/docs/*-t,*/perl/*-t,*/data/make-krb5-conf,*/tools/wordlist-*-t" \
+	env RRA_MAINTAINER_TESTS= valgrind --leak-check=full		\
+	    --show-reachable=yes --trace-children=yes			\
+	    --log-file=$(abs_top_builddir)/tmp-valgrind/log.%p		\
+	    --suppressions=$(abs_top_srcdir)/tests/data/valgrind.supp	\
+	    --trace-children-skip="/bin/sh,*/cat,*/diff,*/expr,*/grep,*/mkdir,*/rm,*/rmdir,*/sed,*/sleep,*/true,*/wc,*/docs/*-t,*/perl/*-t,*/data/make-krb5-conf,*/tools/heimdal-history-t,*/tools/wordlist*-t" \
 	    tests/runtests -l '$(abs_top_srcdir)/tests/TESTS'
