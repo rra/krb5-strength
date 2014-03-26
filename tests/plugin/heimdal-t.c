@@ -280,7 +280,7 @@ main(void)
 
     /* Otherwise, mark the SQLite tests as skipped. */
     count = ARRAY_SIZE(sqlite_tests) + ARRAY_SIZE(principal_tests);
-    skip_block(count * 2 + 1, "not built with SQLite support");
+    skip_block(count * 2, "not built with SQLite support");
 
 #endif /* !HAVE_SQLITE */
 
