@@ -11,6 +11,9 @@ krb5-strength (3.0-1) UNRELEASED; urgency=medium
       history and password strength.
     - New configuration option, minimum_different, which sets the minimum
       number of different characters required in a password.
+  * Add the upstream signing key to debian/upstream/signing-key.asc and
+    configure uscan to do signature validation.  Configure uscan to
+    download the xz tarball instead of the gz tarball.
 
  -- Russ Allbery <rra@debian.org>  Wed, 26 Mar 2014 00:04:13 -0700
 
