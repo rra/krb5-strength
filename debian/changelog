@@ -14,6 +14,10 @@ krb5-strength (3.0-1) unstable; urgency=medium
   * Add the upstream signing key to debian/upstream/signing-key.asc and
     configure uscan to do signature validation.  Configure uscan to
     download the xz tarball instead of the gz tarball.
+  * Create a _history user and group and a /var/lib/heimdal-history
+    directory on package installation for the use of heimdal-history,
+    remove the user and the standard database on purge, and remove the
+    directory if empty on package purge or removal.
 
  -- Russ Allbery <rra@debian.org>  Wed, 26 Mar 2014 00:04:13 -0700
 
