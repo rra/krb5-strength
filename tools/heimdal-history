@@ -55,7 +55,7 @@ Readonly my $LENGTH_STATS_PATH => '/var/lib/heimdal-history/lengths.db';
 
 # The message to return to the user if we reject the password because it was
 # found in the user's history.
-Readonly my $REJECT_MESSAGE => 'password was previously used';
+Readonly my $REJECT_MESSAGE => 'Password was previously used';
 
 # The path to the external strength checking program to run.  This is done
 # first before checking history, and if it fails, that failure is returned as

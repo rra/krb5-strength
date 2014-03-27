@@ -4,7 +4,7 @@
  * Checks whether the password satisfies a set of character class rules.
  *
  * Written by Russ Allbery <eagle@eyrie.org>
- * Copyright 2013
+ * Copyright 2013, 2014
  *     The Board of Trustees of the Leland Stanford Junior University
  *
  * See LICENSE for licensing terms.
@@ -24,10 +24,6 @@ struct password_classes {
     bool digit;
     bool symbol;
 };
-
-/* Abbreviate the most common error reporting syntax. */
-#define MUST_HAVE(ctx, err) \
-    strength_error_class((ctx), "password must contain " err)
 
 
 /*
@@ -65,13 +61,13 @@ check_rule(krb5_context ctx, struct class_rule *rule, size_t length,
     if (length < rule->min || (rule->max > 0 && length > rule->max))
         return 0;
     if (rule->lower && !classes->lower)
-        return MUST_HAVE(ctx, "a lowercase letter");
+        return strength_error_class((ctx), ERROR_CLASS_LOWER);
     if (rule->upper && !classes->upper)
-        return MUST_HAVE(ctx, "an uppercase letter");
+        return strength_error_class((ctx), ERROR_CLASS_UPPER);
     if (rule->digit && !classes->digit)
-        return MUST_HAVE(ctx, "a number");
+        return strength_error_class((ctx), ERROR_CLASS_DIGIT);
     if (rule->symbol && !classes->symbol)
-        return MUST_HAVE(ctx, "a space or punctuation character");
+        return strength_error_class((ctx), ERROR_CLASS_SYMBOL);
     return 0;
 }
 

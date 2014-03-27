@@ -1,5 +1,11 @@
                     User-Visible krb5-strength Changes
 
+krb5-strength 3.1 (unreleased)
+
+    Change the error messages returned for passwords that fail strength
+    checking to start with a capital letter.  This appears to be more
+    consistent with the error message conventions used inside Heimdal.
+
 krb5-strength 3.0 (2014-03-25)
 
     The krb5-strength plugin and heimdal-strength program now support a
