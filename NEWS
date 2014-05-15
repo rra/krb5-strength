@@ -6,6 +6,11 @@ krb5-strength 3.1 (unreleased)
     checking to start with a capital letter.  This appears to be more
     consistent with the error message conventions used inside Heimdal.
 
+    Change the DB_File::Lock calling method in heimdal-history to work
+    properly with the (buggy) CPAN version of DB_File::Lock, instead of
+    relying on Debian's patched version.  Thanks to Bernt Jernberg for the
+    report.
+
 krb5-strength 3.0 (2014-03-25)
 
     The krb5-strength plugin and heimdal-strength program now support a

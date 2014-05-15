@@ -377,7 +377,8 @@ sub check_history {
     {
         my %history;
         my $mode = O_CREAT | O_RDWR;
-        tie(%history, 'DB_File::Lock', [$path, $mode, oct(600)], 'write')
+        tie(%history, 'DB_File::Lock', $path, $mode, oct(600), $DB_HASH,
+            'write')
           or die "$0: cannot open $path: $!\n";
         $history_json = $history{$principal};
     }
@@ -415,7 +416,7 @@ sub write_history {
     # Open and lock the database for write.
     my %history;
     my $mode = O_CREAT | O_RDWR;
-    tie(%history, 'DB_File::Lock', [$path, $mode, oct(600)], 'write')
+    tie(%history, 'DB_File::Lock', $path, $mode, oct(600), $DB_HASH, 'write')
       or die "$0: cannot open $path: $!\n";
 
     # Read the existing history.  If the existing history is corrupt, treat
@@ -464,7 +465,7 @@ sub update_length_counts {
     # Open and lock the database for write.
     my %lengths;
     my $mode = O_CREAT | O_RDWR;
-    tie(%lengths, 'DB_File::Lock', [$path, $mode, oct(600)], 'write')
+    tie(%lengths, 'DB_File::Lock', $path, $mode, oct(600), $DB_HASH, 'write')
       or return;
 
     # Write each of the hashes.
