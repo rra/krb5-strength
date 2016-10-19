@@ -11,6 +11,14 @@ krb5-strength 3.1 (unreleased)
     relying on Debian's patched version.  Thanks to Bernt Jernberg for the
     report.
 
+    Apply the SuSE patch for a buffer overflow when using duplicate rules
+    to the embedded CrackLib.  No duplicating rules are used in the rule
+    set included with this package, and this package doesn't expose the
+    general API, so this was not exploitable, but best to close the latent
+    issue.  (The other recent CrackLib vulnerability, CVE-2016-6318,
+    doesn't apply since all the GECOS manipulation code was removed from
+    the embedded CrackLib in this package.)
+
 krb5-strength 3.0 (2014-03-25)
 
     The krb5-strength plugin and heimdal-strength program now support a
