@@ -9,6 +9,9 @@
 /*
  * Modified as part of the krb5-strength project as follows:
  *
+ * 2016-08-17  Howard Guo <hguo@suse.com>
+ *   - Double the length of buffers in Mangle to provide enough space to
+ *     handle duplicating rules.
  * 2007-03-22  Russ Allbery <eagle@eyrie.org>
  *   - Cap deletion of leading or trailing characters at one more than half
  *     the length of the password string and no more than five characters.
@@ -438,9 +441,8 @@ Mangle(const char *input, const char *control)
     int limit, min_to_shift;
     register int j;
     const char *ptr;
-    static char area[STRINGSIZE];
-    char area2[STRINGSIZE];
-    area[0] = '\0';
+    static char area[STRINGSIZE * 2] = "";
+    char area2[STRINGSIZE * 2] = "";
     strcpy(area, input);
 
     j = strlen(input);
