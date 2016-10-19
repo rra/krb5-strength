@@ -541,14 +541,6 @@ FascistLook(PWDICT *pwp, const char *instring)
 	return ("it looks like a National Insurance number.");
     }
 
-    /* This is pretty useless for a server. */
-#ifdef HAVE_GECOS_AVAILABLE
-    if (ptr = FascistGecos(password, getuid()))
-    {
-	return (ptr);
-    }
-#endif 
-
     /* it should be safe to use Mangle with its reliance on STRINGSIZE
        since password cannot be longer than TRUNCSTRINGSIZE;
        nonetheless this is not an elegant solution */
