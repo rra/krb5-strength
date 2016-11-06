@@ -150,10 +150,10 @@ main(void)
      * three times, once each with CrackLib, CDB, and SQLite.
      */
     count = ARRAY_SIZE(cracklib_tests);
+    count += 2 * ARRAY_SIZE(length_tests);
     count += ARRAY_SIZE(cdb_tests);
     count += ARRAY_SIZE(sqlite_tests);
     count += ARRAY_SIZE(classes_tests);
-    count += ARRAY_SIZE(length_tests);
     count += ARRAY_SIZE(letter_tests);
     count += ARRAY_SIZE(principal_tests) * 3;
     plan(5 + count * 2);
@@ -191,6 +191,22 @@ main(void)
     for (i = 0; i < ARRAY_SIZE(principal_tests); i++)
         is_password_test(verifier, &principal_tests[i]);
 
+    /*
+     * Add length restrictions and a maximum length for CrackLib.  This should
+     * reject passwords as too short, but let through a password that's
+     * actually in the CrackLib dictionary.
+     */
+    setup_argv[5] = (char *) "minimum_length";
+    setup_argv[6] = (char *) "12";
+    setup_argv[7] = (char *) "cracklib_maxlen";
+    setup_argv[8] = (char *) "11";
+    setup_argv[9] = NULL;
+    run_setup((const char **) setup_argv);
+
+    /* Run the length tests. */
+    for (i = 0; i < ARRAY_SIZE(length_tests); i++)
+        is_password_test(verifier, &length_tests[i]);
+
     /* Add simple character class restrictions. */
     setup_argv[5] = (char *) "minimum_different";
     setup_argv[6] = (char *) "8";
@@ -216,10 +232,7 @@ main(void)
     for (i = 0; i < ARRAY_SIZE(classes_tests); i++)
         is_password_test(verifier, &classes_tests[i]);
 
-    /*
-     * Add length restrictions.  This should only do length checks without any
-     * dictionary checks.
-     */
+    /* Try the length checks again with no dictionary at all. */
     setup_argv[3] = (char *) "minimum_length";
     setup_argv[4] = (char *) "12";
     setup_argv[5] = NULL;

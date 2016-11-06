@@ -2,6 +2,13 @@
 
 krb5-strength 3.1 (unreleased)
 
+    A new configuration option, cracklib_maxlen, can be set to skip
+    CrackLib checks of passwords longer than that length.  The CrackLib
+    rules were designed in a world in which most passwords were four to
+    eight characters long and tend to spuriously reject longer passwords.
+    SQLite dictionaries work better for checking longer passwords and
+    passphrases.  Patch from Jorj Bauer.
+
     Change the error messages returned for passwords that fail strength
     checking to start with a capital letter.  This appears to be more
     consistent with the error message conventions used inside Heimdal.

@@ -88,6 +88,11 @@ strength_check_cracklib(krb5_context ctx, krb5_pwqual_moddata data,
     if (data->dictionary == NULL)
         return 0;
 
+    /* Nothing to do if the password is longer than the maximum length. */
+    if (data->cracklib_maxlen > 0)
+        if (strlen(password) > (size_t) data->cracklib_maxlen)
+            return 0;
+
     /* Check the password against CrackLib and return the results. */
     result = FascistCheck(password, data->dictionary);
     if (result != NULL)

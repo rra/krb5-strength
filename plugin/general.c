@@ -55,13 +55,13 @@ strength_init(krb5_context ctx, const char *dictionary,
     strength_config_boolean(ctx, "require_ascii_printable", &data->ascii);
     strength_config_boolean(ctx, "require_non_letter", &data->nonletter);
 
-    /* Get trapdoor length from krb5.conf. */
-    strength_config_number(ctx, "cracklib_maxlen", &data->cracklib_maxlen);
-
     /* Get complex character class restrictions from krb5.conf. */
     code = strength_config_classes(ctx, "require_classes", &data->rules);
     if (code != 0)
         goto fail;
+
+    /* Get CrackLib maximum length from krb5.conf. */
+    strength_config_number(ctx, "cracklib_maxlen", &data->cracklib_maxlen);
 
     /*
      * Try to initialize CDB, CrackLib, and SQLite dictionaries.  These
@@ -202,15 +202,10 @@ strength_check(krb5_context ctx UNUSED, krb5_pwqual_moddata data,
     if (code != 0)
         return code;
 
-    if (data->cracklib_maxlen == 0 ||
-	((long) strlen(password) <= data->cracklib_maxlen)) {
-
-      /* Check the password against CDB, CrackLib, and SQLite if configured. */
-      code = strength_check_cracklib(ctx, data, password);
-      if (code != 0)
+    /* Check the password against CDB, CrackLib, and SQLite if configured. */
+    code = strength_check_cracklib(ctx, data, password);
+    if (code != 0)
         return code;
-    }
-
     code = strength_check_cdb(ctx, data, password);
     if (code != 0)
         return code;

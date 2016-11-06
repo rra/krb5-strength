@@ -80,6 +80,7 @@ struct krb5_pwqual_moddata_st {
     bool nonletter;             /* Whether to require a non-letter */
     struct class_rule *rules;   /* Linked list of character class rules */
     char *dictionary;           /* Base path to CrackLib dictionary */
+    long cracklib_maxlen;       /* Longer passwords skip CrackLib checks */
     bool have_cdb;              /* Whether we have a CDB dictionary */
     int cdb_fd;                 /* File descriptor of CDB dictionary */
 #ifdef HAVE_CDB_H
@@ -90,7 +91,6 @@ struct krb5_pwqual_moddata_st {
     sqlite3_stmt *prefix_query; /* Query using the password prefix */
     sqlite3_stmt *suffix_query; /* Query using the reversed password suffix */
 #endif
-    long cracklib_maxlen;       /* Longer passwords skip cracklib */
 };
 
 BEGIN_DECLS
