@@ -90,6 +90,7 @@ struct krb5_pwqual_moddata_st {
     sqlite3_stmt *prefix_query; /* Query using the password prefix */
     sqlite3_stmt *suffix_query; /* Query using the reversed password suffix */
 #endif
+    long cracklib_maxlen;       /* Longer passwords skip cracklib */
 };
 
 BEGIN_DECLS
