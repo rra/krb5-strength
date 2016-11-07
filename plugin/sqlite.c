@@ -29,6 +29,7 @@
  *
  * Written by Russ Allbery <eagle@eyrie.org>
  * Based on work by David Mazières
+ * Copyright 2016 Russ Allbery <eagle@eyrie.org>
  * Copyright 2014
  *     The Board of Trustees of the Leland Stanford Junior University
  *
@@ -91,7 +92,7 @@ strength_init_sqlite(krb5_context ctx, krb5_pwqual_moddata data UNUSED)
  * context, and returns the generic KADM5_FAILURE code, since there doesn't
  * appear to be anything better.
  */
-static krb5_error_code
+static krb5_error_code __attribute__((__format__(printf, 3, 4)))
 error_sqlite(krb5_context ctx, krb5_pwqual_moddata data, const char *format,
              ...)
 {

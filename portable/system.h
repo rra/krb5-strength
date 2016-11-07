@@ -5,7 +5,8 @@
  * file is the equivalent of including all of the following headers,
  * portably:
  *
- *     #include <sys/types.h>
+ *     #include <inttypes.h>
+ *     #include <limits.h>
  *     #include <stdarg.h>
  *     #include <stdbool.h>
  *     #include <stddef.h>
@@ -14,13 +15,14 @@
  *     #include <stdint.h>
  *     #include <string.h>
  *     #include <strings.h>
+ *     #include <sys/types.h>
  *     #include <unistd.h>
  *
  * Missing functions are provided via #define or prototyped if available from
  * the portable helper library.  Also provides some standard #defines.
  *
  * The canonical version of this file is maintained in the rra-c-util package,
- * which can be found at <http://www.eyrie.org/~eagle/software/rra-c-util/>.
+ * which can be found at <https://www.eyrie.org/~eagle/software/rra-c-util/>.
  *
  * Written by Russ Allbery <eagle@eyrie.org>
  *
@@ -46,6 +48,7 @@
 #if HAVE_INTTYPES_H
 # include <inttypes.h>
 #endif
+#include <limits.h>
 #include <stdarg.h>
 #include <stddef.h>
 #if HAVE_STDINT_H
@@ -123,6 +126,12 @@ extern int snprintf(char *, size_t, const char *, ...)
 #endif
 #if !HAVE_DECL_VSNPRINTF
 extern int vsnprintf(char *, size_t, const char *, va_list);
+#endif
+#if !HAVE_MKSTEMP
+extern int mkstemp(char *);
+#endif
+#if !HAVE_REALLOCARRAY
+extern void *reallocarray(void *, size_t, size_t);
 #endif
 #if !HAVE_STRNDUP
 extern char *strndup(const char *, size_t);

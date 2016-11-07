@@ -22,6 +22,7 @@ following modifications have been made:
  * Set hidden visibility on all CrackLib symbols.
  * Close the wfp file handle on PWClose if it's open.
  * Applied various patches from distributions for security vulnerabilities.
+ * Changed the type of some variables to size_t to avoid truncation.
 
 See the leading comments in each source file for a more detailed timeline
 and list of changes.

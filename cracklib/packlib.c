@@ -26,14 +26,14 @@
  *   - Remove last block optimization in GetPW and start fresh each time.
  * 2013-12-13  Russ Allbery <eagle@eyrie.org>
  *   - Close the wfp file handle on PWClose if it's open.
+ * 2016-11-06  Russ Allbery <eagle@eyrie.org>
+ *   - Remove unused vers_id to silence GCC warnings.
  */
 
 #include <stdio.h>
 #include <string.h>
 
 #include "packer.h"
-
-static const char vers_id[] = "packlib.c : v2.3p2 Alec Muffett 18 May 1993";
 
 PWDICT *
 PWOpen(const char *prefix, const char *mode)

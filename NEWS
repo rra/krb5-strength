@@ -26,6 +26,28 @@ krb5-strength 3.1 (unreleased)
     doesn't apply since all the GECOS manipulation code was removed from
     the embedded CrackLib in this package.)
 
+    Update to rra-c-util 6.2:
+
+    * Use calloc in preference to malloc wherever appropriate.
+    * Use reallocarray in preference to realloc wherever appropriate.
+    * Suppress warnings from Kerberos headers under make warnings.
+    * Support the embedded Kerberos in Solaris 10 in library probes.
+    * Add missing va_end in xasprintf implementation.
+    * Fix logic in Test::RRA::Automake for new Automake dist checking.
+    * Fix all return-value checks for snprintf to avoid off-by-one error.
+    * Update warning flags for make warnings to GCC 6.1.0.
+    * Fix Test::RRA::Config for new "do" semantics in Perl 5.22.2.
+    * Add a new test for obsolete eyrie.org URLs.
+    * Require Test::Strict 0.25 or newer for Perl strictness checks.
+
+    Update to C TAP Harness 4.1:
+
+    * Replace all remaining uses of sprintf.
+    * Test lists may now have comments and blank lines.
+    * runtests -v will show the complete output from a test.
+    * Fix segfault in runtests when given an empty test list.
+    * Tests use C_TAP_SOURCE and C_TAP_BUILD instead of SOURCE and BUILD.
+
 krb5-strength 3.0 (2014-03-25)
 
     The krb5-strength plugin and heimdal-strength program now support a

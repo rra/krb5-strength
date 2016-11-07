@@ -2,7 +2,7 @@
  * Prototypes for error handling for Kerberos.
  *
  * The canonical version of this file is maintained in the rra-c-util package,
- * which can be found at <http://www.eyrie.org/~eagle/software/rra-c-util/>.
+ * which can be found at <https://www.eyrie.org/~eagle/software/rra-c-util/>.
  *
  * Written by Russ Allbery <eagle@eyrie.org>
  * Copyright 2006, 2007, 2008, 2009, 2010, 2013
@@ -44,9 +44,9 @@ BEGIN_DECLS
  * an error code to get the Kerberos error.
  */
 void die_krb5(krb5_context, krb5_error_code, const char *, ...)
-    __attribute__((__nonnull__, __noreturn__, __format__(printf, 3, 4)));
+    __attribute__((__nonnull__(3), __noreturn__, __format__(printf, 3, 4)));
 void warn_krb5(krb5_context, krb5_error_code, const char *, ...)
-    __attribute__((__nonnull__, __format__(printf, 3, 4)));
+    __attribute__((__nonnull__(3), __format__(printf, 3, 4)));
 
 /* Undo default visibility change. */
 #pragma GCC visibility pop

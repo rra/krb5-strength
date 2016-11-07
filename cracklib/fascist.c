@@ -29,9 +29,10 @@
  *   - Replaced MAXSTEP with allowing one increment per four characters.
  *   - Changed error for very short passwords to match current CrackLib.
  *   - Close the dictionary after each password lookup.
+ * 2016-11-06  Russ Allbery <eagle@eyrie.org>
+ *   - Remove unused vers_id to silence GCC warnings
+ *   - Changed some variables from int or unsigned int to size_t
  */
-
-static const char vers_id[] = "fascist.c : v2.3p3 Alec Muffett 14 dec 1997";
 
 #include "packer.h"
 #include <sys/types.h>
@@ -435,8 +436,8 @@ static const char *r_destructors[] = {
 static const char *
 FascistLook(PWDICT *pwp, const char *instring)
 {
-    int i, pw_len;
-    unsigned int mindiff;
+    int i;
+    size_t pw_len, mindiff;
     char *ptr;
     char *jptr;
     char junk[STRINGSIZE];

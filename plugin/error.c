@@ -5,6 +5,7 @@
  * message in the Kerberos context.
  *
  * Written by Russ Allbery <eagle@eyrie.org>
+ * Copyright 2016 Russ Allbery <eagle@eyrie.org>
  * Copyright 2013
  *     The Board of Trustees of the Leland Stanford Junior University
  *
@@ -25,7 +26,7 @@
  * Internal helper function to set the Kerberos error message given a format,
  * an error code, and a variable argument structure.
  */
-static void
+static void __attribute__((__format__(printf, 3, 0)))
 set_error(krb5_context ctx, krb5_error_code code, const char *format,
           va_list args)
 {

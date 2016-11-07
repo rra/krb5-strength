@@ -25,9 +25,10 @@
  *   - Make internal functions static.
  *   - Remove unused variables.
  *   - Changed a variable to unsigned to avoid gcc warnings.
+ * 2016-11-06  Russ Allbery <eagle@eyrie.org>
+ *   - Remove unused vers_id to silence GCC warnings.
+ *   - Added GCC __attribute__ marker on Debug() function.
  */
-
-static const char vers_id[] = "rules.c : v5.0p3 Alec Muffett 20 May 1993";
 
 #include <stdarg.h>
 
@@ -39,7 +40,7 @@ static const char vers_id[] = "rules.c : v5.0p3 Alec Muffett 20 May 1993";
 
 #include "packer.h"
 
-static void
+static void __attribute__((__format__(printf, 2, 3)))
 Debug(int val, const char *fmt, ...)
 {
     if (val < 2) {

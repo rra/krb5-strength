@@ -2,7 +2,7 @@
  * Utility functions for tests that use Kerberos.
  *
  * The canonical version of this file is maintained in the rra-c-util package,
- * which can be found at <http://www.eyrie.org/~eagle/software/rra-c-util/>.
+ * which can be found at <https://www.eyrie.org/~eagle/software/rra-c-util/>.
  *
  * Written by Russ Allbery <eagle@eyrie.org>
  * Copyright 2006, 2007, 2009, 2011, 2012, 2013, 2014
@@ -46,17 +46,21 @@ struct kerberos_config {
     char *username;             /* The local (non-realm) part of principal. */
     char *realm;                /* The realm part of the principal. */
     char *password;             /* The password. */
+    char *pkinit_principal;     /* Principal for PKINIT authentication. */
+    char *pkinit_cert;          /* Path to certificates for PKINIT. */
 };
 
 /*
  * Whether to skip all tests (by calling skip_all) in kerberos_setup if
- * certain configuration information isn't available.
+ * certain configuration information isn't available.  "_BOTH" means that the
+ * tests require both keytab and password, but PKINIT is not required.
  */
 enum kerberos_needs {
     TAP_KRB_NEEDS_NONE     = 0x00,
     TAP_KRB_NEEDS_KEYTAB   = 0x01,
     TAP_KRB_NEEDS_PASSWORD = 0x02,
-    TAP_KRB_NEEDS_BOTH     = 0x01 | 0x02
+    TAP_KRB_NEEDS_BOTH     = 0x01 | 0x02,
+    TAP_KRB_NEEDS_PKINIT   = 0x04
 };
 
 BEGIN_DECLS
@@ -104,11 +108,11 @@ void kerberos_cleanup_conf(void);
 
 /* Bail out with an error, appending the Kerberos error message. */
 void bail_krb5(krb5_context, krb5_error_code, const char *format, ...)
-    __attribute__((__noreturn__, __nonnull__, __format__(printf, 3, 4)));
+    __attribute__((__noreturn__, __nonnull__(3), __format__(printf, 3, 4)));
 
 /* Report a diagnostic with Kerberos error to stderr prefixed with #. */
 void diag_krb5(krb5_context, krb5_error_code, const char *format, ...)
-    __attribute__((__nonnull__, __format__(printf, 3, 4)));
+    __attribute__((__nonnull__(3), __format__(printf, 3, 4)));
 
 /*
  * Given a Kerberos context and the path to a keytab, retrieve the principal

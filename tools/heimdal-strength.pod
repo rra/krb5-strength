@@ -182,7 +182,7 @@ describes the interface that this program implements and how to configure
 Heimdal to use it.
 
 The current version of this program is available from its web page at
-L<http://www.eyrie.org/~eagle/software/krb5-strength/> as part of the
+L<https://www.eyrie.org/~eagle/software/krb5-strength/> as part of the
 krb5-strength package.
 
 =head1 AUTHOR
@@ -190,6 +190,8 @@ krb5-strength package.
 Russ Allbery <eagle@eyrie.org>
 
 =head1 COPYRIGHT AND LICENSE
+
+Copyright 2016 Russ Allbery <eagle@eyrie.org>
 
 Copyright 2010, 2013, 2014 The Board of Trustees of the Leland Stanford
 Junior University
