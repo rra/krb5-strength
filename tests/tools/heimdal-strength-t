@@ -165,8 +165,11 @@ plan(tests => $count * 3 + 21);
 # Install the krb5.conf file with a configuration pointing to the test
 # CrackLib dictionary.
 my $datadir = $ENV{BUILD} ? "$ENV{BUILD}/data" : 'tests/data';
-my $krb5_conf
-  = create_krb5_conf({ password_dictionary => "$datadir/dictionary" });
+my $krb5_conf = create_krb5_conf(
+    {
+        password_dictionary => "$datadir/dictionary",
+    }
+);
 local $ENV{KRB5_CONFIG} = $krb5_conf;
 
 # Run the CrackLib password tests and based-on-principal tests from JSON.
