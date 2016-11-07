@@ -158,6 +158,9 @@ for my $type (qw(cdb classes cracklib length letter principal sqlite)) {
 # We run the principal tests three times, for CrackLib, CDB, and SQLite.
 $count += 2 * scalar(@{ $tests{principal} });
 
+# We run the length checks twice.
+$count += scalar(@{ $tests{length} });
+
 # We can now calculate our plan based on three tests for each password test,
 # plus 21 additional tests for error handling.
 plan(tests => $count * 3 + 21);
@@ -185,6 +188,24 @@ local $ENV{KRB5_CONFIG} = $krb5_conf;
 
 # Run the password length checks.
 note('Password length checks');
+for my $test (@{ $tests{length} }) {
+    check_password($test);
+}
+
+# Add a CrackLib dictionary and a maximum password length setting.
+$krb5_conf = create_krb5_conf(
+    {
+        password_dictionary => "$datadir/dictionary",
+        minimum_length      => 12,
+        cracklib_maxlen     => 11,
+    }
+);
+local $ENV{KRB5_CONFIG} = $krb5_conf;
+
+# Run the length checks again.  They should have the same result, even though
+# there's a CrackLib dictionary, since the dictionary hit is above the minimum
+# length.
+note('Password length checks with cracklib_maxlen');
 for my $test (@{ $tests{length} }) {
     check_password($test);
 }
