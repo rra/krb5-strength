@@ -165,11 +165,8 @@ plan(tests => $count * 3 + 21);
 # Install the krb5.conf file with a configuration pointing to the test
 # CrackLib dictionary.
 my $datadir = $ENV{BUILD} ? "$ENV{BUILD}/data" : 'tests/data';
-my $krb5_conf = create_krb5_conf(
-    {
-        password_dictionary => "$datadir/dictionary",
-    }
-);
+my $krb5_conf
+  = create_krb5_conf({ password_dictionary => "$datadir/dictionary" });
 local $ENV{KRB5_CONFIG} = $krb5_conf;
 
 # Run the CrackLib password tests and based-on-principal tests from JSON.
@@ -247,11 +244,8 @@ SKIP: {
 # Install the krb5.conf file with configuration pointing to the SQLite
 # dictionary.
 my $sqlite_database = test_file_path('data/wordlist.sqlite');
-$krb5_conf = create_krb5_conf(
-    {
-        password_dictionary_sqlite => $sqlite_database,
-    }
-);
+$krb5_conf
+  = create_krb5_conf({ password_dictionary_sqlite => $sqlite_database });
 local $ENV{KRB5_CONFIG} = $krb5_conf;
 
 # Check whether we were built with SQLite support.  If so, run those tests.
