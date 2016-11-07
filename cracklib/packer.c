@@ -13,6 +13,8 @@
  *   - Add ANSI C protototypes for all functions.
  * 2010-03-14  Russ Allbery <eagle@eyrie.org>
  *   - Use unsigned long instead of int32 to avoid printf warnings.
+ * 2016-11-06  Mark Sirota <msirota@isc.upenn.edu>
+ *   - Display a warning when processing out-of-order input.
  */
 
 #include "packer.h"
@@ -23,7 +25,7 @@ main(int argc, char *argv[])
     unsigned long readed;
     unsigned long wrote;
     PWDICT *pwp;
-    char buffer[STRINGSIZE];
+    char buffer[STRINGSIZE], prev[STRINGSIZE];
 
     if (argc <= 1)
     {
@@ -38,6 +40,7 @@ main(int argc, char *argv[])
     }
 
     wrote = 0;
+    prev[0] = '\0';
 
     for (readed = 0; fgets(buffer, STRINGSIZE, stdin); /* nothing */)
     {
@@ -52,6 +55,18 @@ main(int argc, char *argv[])
 	    fprintf(stderr, "skipping line: %lu\n", readed);
 	    continue;
 	}
+
+	/*
+	 * If this happens, strcmp() in FindPW() in packlib.c will be unhappy.
+	 */
+	if (strcmp(buffer, prev) < 0)
+	{
+	    fprintf(stderr, "warning: input out of order: '%s' should not"
+		    " follow '%s' (line %lu), skipping\n", buffer, prev,
+		    readed);
+	    continue;
+	}
+	strcpy(prev, buffer);
 
 	if (PutPW(pwp, buffer))
 	{

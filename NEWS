@@ -26,6 +26,11 @@ krb5-strength 3.1 (unreleased)
     doesn't apply since all the GECOS manipulation code was removed from
     the embedded CrackLib in this package.)
 
+    Patch the mkdict and packer in the embedded copy of CrackLib to force
+    C locale when sorting (avoiding a corrupted dictionary) and warn and
+    skip out-of-order words rather than creating a corrupted dictionary.
+    Patch from Mark Sirota.
+
     Update to rra-c-util 6.2:
 
     * Use calloc in preference to malloc wherever appropriate.
