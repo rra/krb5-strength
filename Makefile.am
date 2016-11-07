@@ -8,11 +8,12 @@
 # See LICENSE for licensing terms.
 
 ACLOCAL_AMFLAGS = -I m4
-EXTRA_DIST = .gitignore LICENSE bootstrap cracklib/HISTORY cracklib/LICENCE \
-	cracklib/README cracklib/genrules.pl cracklib/mkdict tests/HOWTO    \
-	tests/TESTS tests/data/krb5.conf tests/data/make-krb5-conf	    \
-	tests/data/passwords tests/data/perl.conf tests/data/perlcriticrc   \
-	tests/data/perltidyrc tests/data/valgrind.supp tests/data/wordlist  \
+EXTRA_DIST = .gitignore .travis.yml LICENSE bootstrap cracklib/HISTORY	    \
+	cracklib/LICENCE cracklib/README cracklib/genrules.pl		    \
+	cracklib/mkdict tests/HOWTO tests/TESTS tests/data/krb5.conf	    \
+	tests/data/make-krb5-conf tests/data/passwords tests/data/perl.conf \
+	tests/data/perlcriticrc tests/data/perltidyrc			    \
+	tests/data/valgrind.supp tests/data/wordlist			    \
 	tests/data/wordlist.cdb tests/data/wordlist.sqlite		    \
 	tests/docs/pod-spelling-t tests/docs/pod-t tests/perl/critic-t	    \
 	tests/perl/minimum-version-t tests/perl/strict-t		    \
