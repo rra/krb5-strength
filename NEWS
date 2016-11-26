@@ -31,6 +31,11 @@ krb5-strength 3.1 (unreleased)
     skip out-of-order words rather than creating a corrupted dictionary.
     Patch from Mark Sirota.
 
+    Configuration instrutions are now in the heimdal-history and
+    heimdal-strength man pages and a new krb5-strength man page (which
+    documents configuration of the KDC plugin) instead of the README file
+    to make it more accessible after the software has been installed.
+
     Update to rra-c-util 6.2:
 
     * Use calloc in preference to malloc wherever appropriate.

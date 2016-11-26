@@ -10,9 +10,9 @@
 ACLOCAL_AMFLAGS = -I m4
 EXTRA_DIST = .gitignore .travis.yml LICENSE bootstrap cracklib/HISTORY	    \
 	cracklib/LICENCE cracklib/README cracklib/genrules.pl		    \
-	cracklib/mkdict tests/HOWTO tests/TESTS tests/data/krb5.conf	    \
-	tests/data/make-krb5-conf tests/data/passwords tests/data/perl.conf \
-	tests/data/perlcriticrc tests/data/perltidyrc			    \
+	cracklib/mkdict docs/krb5-strength.5.in tests/HOWTO tests/TESTS	    \
+	tests/data/krb5.conf tests/data/make-krb5-conf tests/data/passwords \
+	tests/data/perl.conf tests/data/perlcriticrc tests/data/perltidyrc  \
 	tests/data/valgrind.supp tests/data/wordlist			    \
 	tests/data/wordlist.cdb tests/data/wordlist.sqlite		    \
 	tests/docs/pod-spelling-t tests/docs/pod-t tests/perl/critic-t	    \
@@ -95,21 +95,28 @@ dist_bin_SCRIPTS = tools/heimdal-history tools/krb5-strength-wordlist
 # Man pages for all tools.
 dist_man_MANS = tools/heimdal-history.1 tools/heimdal-strength.1 \
 	tools/krb5-strength-wordlist.1
+man_MANS = docs/krb5-strength.5
+
+# Substitute the installation paths into the manual page.
+docs/krb5-strength.5: $(srcdir)/docs/krb5-strength.5.in
+	[ -d docs ] || mkdir docs
+	sed -e 's%\(\\f(CI\)*\@moduledir\(\\fI\)*\@%$(moduledir)%' \
+	    < $(srcdir)/docs/krb5-strength.5.in > $@
 
 # Handle the standard stuff that make maintainer-clean should probably remove
 # but doesn't.  This breaks the GNU coding standard, but in this area the GNU
 # coding standard is dumb.
-CLEANFILES = tests/data/dictionary.hwm tests/data/dictionary.pwd \
-	tests/data/dictionary.pwi
+CLEANFILES = docs/krb5-strength.5 tests/data/dictionary.hwm \
+	tests/data/dictionary.pwd tests/data/dictionary.pwi
 DISTCLEANFILES = tests/data/.placeholder
-MAINTAINERCLEANFILES = Makefile.in aclocal.m4 build-aux/compile		 \
-	build-aux/config.guess build-aux/config.sub build-aux/depcomp	 \
-	build-aux/install-sh build-aux/ltmain.sh build-aux/missing	 \
-	config.h.in config.h.in~ configure m4/libtool.m4 m4/ltoptions.m4 \
-	m4/ltsugar.m4 m4/ltversion.m4 m4/lt~obsolete.m4			 \
-	tests/data/wordlist.cdb tests/data/wordlist.sqlite		 \
-	tools/heimdal-history.1 tools/heimdal-strength.1		 \
-	tools/krb5-strength-wordlist.1
+MAINTAINERCLEANFILES = Makefile.in aclocal.m4 build-aux/compile		\
+	build-aux/config.guess build-aux/config.sub build-aux/depcomp	\
+	build-aux/install-sh build-aux/ltmain.sh build-aux/missing	\
+	config.h.in config.h.in~ configure docs/krb5-strength.5.in	\
+	m4/libtool.m4 m4/ltoptions.m4 m4/ltsugar.m4 m4/ltversion.m4	\
+	m4/lt~obsolete.m4 tests/data/wordlist.cdb			\
+	tests/data/wordlist.sqlite tools/heimdal-history.1		\
+	tools/heimdal-strength.1 tools/krb5-strength-wordlist.1
 
 # Also remove the generated *.c files from our JSON test data on
 # maintainer-clean.

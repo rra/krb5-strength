@@ -662,7 +662,7 @@ __END__
 =for stopwords
 heimdal-history heimdal-strength Heimdal -hmq BerkeleyDB timestamps POSIX
 whitespace API Allbery sublicense MERCHANTABILITY NONINFRINGEMENT syslog
-pseudorandom JSON LDAP-compatible PBKDF2 SHA-256
+pseudorandom JSON LDAP-compatible PBKDF2 SHA-256 KDC
 
 =head1 NAME
 
@@ -695,6 +695,9 @@ It does so by invoking another program that also uses the Heimdal external
 password strength checking interface.  By default, it runs
 B</usr/bin/heimdal-strength>.  Only if that program approves the password
 does it hash it and check history.
+
+For more information on how to set up password history, see
+L</CONFIGURATION> below.
 
 As with any implementation of the Heimdal external password strength
 checking protocol, B<heimdal-history> expects, on standard input:
@@ -799,6 +802,35 @@ testing, since Heimdal won't pass this argument.
 
 =back
 
+=head1 CONFIGURATION
+
+Additional setup is required to use this history implementation with your
+Heimdal KDC.
+
+First, ensure that its dependencies are installed, and then examine the
+local configuration settings at the top of the B<heimdal-history> program.
+By default, it requires a C<_history> user and C<_history> group be
+present on the system, and all history information will be read and
+written as that user and group.  It also requires a C<nobody> user and
+C<nogroup> group to be present (this should be the default with most
+variants of UNIX), and all strength checking will be done as that user and
+group.  It uses various files in F</var/lib/heimdal-history> to store
+history and statistical information by default, so if using the defaults,
+create that directory and ensure it is writable by the C<_history> user.
+
+Once that setup is done, change your C<[password_quality]> configuration
+in F<krb5.conf> or F<kdc.conf> to:
+
+    [password_quality]
+        policies         = external-check
+        external_program = /usr/local/bin/heimdal-history
+
+The B<heimdal-history> program will automatically also run
+B<heimdal-strength> as well, looking for it in F</usr/bin>.  Change the
+C<$STRENGTH_PROGRAM> setting at the top of the script if you have that
+program in a different location.  You should continue to configure
+B<heimdal-strength> as if you were running it directly.
+
 =head1 RETURN STATUS
 
 On approval of the password, B<heimdal-history> will print C<APPROVED> and
@@ -856,6 +888,8 @@ C<_history> and group C<_history>.
 Russ Allbery <eagle@eyrie.org>
 
 =head1 COPYRIGHT AND LICENSE
+
+Copyright 2016 Russ Allbery <eagle@eyrie.org>
 
 Copyright 2013, 2014 The Board of Trustees of the Leland Stanford Junior
 University

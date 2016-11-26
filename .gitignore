@@ -10,6 +10,7 @@
 /config.status
 /configure
 /cracklib/packer
+/docs/krb5-strength.5.in
 /libtool
 /m4/libtool.m4
 /m4/ltoptions.m4
@@ -39,6 +40,7 @@
 .dirstamp
 .libs/
 *.1
+*.5
 *.a
 *.lo
 *.la

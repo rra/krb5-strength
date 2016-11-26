@@ -54,6 +54,16 @@ The following F<krb5.conf> configuration options are supported:
 
 =over 4
 
+=item cracklib_maxlen
+
+Normally, all passwords are checked with CrackLib if a CrackLib dictionary
+is defined.  However, CrackLib's rules were designed for a world in which
+most passwords were four to eight characters long, and tends to spuriously
+reject a lot of passphrases.  If this option is set to something other
+than its default of 0, passwords longer than that length bypass CrackLib
+checks.  (Using a SQLite dictionary for longer passwords is strongly
+recommended.)
+
 =item minimum_different
 
 If set to a numeric value, passwords with fewer than this number of unique
