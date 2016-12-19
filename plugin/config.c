@@ -22,6 +22,9 @@
 #include <plugin/internal.h>
 #include <util/macros.h>
 
+/* maximum number of character classes */
+#define MAX_CLASSES 4
+
 /* The representation of the realm differs between MIT and Kerberos. */
 #ifdef HAVE_KRB5_REALM
 typedef krb5_realm realm_type;
@@ -169,10 +172,10 @@ parse_class(krb5_context ctx, const char *spec, struct class_rule **rule)
         return strength_error_system(ctx, "cannot allocate memory");
 
     /*
-     * If the rule starts with a digit, it starts with a range of affected
-     * password lengths.  Parse that range.
+     * If the rule starts with a digit and contains a '-', it starts
+     * with a range of affected password lengths.  Parse that range.
      */
-    if (isdigit((unsigned char) *spec)) {
+    if (isdigit((unsigned char) *spec) && strchr(spec, '-') != NULL) {
         okay = parse_number(spec, &(*rule)->min, &end);
         if (okay)
             okay = (*end == '-');
@@ -209,6 +212,17 @@ parse_class(krb5_context ctx, const char *spec, struct class_rule **rule)
             (*rule)->digit = true;
         else if (strcmp(classes->strings[i], "symbol") == 0)
             (*rule)->symbol = true;
+	else if (isdigit((unsigned char) *classes->strings[i])) {
+	    okay = parse_number(classes->strings[i],
+				&(*rule)->num_classes, &end);
+	    if (!okay || *end != '\0' || (*rule)->num_classes > MAX_CLASSES) {
+                code = strength_error_config(ctx, "bad character class"
+                                             " requirement in configuration:"
+                                             " %s",
+					     classes->strings[i]);
+		goto fail;
+	    }
+	}
         else {
             code = strength_error_config(ctx, "unknown character class %s",
                                          classes->strings[i]);

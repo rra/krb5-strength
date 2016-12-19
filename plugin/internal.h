@@ -58,6 +58,7 @@ struct class_rule {
     bool upper;
     bool digit;
     bool symbol;
+    unsigned long num_classes;
     struct class_rule *next;
 };
 

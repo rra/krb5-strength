@@ -23,6 +23,7 @@ struct password_classes {
     bool upper;
     bool digit;
     bool symbol;
+    unsigned long num_classes;
 };
 
 
@@ -46,6 +47,15 @@ analyze_password(const char *password, struct password_classes *classes)
         else
             classes->symbol = true;
     }
+
+    if (classes->lower)
+	classes->num_classes++;
+    if (classes->upper)
+	classes->num_classes++;
+    if (classes->digit)
+	classes->num_classes++;
+    if (classes->symbol)
+	classes->num_classes++;
 }
 
 
@@ -60,6 +70,12 @@ check_rule(krb5_context ctx, struct class_rule *rule, size_t length,
 {
     if (length < rule->min || (rule->max > 0 && length > rule->max))
         return 0;
+
+    if (classes->num_classes < rule->num_classes)
+        return strength_error_class((ctx),
+				    "password must have %lu character classes",
+				    rule->num_classes);
+    
     if (rule->lower && !classes->lower)
         return strength_error_class((ctx), ERROR_CLASS_LOWER);
     if (rule->upper && !classes->upper)

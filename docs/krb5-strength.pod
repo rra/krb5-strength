@@ -235,10 +235,11 @@ whitespace-separated rule.  Each rule has the syntax:
     [<min>-<max>:]<class>[,<class>...]
 
 where <class> is one of C<upper>, C<lower>, C<digit>, or C<symbol>
-(without quote marks).  The symbol class includes all characters other
-than alphanumeric characters, including space.  The listed classes must
-appear in the password.  Separate multiple required classes with a comma
-(and no space).
+(without quote marks), or an integer representing a minimum number of
+character classes.  The symbol class includes all characters other than
+alphanumeric characters, including space.  The listed classes must appear
+in the password.  Separate multiple required classes with a comma (and no
+space).
 
 The character class checks will be done in whatever locale the plugin or
 password check program is run in, which will normally be the POSIX C
@@ -264,6 +265,32 @@ and lower case and a digit, and passwords from 16 to 19 characters long
 contain both upper and lower case.  Passwords longer than 20 characters
 have no character class restrictions.  (This example is probably used in
 conjunction with C<minimum_length = 8>.)
+
+C<require_classes> also supports specifying the minimum number of
+character classes a password should contain.  For example:
+
+    require_classes = 3
+
+would require all passwords to have a minimum of any three of the
+character classes.
+
+This can also be used with <min> and <max> ranges, as above.  For example:
+
+    require_classes = 8-11:3 12-19:2
+
+requires all passwords from 8 to 11 characters contain at least three
+different character classes, and passwords from 12 to 19 characters
+contain at least two different character classes.  Ranges can overlap, as
+in the examples above, but this makes less sense when specifying a minimum
+number of classes.
+
+Minimum numbers of character classes can be combined with specific
+character classes.  For example:
+
+    require_classes = symbol,3
+
+requires all passwords contain three distinct character classes and must
+contain a symbol character.
 
 =item require_non_letter
 
