@@ -224,7 +224,7 @@ main(void)
     /* Add complex character class restrictions and remove the dictionary. */
     free(setup_argv[4]);
     setup_argv[3] = (char *) "require_classes";
-    setup_argv[4] = (char *) "8-19:lower,upper 8-15:digit 8-11:symbol";
+    setup_argv[4] = (char *) "8-19:lower,upper 8-15:digit 8-11:symbol 24-24:3";
     setup_argv[5] = NULL;
     run_setup((const char **) setup_argv);
 

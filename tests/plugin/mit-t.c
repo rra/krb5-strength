@@ -301,7 +301,7 @@ main(void)
      * the dictionary configuration.
      */
     setup_argv[3] = (char *) "require_classes";
-    setup_argv[4] = (char *) "8-19:lower,upper 8-15:digit 8-11:symbol";
+    setup_argv[4] = (char *) "8-19:lower,upper 8-15:digit 8-11:symbol 24-24:3";
     setup_argv[5] = NULL;
     run_setup((const char **) setup_argv);
 
@@ -315,7 +315,7 @@ main(void)
     code = vtable->open(ctx, NULL, &data);
     is_int(0, code, "Plugin initialization (complex character class)");
     if (code != 0)
-        bail("cannot continue after plugin initialization failure");
+        bail_krb5(ctx, code, "plugin initialization failure");
     for (i = 0; i < ARRAY_SIZE(classes_tests); i++)
         is_password_test(ctx, vtable, data, &classes_tests[i]);
     vtable->close(ctx, data);

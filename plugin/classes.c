@@ -4,6 +4,7 @@
  * Checks whether the password satisfies a set of character class rules.
  *
  * Written by Russ Allbery <eagle@eyrie.org>
+ * Copyright 2016 Russ Allbery <eagle@eyrie.org>
  * Copyright 2013, 2014
  *     The Board of Trustees of the Leland Stanford Junior University
  *
@@ -47,15 +48,10 @@ analyze_password(const char *password, struct password_classes *classes)
         else
             classes->symbol = true;
     }
-
-    if (classes->lower)
-	classes->num_classes++;
-    if (classes->upper)
-	classes->num_classes++;
-    if (classes->digit)
-	classes->num_classes++;
-    if (classes->symbol)
-	classes->num_classes++;
+    if (classes->lower)  classes->num_classes++;
+    if (classes->upper)  classes->num_classes++;
+    if (classes->digit)  classes->num_classes++;
+    if (classes->symbol) classes->num_classes++;
 }
 
 
@@ -70,20 +66,16 @@ check_rule(krb5_context ctx, struct class_rule *rule, size_t length,
 {
     if (length < rule->min || (rule->max > 0 && length > rule->max))
         return 0;
-
     if (classes->num_classes < rule->num_classes)
-        return strength_error_class((ctx),
-				    "password must have %lu character classes",
-				    rule->num_classes);
-    
+        return strength_error_class(ctx, ERROR_CLASS_MIN, rule->num_classes);
     if (rule->lower && !classes->lower)
-        return strength_error_class((ctx), ERROR_CLASS_LOWER);
+        return strength_error_class(ctx, ERROR_CLASS_LOWER);
     if (rule->upper && !classes->upper)
-        return strength_error_class((ctx), ERROR_CLASS_UPPER);
+        return strength_error_class(ctx, ERROR_CLASS_UPPER);
     if (rule->digit && !classes->digit)
-        return strength_error_class((ctx), ERROR_CLASS_DIGIT);
+        return strength_error_class(ctx, ERROR_CLASS_DIGIT);
     if (rule->symbol && !classes->symbol)
-        return strength_error_class((ctx), ERROR_CLASS_SYMBOL);
+        return strength_error_class(ctx, ERROR_CLASS_SYMBOL);
     return 0;
 }
 

@@ -146,5 +146,29 @@
         "name": "all classes with space (20)",
         "principal": "test@EXAMPLE.ORG",
         "password": "pass wordX9wordwordw"
+    },
+    {
+        "name": "only lowercase (24)",
+        "principal": "test@EXAMPLE.ORG",
+        "password": "alllowercasewithclassreq",
+        "code": "KADM5_PASS_Q_CLASS",
+        "error": "Password must contain 3 types of characters (lowercase, uppercase, numbers, symbols)"
+    },
+    {
+        "name": "lower and uppercase (24)",
+        "principal": "test@EXAMPLE.ORG",
+        "password": "LowerUprcasewithclassreq",
+        "code": "KADM5_PASS_Q_CLASS",
+        "error": "Password must contain 3 types of characters (lowercase, uppercase, numbers, symbols)"
+    },
+    {
+        "name": "lower, uppercase, symbols (24)",
+        "principal": "test@EXAMPLE.ORG",
+        "password": "LowerUp!casewithclassreq"
+    },
+    {
+        "name": "only lowercase (25)",
+        "principal": "test@EXAMPLE.ORG",
+        "password": "alllowercasewithclassreqr"
     }
 ]

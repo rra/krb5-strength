@@ -38,6 +38,9 @@ typedef struct krb5_pwqual_moddata_st *krb5_pwqual_moddata;
 #define ERROR_CLASS_DIGIT  "Password must contain a number"
 #define ERROR_CLASS_SYMBOL \
     "Password must contain a space or punctuation character"
+#define ERROR_CLASS_MIN \
+    "Password must contain %lu types of characters (lowercase, uppercase," \
+    " numbers, symbols)"
 #define ERROR_DICT         "Password found in list of common passwords"
 #define ERROR_LETTER       "Password is only letters and spaces"
 #define ERROR_MINDIFF      "Password does not contain enough unique characters"

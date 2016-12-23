@@ -6,6 +6,7 @@
  * krb5_appdefaults_* functions.
  *
  * Written by Russ Allbery <eagle@eyrie.org>
+ * Copyright 2016 Russ Allbery <eagle@eyrie.org>
  * Copyright 2013
  *     The Board of Trustees of the Leland Stanford Junior University
  *
@@ -22,15 +23,15 @@
 #include <plugin/internal.h>
 #include <util/macros.h>
 
-/* maximum number of character classes */
-#define MAX_CLASSES 4
-
 /* The representation of the realm differs between MIT and Kerberos. */
 #ifdef HAVE_KRB5_REALM
 typedef krb5_realm realm_type;
 #else
 typedef krb5_data *realm_type;
 #endif
+
+/* Maximum number of character classes. */
+#define MAX_CLASSES 4
 
 
 /*
@@ -163,7 +164,7 @@ parse_class(krb5_context ctx, const char *spec, struct class_rule **rule)
     struct vector *classes = NULL;
     size_t i;
     krb5_error_code code;
-    const char *end;
+    const char *class, *end;
     bool okay;
 
     /* Create the basic rule structure. */
@@ -204,28 +205,26 @@ parse_class(krb5_context ctx, const char *spec, struct class_rule **rule)
      * unknown character class.
      */
     for (i = 0; i < classes->count; i++) {
-        if (strcmp(classes->strings[i], "upper") == 0)
+        class = classes->strings[i];
+        if (strcmp(class, "upper") == 0)
             (*rule)->upper = true;
-        else if (strcmp(classes->strings[i], "lower") == 0)
+        else if (strcmp(class, "lower") == 0)
             (*rule)->lower = true;
-        else if (strcmp(classes->strings[i], "digit") == 0)
+        else if (strcmp(class, "digit") == 0)
             (*rule)->digit = true;
-        else if (strcmp(classes->strings[i], "symbol") == 0)
+        else if (strcmp(class, "symbol") == 0)
             (*rule)->symbol = true;
-	else if (isdigit((unsigned char) *classes->strings[i])) {
-	    okay = parse_number(classes->strings[i],
-				&(*rule)->num_classes, &end);
+	else if (isdigit((unsigned char) *class)) {
+	    okay = parse_number(class, &(*rule)->num_classes, &end);
 	    if (!okay || *end != '\0' || (*rule)->num_classes > MAX_CLASSES) {
-                code = strength_error_config(ctx, "bad character class"
-                                             " requirement in configuration:"
-                                             " %s",
-					     classes->strings[i]);
+                code = strength_error_config(ctx, "bad character class minimum"
+                                             " in configuration: %s", class);
 		goto fail;
 	    }
 	}
         else {
             code = strength_error_config(ctx, "unknown character class %s",
-                                         classes->strings[i]);
+                                         class);
             goto fail;
         }
     }

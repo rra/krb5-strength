@@ -152,6 +152,37 @@ sub load_password_tests {
     return $json->decode($testdata);
 }
 
+# Test a required_classes syntax error.  Takes the string for required_classes
+# and verifies that the appropriate error message is returned.
+#
+# $bad_class - Bad class specification
+#
+# Returns: undef
+sub test_require_classes_syntax {
+    my ($bad_class)  = @_;
+    my $error_prefix = 'Cannot initialize strength checking';
+    my $bad_message  = 'bad character class requirement in configuration';
+    my $bad_minimum  = 'bad character class minimum in configuration';
+
+    # Run heimdal-strength.
+    my $krb5_conf = create_krb5_conf({ require_classes => $bad_class });
+    local $ENV{KRB5_CONFIG} = $krb5_conf;
+    my ($status, $output, $err) = run_heimdal_strength('test', 'password', 1);
+
+    # Check the results.
+    is($status, 1,   "Bad class specification '$bad_class' (status)");
+    is($output, q{}, '...no output');
+    my $expected;
+    if ($bad_class =~ m{ \A (\d+ [^-]*) \z | : (\d+) \z }xms) {
+        my $minimum = $1 || $2;
+        $expected = "$error_prefix: $bad_minimum: $minimum\n";
+    } else {
+        $expected = "$error_prefix: $bad_message: $bad_class\n";
+    }
+    is($err, $expected, '...correct error');
+    return;
+}
+
 # Load the password tests from JSON.  Accumulate a total count of tests for
 # the testing plan.
 my (%tests, $count);
@@ -168,8 +199,8 @@ $count += 2 * scalar(@{ $tests{principal} });
 $count += scalar(@{ $tests{length} });
 
 # We can now calculate our plan based on three tests for each password test,
-# plus 21 additional tests for error handling.
-plan(tests => $count * 3 + 21);
+# plus 27 additional tests for error handling.
+plan(tests => $count * 3 + 27);
 
 # Install the krb5.conf file with a configuration pointing to the test
 # CrackLib dictionary.
@@ -233,7 +264,7 @@ for my $test (@{ $tests{letter} }) {
 }
 
 # Install the krb5.conf file for complex character class restrictions.
-my $classes = '8-19:lower,upper 8-15:digit 8-11:symbol';
+my $classes = '8-19:lower,upper 8-15:digit 8-11:symbol 24-24:3';
 $krb5_conf = create_krb5_conf({ require_classes => $classes });
 local $ENV{KRB5_CONFIG} = $krb5_conf;
 
@@ -306,16 +337,10 @@ is($err, "$error_prefix: unknown character class bogus\n", '...correct error');
 
 # Test a variety of configuration syntax errors in require_classes.
 my @bad_classes = qw(
-  8 8bogus 8:bogus 4-:bogus 4-bogus 4-8bogus
+  8 8bogus 8:bogus 4-:bogus 4-bogus 4-8bogus 10:3 10-11:5
 );
-my $bad_message = 'bad character class requirement in configuration';
 for my $bad_class (@bad_classes) {
-    $krb5_conf = create_krb5_conf({ require_classes => $bad_class });
-    local $ENV{KRB5_CONFIG} = $krb5_conf;
-    ($status, $output, $err) = run_heimdal_strength('test', 'password', 1);
-    is($status, 1,   "Bad class specification '$bad_class' (status)");
-    is($output, q{}, '...no output');
-    is($err, "$error_prefix: $bad_message: $bad_class\n", '...correct error');
+    test_require_classes_syntax($bad_class);
 }
 
 # Clean up our temporary krb5.conf file on any exit.
