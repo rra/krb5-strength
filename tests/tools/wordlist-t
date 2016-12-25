@@ -3,6 +3,7 @@
 # Test suite for krb5-strength-wordlist filtering functions.
 #
 # Written by Russ Allbery <eagle@eyrie.org>
+# Copyright 2016 Russ Allbery <eagle@eyrie.org>
 # Copyright 2014
 #     The Board of Trustees of the Leland Stanford Junior University
 #
@@ -60,7 +61,7 @@ my @wordlist = slurp(test_file_path('data/wordlist'));
 # Generate a filtered version that should match the eventual output of
 # krb5-strength-wordlist, removing words containing the letter d and any
 # shorter than 8 characters.
-my @filtered = grep { !m{d}xms && length($_) >= 8 } @wordlist;
+my @filtered = grep { !m{d}xms && length >= 8 } @wordlist;
 
 # Add a non-ASCII word to test non-ASCII filtering.
 push(@wordlist, encode('UTF-8', "\N{U+0639}\N{U+0631}\N{U+0628}\N{U+649}"));

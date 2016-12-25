@@ -5,7 +5,7 @@
  * asprintf and vasprintf for those platforms that don't have them.
  *
  * The canonical version of this file is maintained in the rra-c-util package,
- * which can be found at <http://www.eyrie.org/~eagle/software/rra-c-util/>.
+ * which can be found at <https://www.eyrie.org/~eagle/software/rra-c-util/>.
  *
  * Written by Russ Allbery <eagle@eyrie.org>
  *
@@ -19,6 +19,7 @@
  */
 
 #include <config.h>
+#include <portable/macros.h>
 #include <portable/system.h>
 
 #include <errno.h>
@@ -28,11 +29,14 @@
  * with the system versions.
  */
 #if TESTING
+# undef asprintf
+# undef vasprintf
 # define asprintf test_asprintf
 # define vasprintf test_vasprintf
 int test_asprintf(char **, const char *, ...)
     __attribute__((__format__(printf, 2, 3)));
-int test_vasprintf(char **, const char *, va_list);
+int test_vasprintf(char **, const char *, va_list)
+    __attribute__((__format__(printf, 2, 0)));
 #endif
 
 

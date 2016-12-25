@@ -10,9 +10,10 @@
  * up the TAP output format, or finding things in the test environment.
  *
  * This file is part of C TAP Harness.  The current version plus supporting
- * documentation is at <http://www.eyrie.org/~eagle/software/c-tap-harness/>.
+ * documentation is at <https://www.eyrie.org/~eagle/software/c-tap-harness/>.
  *
- * Copyright 2009, 2010, 2011, 2012, 2013 Russ Allbery <eagle@eyrie.org>
+ * Copyright 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016
+ *     Russ Allbery <eagle@eyrie.org>
  * Copyright 2001, 2002, 2004, 2005, 2006, 2007, 2008, 2011, 2012, 2013, 2014
  *     The Board of Trustees of the Leland Stanford Junior University
  *
@@ -36,6 +37,7 @@
  */
 
 #include <errno.h>
+#include <limits.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -104,7 +106,7 @@ static struct cleanup_func *cleanup_funcs = NULL;
 /*
  * Registered diag files.  Any output found in these files will be printed out
  * as if it were passed to diag() before any other output we do.  This allows
- * background processes to log to a file and have that output interleved with
+ * background processes to log to a file and have that output interleaved with
  * the test output.
  */
 struct diag_file {
@@ -136,6 +138,52 @@ static struct diag_file *diag_files = NULL;
 
 
 /*
+ * Form a new string by concatenating multiple strings.  The arguments must be
+ * terminated by (const char *) 0.
+ *
+ * This function only exists because we can't assume asprintf.  We can't
+ * simulate asprintf with snprintf because we're only assuming SUSv3, which
+ * does not require that snprintf with a NULL buffer return the required
+ * length.  When those constraints are relaxed, this should be ripped out and
+ * replaced with asprintf or a more trivial replacement with snprintf.
+ */
+static char *
+concat(const char *first, ...)
+{
+    va_list args;
+    char *result;
+    const char *string;
+    size_t offset;
+    size_t length = 0;
+
+    /*
+     * Find the total memory required.  Ensure we don't overflow length.  See
+     * the comment for breallocarray for why we're using UINT_MAX here.
+     */
+    va_start(args, first);
+    for (string = first; string != NULL; string = va_arg(args, const char *)) {
+        if (length >= UINT_MAX - strlen(string))
+            bail("strings too long in concat");
+        length += strlen(string);
+    }
+    va_end(args);
+    length++;
+
+    /* Create the string. */
+    result = bmalloc(length);
+    va_start(args, first);
+    offset = 0;
+    for (string = first; string != NULL; string = va_arg(args, const char *)) {
+        memcpy(result + offset, string, strlen(string));
+        offset += strlen(string);
+    }
+    va_end(args);
+    result[offset] = '\0';
+    return result;
+}
+
+
+/*
  * Check all registered diag_files for any output.  We only print out the
  * output if we see a complete line; otherwise, we wait for the next newline.
  */
@@ -145,7 +193,7 @@ check_diag_files(void)
     struct diag_file *file;
     fpos_t where;
     size_t length;
-    int incomplete;
+    int size, incomplete;
 
     /*
      * Walk through each file and read each line of output available.  The
@@ -169,7 +217,8 @@ check_diag_files(void)
         /* Continue until we get EOF or an incomplete line of data. */
         incomplete = 0;
         while (!feof(file->file) && !incomplete) {
-            if (fgets(file->buffer, file->bufsize, file->file) == NULL) {
+            size = file->bufsize > INT_MAX ? INT_MAX : (int) file->bufsize;
+            if (fgets(file->buffer, size, file->file) == NULL) {
                 if (ferror(file->file))
                     sysbail("cannot read from %s", file->name);
                 continue;
@@ -177,13 +226,16 @@ check_diag_files(void)
 
             /*
              * See if the line ends in a newline.  If not, see which error
-             * case we have.
+             * case we have.  Use UINT_MAX as a substitute for SIZE_MAX (see
+             * the comment for breallocarray).
              */
             length = strlen(file->buffer);
             if (file->buffer[length - 1] != '\n') {
                 if (length < file->bufsize - 1)
                     incomplete = 1;
                 else {
+                    if (file->bufsize >= UINT_MAX - BUFSIZ)
+                        sysbail("line too long in %s", file->name);
                     file->bufsize += BUFSIZ;
                     file->buffer = brealloc(file->buffer, file->bufsize);
                 }
@@ -349,7 +401,7 @@ skip_all(const char *format, ...)
  * Takes a boolean success value and assumes the test passes if that value
  * is true and fails if that value is false.
  */
-void
+int
 ok(int success, const char *format, ...)
 {
     fflush(stderr);
@@ -359,13 +411,14 @@ ok(int success, const char *format, ...)
         _failed++;
     PRINT_DESC(" - ", format);
     putchar('\n');
+    return success;
 }
 
 
 /*
  * Same as ok(), but takes the format arguments as a va_list.
  */
-void
+int
 okv(int success, const char *format, va_list args)
 {
     fflush(stderr);
@@ -378,6 +431,7 @@ okv(int success, const char *format, va_list args)
         vprintf(format, args);
     }
     putchar('\n');
+    return success;
 }
 
 
@@ -398,20 +452,21 @@ skip(const char *reason, ...)
 /*
  * Report the same status on the next count tests.
  */
-void
-ok_block(unsigned long count, int status, const char *format, ...)
+int
+ok_block(unsigned long count, int success, const char *format, ...)
 {
     unsigned long i;
 
     fflush(stderr);
     check_diag_files();
     for (i = 0; i < count; i++) {
-        printf("%sok %lu", status ? "" : "not ", testnum++);
-        if (!status)
+        printf("%sok %lu", success ? "" : "not ", testnum++);
+        if (!success)
             _failed++;
         PRINT_DESC(" - ", format);
         putchar('\n');
     }
+    return success;
 }
 
 
@@ -437,12 +492,15 @@ skip_block(unsigned long count, const char *reason, ...)
  * Takes an expected integer and a seen integer and assumes the test passes
  * if those two numbers match.
  */
-void
+int
 is_int(long wanted, long seen, const char *format, ...)
 {
+    int success;
+
     fflush(stderr);
     check_diag_files();
-    if (wanted == seen)
+    success = (wanted == seen);
+    if (success)
         printf("ok %lu", testnum++);
     else {
         diag("wanted: %ld", wanted);
@@ -452,6 +510,7 @@ is_int(long wanted, long seen, const char *format, ...)
     }
     PRINT_DESC(" - ", format);
     putchar('\n');
+    return success;
 }
 
 
@@ -459,16 +518,19 @@ is_int(long wanted, long seen, const char *format, ...)
  * Takes a string and what the string should be, and assumes the test passes
  * if those strings match (using strcmp).
  */
-void
+int
 is_string(const char *wanted, const char *seen, const char *format, ...)
 {
+    int success;
+
     if (wanted == NULL)
         wanted = "(null)";
     if (seen == NULL)
         seen = "(null)";
     fflush(stderr);
     check_diag_files();
-    if (strcmp(wanted, seen) == 0)
+    success = (strcmp(wanted, seen) == 0);
+    if (success)
         printf("ok %lu", testnum++);
     else {
         diag("wanted: %s", wanted);
@@ -478,6 +540,7 @@ is_string(const char *wanted, const char *seen, const char *format, ...)
     }
     PRINT_DESC(" - ", format);
     putchar('\n');
+    return success;
 }
 
 
@@ -485,12 +548,15 @@ is_string(const char *wanted, const char *seen, const char *format, ...)
  * Takes an expected unsigned long and a seen unsigned long and assumes the
  * test passes if the two numbers match.  Otherwise, reports them in hex.
  */
-void
+int
 is_hex(unsigned long wanted, unsigned long seen, const char *format, ...)
 {
+    int success;
+
     fflush(stderr);
     check_diag_files();
-    if (wanted == seen)
+    success = (wanted == seen);
+    if (success)
         printf("ok %lu", testnum++);
     else {
         diag("wanted: %lx", (unsigned long) wanted);
@@ -500,6 +566,7 @@ is_hex(unsigned long wanted, unsigned long seen, const char *format, ...)
     }
     PRINT_DESC(" - ", format);
     putchar('\n');
+    return success;
 }
 
 
@@ -547,9 +614,10 @@ sysbail(const char *format, ...)
 
 
 /*
- * Report a diagnostic to stderr.
+ * Report a diagnostic to stderr.  Always returns 1 to allow embedding in
+ * compound statements.
  */
-void
+int
 diag(const char *format, ...)
 {
     va_list args;
@@ -562,13 +630,15 @@ diag(const char *format, ...)
     vprintf(format, args);
     va_end(args);
     printf("\n");
+    return 1;
 }
 
 
 /*
- * Report a diagnostic to stderr, appending strerror(errno).
+ * Report a diagnostic to stderr, appending strerror(errno).  Always returns 1
+ * to allow embedding in compound statements.
  */
-void
+int
 sysdiag(const char *format, ...)
 {
     va_list args;
@@ -582,6 +652,7 @@ sysdiag(const char *format, ...)
     vprintf(format, args);
     va_end(args);
     printf(": %s\n", strerror(oerrno));
+    return 1;
 }
 
 
@@ -680,6 +751,32 @@ brealloc(void *p, size_t size)
 
 
 /*
+ * The same as brealloc, but determine the size by multiplying an element
+ * count by a size, similar to calloc.  The multiplication is checked for
+ * integer overflow.
+ *
+ * We should technically use SIZE_MAX here for the overflow check, but
+ * SIZE_MAX is C99 and we're only assuming C89 + SUSv3, which does not
+ * guarantee that it exists.  They do guarantee that UINT_MAX exists, and we
+ * can assume that UINT_MAX <= SIZE_MAX.
+ *
+ * (In theory, C89 and C99 permit size_t to be smaller than unsigned int, but
+ * I disbelieve in the existence of such systems and they will have to cope
+ * without overflow checks.)
+ */
+void *
+breallocarray(void *p, size_t n, size_t size)
+{
+    if (n > 0 && UINT_MAX / n <= size)
+        bail("reallocarray too large");
+    p = realloc(p, n * size);
+    if (p == NULL)
+        sysbail("failed to realloc %lu bytes", (unsigned long) (n * size));
+    return p;
+}
+
+
+/*
  * Copy a string, reporting a fatal error with bail on failure.
  */
 char *
@@ -712,7 +809,7 @@ bstrndup(const char *s, size_t n)
     /* Don't assume that the source string is nul-terminated. */
     for (p = s; (size_t) (p - s) < n && *p != '\0'; p++)
         ;
-    length = p - s;
+    length = (size_t) (p - s);
     copy = malloc(length + 1);
     if (p == NULL)
         sysbail("failed to strndup %lu bytes", (unsigned long) length);
@@ -723,31 +820,24 @@ bstrndup(const char *s, size_t n)
 
 
 /*
- * Locate a test file.  Given the partial path to a file, look under BUILD and
- * then SOURCE for the file and return the full path to the file.  Returns
- * NULL if the file doesn't exist.  A non-NULL return should be freed with
- * test_file_path_free().
- *
- * This function uses sprintf because it attempts to be independent of all
- * other portability layers.  The use immediately after a memory allocation
- * should be safe without using snprintf or strlcpy/strlcat.
+ * Locate a test file.  Given the partial path to a file, look under
+ * C_TAP_BUILD and then C_TAP_SOURCE for the file and return the full path to
+ * the file.  Returns NULL if the file doesn't exist.  A non-NULL return
+ * should be freed with test_file_path_free().
  */
 char *
 test_file_path(const char *file)
 {
     char *base;
     char *path = NULL;
-    size_t length;
-    const char *envs[] = { "BUILD", "SOURCE", NULL };
+    const char *envs[] = { "C_TAP_BUILD", "C_TAP_SOURCE", NULL };
     int i;
 
     for (i = 0; envs[i] != NULL; i++) {
         base = getenv(envs[i]);
         if (base == NULL)
             continue;
-        length = strlen(base) + 1 + strlen(file) + 1;
-        path = bmalloc(length);
-        sprintf(path, "%s/%s", base, file);
+        path = concat(base, "/", file, (const char *) 0);
         if (access(path, R_OK) == 0)
             break;
         free(path);
@@ -770,7 +860,7 @@ test_file_path_free(char *path)
 
 
 /*
- * Create a temporary directory, tmp, under BUILD if set and the current
+ * Create a temporary directory, tmp, under C_TAP_BUILD if set and the current
  * directory if it does not.  Returns the path to the temporary directory in
  * newly allocated memory, and calls bail on any failure.  The return value
  * should be freed with test_tmpdir_free.
@@ -784,14 +874,11 @@ test_tmpdir(void)
 {
     const char *build;
     char *path = NULL;
-    size_t length;
 
-    build = getenv("BUILD");
+    build = getenv("C_TAP_BUILD");
     if (build == NULL)
         build = ".";
-    length = strlen(build) + strlen("/tmp") + 1;
-    path = bmalloc(length);
-    sprintf(path, "%s/tmp", build);
+    path = concat(build, "/tmp", (const char *) 0);
     if (access(path, X_OK) < 0)
         if (mkdir(path, 0777) < 0)
             sysbail("error creating temporary directory %s", path);

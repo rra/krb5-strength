@@ -1,25 +1,28 @@
 # Automake makefile for krb5-strength.
 #
 # Written by Russ Allbery <eagle@eyrie.org>
+# Copyright 2016 Russ Allbery <eagle@eyrie.org>
 # Copyright 2007, 2009, 2010, 2012, 2013, 2014
 #     The Board of Trustees of the Leland Stanford Junior University
 #
 # See LICENSE for licensing terms.
 
 ACLOCAL_AMFLAGS = -I m4
-EXTRA_DIST = .gitignore LICENSE autogen cracklib/HISTORY cracklib/LICENCE  \
-	cracklib/README cracklib/genrules.pl cracklib/mkdict tests/HOWTO   \
-	tests/TESTS tests/data/krb5.conf tests/data/make-krb5-conf	   \
-	tests/data/passwords tests/data/perl.conf tests/data/perlcriticrc  \
-	tests/data/perltidyrc tests/data/valgrind.supp tests/data/wordlist \
-	tests/data/wordlist.cdb tests/data/wordlist.sqlite		   \
-	tests/docs/pod-spelling-t tests/docs/pod-t tests/perl/critic-t	   \
-	tests/perl/minimum-version-t tests/perl/strict-t		   \
-	tests/tap/libtap.sh tests/tap/perl/Test/RRA.pm			   \
-	tests/tap/perl/Test/RRA/Config.pm				   \
-	tests/tap/perl/Test/RRA/Automake.pm tests/tools/heimdal-history-t  \
-	tests/tools/heimdal-strength-t tests/tools/wordlist-cdb-t	   \
-	tests/tools/wordlist-sqlite-t tests/tools/wordlist-t		   \
+EXTRA_DIST = .gitignore .travis.yml README.md LICENSE bootstrap		    \
+	cracklib/HISTORY cracklib/LICENCE cracklib/README		    \
+	cracklib/genrules.pl cracklib/mkdict docs/krb5-strength.5.in	    \
+	docs/krb5-strength.pod docs/metadata tests/README tests/TESTS	    \
+	tests/data/krb5.conf tests/data/make-krb5-conf tests/data/passwords \
+	tests/data/perl.conf tests/data/perlcriticrc tests/data/perltidyrc  \
+	tests/data/valgrind.supp tests/data/wordlist			    \
+	tests/data/wordlist.cdb tests/data/wordlist.sqlite		    \
+	tests/docs/pod-spelling-t tests/docs/pod-t tests/docs/urls-t	    \
+	tests/perl/critic-t tests/perl/minimum-version-t		    \
+	tests/perl/strict-t tests/tap/libtap.sh tests/tap/perl/Test/RRA.pm  \
+	tests/tap/perl/Test/RRA/Config.pm				    \
+	tests/tap/perl/Test/RRA/Automake.pm tests/tools/heimdal-history-t   \
+	tests/tools/heimdal-strength-t tests/tools/wordlist-cdb-t	    \
+	tests/tools/wordlist-sqlite-t tests/tools/wordlist-t		    \
 	tests/util/xmalloc-t tools/heimdal-strength.pod
 
 # Do this globally.  Everything needs to find the Kerberos headers and
@@ -93,58 +96,51 @@ dist_bin_SCRIPTS = tools/heimdal-history tools/krb5-strength-wordlist
 # Man pages for all tools.
 dist_man_MANS = tools/heimdal-history.1 tools/heimdal-strength.1 \
 	tools/krb5-strength-wordlist.1
+man_MANS = docs/krb5-strength.5
+
+# Substitute the installation paths into the manual page.
+docs/krb5-strength.5: $(srcdir)/docs/krb5-strength.5.in
+	[ -d docs ] || mkdir docs
+	sed -e 's%\(\\f(CI\)*\@moduledir\(\\fI\)*\@%$(moduledir)%' \
+	    < $(srcdir)/docs/krb5-strength.5.in > $@
 
 # Handle the standard stuff that make maintainer-clean should probably remove
 # but doesn't.  This breaks the GNU coding standard, but in this area the GNU
 # coding standard is dumb.
-CLEANFILES = tests/data/dictionary.hwm tests/data/dictionary.pwd \
-	tests/data/dictionary.pwi
+CLEANFILES = docs/krb5-strength.5 tests/data/dictionary.hwm \
+	tests/data/dictionary.pwd tests/data/dictionary.pwi
 DISTCLEANFILES = tests/data/.placeholder
-MAINTAINERCLEANFILES = Makefile.in aclocal.m4 build-aux/compile		 \
-	build-aux/config.guess build-aux/config.sub build-aux/depcomp	 \
-	build-aux/install-sh build-aux/ltmain.sh build-aux/missing	 \
-	config.h.in config.h.in~ configure m4/libtool.m4 m4/ltoptions.m4 \
-	m4/ltsugar.m4 m4/ltversion.m4 m4/lt~obsolete.m4			 \
-	tests/data/wordlist.cdb tests/data/wordlist.sqlite		 \
-	tools/heimdal-history.1 tools/heimdal-strength.1		 \
-	tools/krb5-strength-wordlist.1
+MAINTAINERCLEANFILES = Makefile.in aclocal.m4 build-aux/compile		\
+	build-aux/config.guess build-aux/config.sub build-aux/depcomp	\
+	build-aux/install-sh build-aux/ltmain.sh build-aux/missing	\
+	config.h.in config.h.in~ configure docs/krb5-strength.5.in	\
+	m4/libtool.m4 m4/ltoptions.m4 m4/ltsugar.m4 m4/ltversion.m4	\
+	m4/lt~obsolete.m4 tests/data/wordlist.cdb			\
+	tests/data/wordlist.sqlite tools/heimdal-history.1		\
+	tools/heimdal-strength.1 tools/krb5-strength-wordlist.1
 
 # Also remove the generated *.c files from our JSON test data on
 # maintainer-clean.
 maintainer-clean-local:
 	rm -f tests/data/passwords/*.c
 
-# A set of flags for warnings.  Add -O because gcc won't find some warnings
-# without optimization turned on.  Desirable warnings that can't be turned
-# on due to other problems:
-#
-#     -Wconversion      http://bugs.debian.org/488884 (htons warnings)
-#
-# Last checked against gcc 4.7.2 (2013-04-22).  -D_FORTIFY_SOURCE=2 enables
-# warn_unused_result attribute markings on glibc functions on Linux, which
-# catches a few more issues.
-WARNINGS = -g -O -D_FORTIFY_SOURCE=2 -Wall -Wextra -Wendif-labels	   \
-	-Wformat=2 -Winit-self -Wswitch-enum -Wuninitialized -Wfloat-equal \
-	-Wdeclaration-after-statement -Wshadow -Wpointer-arith		   \
-	-Wbad-function-cast -Wcast-align -Wwrite-strings		   \
-	-Wjump-misses-init -Wlogical-op -Wstrict-prototypes		   \
-	-Wold-style-definition -Wmissing-prototypes -Wnormalized=nfc	   \
-	-Wpacked -Wredundant-decls -Wnested-externs -Winline -Wvla -Werror
-
 warnings:
-	$(MAKE) V=0 CFLAGS='$(WARNINGS)'
-	$(MAKE) V=0 CFLAGS='$(WARNINGS)' $(check_PROGRAMS)
+	$(MAKE) V=0 CFLAGS='$(WARNINGS_CFLAGS) $(AM_CFLAGS)' \
+	    KRB5_CPPFLAGS='$(KRB5_CPPFLAGS_GCC)'
+	$(MAKE) V=0 CFLAGS='$(WARNINGS_CFLAGS) $(AM_CFLAGS)' \
+	    KRB5_CPPFLAGS='$(KRB5_CPPFLAGS_GCC)' $(check_PROGRAMS)
 
 # The bits below are for the test suite, not for the main package.
-check_PROGRAMS = tests/runtests tests/plugin/heimdal-t tests/plugin/mit-t   \
-	tests/portable/asprintf-t tests/portable/mkstemp-t		    \
-	tests/portable/snprintf-t tests/portable/strndup-t		    \
-	tests/util/messages-krb5-t tests/util/messages-t tests/util/xmalloc
+check_PROGRAMS = tests/runtests tests/plugin/heimdal-t tests/plugin/mit-t \
+	tests/portable/asprintf-t tests/portable/mkstemp-t		  \
+	tests/portable/reallocarray-t tests/portable/snprintf-t		  \
+	tests/portable/strndup-t tests/util/messages-krb5-t		  \
+	tests/util/messages-t tests/util/xmalloc
 if EMBEDDED_CRACKLIB
     check_PROGRAMS += cracklib/packer
 endif
-tests_runtests_CPPFLAGS = -DSOURCE='"$(abs_top_srcdir)/tests"' \
-	-DBUILD='"$(abs_top_builddir)/tests"'
+tests_runtests_CPPFLAGS = -DC_TAP_SOURCE='"$(abs_top_srcdir)/tests"' \
+	-DC_TAP_BUILD='"$(abs_top_builddir)/tests"'
 check_LIBRARIES = tests/tap/libtap.a
 tests_tap_libtap_a_CPPFLAGS = -I$(abs_top_srcdir)/tests $(KRB5_CPPFLAGS)
 tests_tap_libtap_a_SOURCES = tests/tap/basic.c tests/tap/basic.h	\
@@ -165,6 +161,10 @@ tests_portable_asprintf_t_LDADD = tests/tap/libtap.a portable/libportable.la
 tests_portable_mkstemp_t_SOURCES = tests/portable/mkstemp-t.c \
 	tests/portable/mkstemp.c
 tests_portable_mkstemp_t_LDADD = tests/tap/libtap.a portable/libportable.la
+tests_portable_reallocarray_t_SOURCES = tests/portable/reallocarray-t.c \
+	tests/portable/reallocarray.c
+tests_portable_reallocarray_t_LDADD = tests/tap/libtap.a \
+	portable/libportable.la
 tests_portable_snprintf_t_SOURCES = tests/portable/snprintf-t.c \
 	tests/portable/snprintf.c
 tests_portable_snprintf_t_LDADD = tests/tap/libtap.a portable/libportable.la

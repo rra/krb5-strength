@@ -28,7 +28,7 @@ const struct password_test sqlite_tests[] = {
         "test@EXAMPLE.ORG",
         "password",
         KADM5_PASS_Q_DICT,
-        "password found in list of common passwords",
+        "Password found in list of common passwords",
     },
     {
 
@@ -36,7 +36,7 @@ const struct password_test sqlite_tests[] = {
         "test@EXAMPLE.ORG",
         "bitterbane",
         KADM5_PASS_Q_DICT,
-        "password found in list of common passwords",
+        "Password found in list of common passwords",
     },
     {
 
@@ -44,7 +44,7 @@ const struct password_test sqlite_tests[] = {
         "test@EXAMPLE.ORG",
         "1bitterbane",
         KADM5_PASS_Q_DICT,
-        "password found in list of common passwords",
+        "Password found in list of common passwords",
     },
     {
 
@@ -52,7 +52,7 @@ const struct password_test sqlite_tests[] = {
         "test@EXAMPLE.ORG",
         "bitterbane1",
         KADM5_PASS_Q_DICT,
-        "password found in list of common passwords",
+        "Password found in list of common passwords",
     },
     {
 
@@ -68,7 +68,7 @@ const struct password_test sqlite_tests[] = {
         "test@EXAMPLE.ORG",
         "ab",
         KADM5_PASS_Q_DICT,
-        "password found in list of common passwords",
+        "Password found in list of common passwords",
     },
     {
 
@@ -76,7 +76,7 @@ const struct password_test sqlite_tests[] = {
         "test@EXAMPLE.ORG",
         "one",
         KADM5_PASS_Q_DICT,
-        "password found in list of common passwords",
+        "Password found in list of common passwords",
     },
     {
 
@@ -92,7 +92,7 @@ const struct password_test sqlite_tests[] = {
         "test@EXAMPLE.ORG",
         "itterbane",
         KADM5_PASS_Q_DICT,
-        "password found in list of common passwords",
+        "Password found in list of common passwords",
     },
     {
 
@@ -100,7 +100,7 @@ const struct password_test sqlite_tests[] = {
         "test@EXAMPLE.ORG",
         "btterbane",
         KADM5_PASS_Q_DICT,
-        "password found in list of common passwords",
+        "Password found in list of common passwords",
     },
     {
 
@@ -108,7 +108,7 @@ const struct password_test sqlite_tests[] = {
         "test@EXAMPLE.ORG",
         "biterbane",
         KADM5_PASS_Q_DICT,
-        "password found in list of common passwords",
+        "Password found in list of common passwords",
     },
     {
 
@@ -116,7 +116,7 @@ const struct password_test sqlite_tests[] = {
         "test@EXAMPLE.ORG",
         "bittrbane",
         KADM5_PASS_Q_DICT,
-        "password found in list of common passwords",
+        "Password found in list of common passwords",
     },
     {
 
@@ -124,7 +124,7 @@ const struct password_test sqlite_tests[] = {
         "test@EXAMPLE.ORG",
         "bittebane",
         KADM5_PASS_Q_DICT,
-        "password found in list of common passwords",
+        "Password found in list of common passwords",
     },
     {
 
@@ -132,7 +132,7 @@ const struct password_test sqlite_tests[] = {
         "test@EXAMPLE.ORG",
         "bitterane",
         KADM5_PASS_Q_DICT,
-        "password found in list of common passwords",
+        "Password found in list of common passwords",
     },
     {
 
@@ -140,7 +140,7 @@ const struct password_test sqlite_tests[] = {
         "test@EXAMPLE.ORG",
         "bitterbne",
         KADM5_PASS_Q_DICT,
-        "password found in list of common passwords",
+        "Password found in list of common passwords",
     },
     {
 
@@ -148,7 +148,7 @@ const struct password_test sqlite_tests[] = {
         "test@EXAMPLE.ORG",
         "bitterbae",
         KADM5_PASS_Q_DICT,
-        "password found in list of common passwords",
+        "Password found in list of common passwords",
     },
     {
 
@@ -156,7 +156,7 @@ const struct password_test sqlite_tests[] = {
         "test@EXAMPLE.ORG",
         "bitterban",
         KADM5_PASS_Q_DICT,
-        "password found in list of common passwords",
+        "Password found in list of common passwords",
     },
     {
 
@@ -164,7 +164,7 @@ const struct password_test sqlite_tests[] = {
         "test@EXAMPLE.ORG",
         "Citterbane",
         KADM5_PASS_Q_DICT,
-        "password found in list of common passwords",
+        "Password found in list of common passwords",
     },
     {
 
@@ -172,7 +172,7 @@ const struct password_test sqlite_tests[] = {
         "test@EXAMPLE.ORG",
         "b7tterbane",
         KADM5_PASS_Q_DICT,
-        "password found in list of common passwords",
+        "Password found in list of common passwords",
     },
     {
 
@@ -180,7 +180,7 @@ const struct password_test sqlite_tests[] = {
         "test@EXAMPLE.ORG",
         "bi#terbane",
         KADM5_PASS_Q_DICT,
-        "password found in list of common passwords",
+        "Password found in list of common passwords",
     },
     {
 
@@ -188,7 +188,7 @@ const struct password_test sqlite_tests[] = {
         "test@EXAMPLE.ORG",
         "bit*erbane",
         KADM5_PASS_Q_DICT,
-        "password found in list of common passwords",
+        "Password found in list of common passwords",
     },
     {
 
@@ -196,7 +196,7 @@ const struct password_test sqlite_tests[] = {
         "test@EXAMPLE.ORG",
         "bittgrbane",
         KADM5_PASS_Q_DICT,
-        "password found in list of common passwords",
+        "Password found in list of common passwords",
     },
     {
 
@@ -204,7 +204,7 @@ const struct password_test sqlite_tests[] = {
         "test@EXAMPLE.ORG",
         "bitte.bane",
         KADM5_PASS_Q_DICT,
-        "password found in list of common passwords",
+        "Password found in list of common passwords",
     },
     {
 
@@ -212,7 +212,7 @@ const struct password_test sqlite_tests[] = {
         "test@EXAMPLE.ORG",
         "bitter ane",
         KADM5_PASS_Q_DICT,
-        "password found in list of common passwords",
+        "Password found in list of common passwords",
     },
     {
 
@@ -220,7 +220,7 @@ const struct password_test sqlite_tests[] = {
         "test@EXAMPLE.ORG",
         "bitterb-ne",
         KADM5_PASS_Q_DICT,
-        "password found in list of common passwords",
+        "Password found in list of common passwords",
     },
     {
 
@@ -228,7 +228,7 @@ const struct password_test sqlite_tests[] = {
         "test@EXAMPLE.ORG",
         "bitterbame",
         KADM5_PASS_Q_DICT,
-        "password found in list of common passwords",
+        "Password found in list of common passwords",
     },
     {
 
@@ -236,7 +236,7 @@ const struct password_test sqlite_tests[] = {
         "test@EXAMPLE.ORG",
         "bitterbanq",
         KADM5_PASS_Q_DICT,
-        "password found in list of common passwords",
+        "Password found in list of common passwords",
     },
     {
 
@@ -244,7 +244,7 @@ const struct password_test sqlite_tests[] = {
         "test@EXAMPLE.ORG",
         "b7itterbane",
         KADM5_PASS_Q_DICT,
-        "password found in list of common passwords",
+        "Password found in list of common passwords",
     },
     {
 
@@ -252,7 +252,7 @@ const struct password_test sqlite_tests[] = {
         "test@EXAMPLE.ORG",
         "bi#tterbane",
         KADM5_PASS_Q_DICT,
-        "password found in list of common passwords",
+        "Password found in list of common passwords",
     },
     {
 
@@ -260,7 +260,7 @@ const struct password_test sqlite_tests[] = {
         "test@EXAMPLE.ORG",
         "bit*terbane",
         KADM5_PASS_Q_DICT,
-        "password found in list of common passwords",
+        "Password found in list of common passwords",
     },
     {
 
@@ -268,7 +268,7 @@ const struct password_test sqlite_tests[] = {
         "test@EXAMPLE.ORG",
         "bit*terbane",
         KADM5_PASS_Q_DICT,
-        "password found in list of common passwords",
+        "Password found in list of common passwords",
     },
     {
 
@@ -276,7 +276,7 @@ const struct password_test sqlite_tests[] = {
         "test@EXAMPLE.ORG",
         "bittgerbane",
         KADM5_PASS_Q_DICT,
-        "password found in list of common passwords",
+        "Password found in list of common passwords",
     },
     {
 
@@ -284,7 +284,7 @@ const struct password_test sqlite_tests[] = {
         "test@EXAMPLE.ORG",
         "bitte.rbane",
         KADM5_PASS_Q_DICT,
-        "password found in list of common passwords",
+        "Password found in list of common passwords",
     },
     {
 
@@ -292,7 +292,7 @@ const struct password_test sqlite_tests[] = {
         "test@EXAMPLE.ORG",
         "bitter bane",
         KADM5_PASS_Q_DICT,
-        "password found in list of common passwords",
+        "Password found in list of common passwords",
     },
     {
 
@@ -300,7 +300,7 @@ const struct password_test sqlite_tests[] = {
         "test@EXAMPLE.ORG",
         "bitterb-ane",
         KADM5_PASS_Q_DICT,
-        "password found in list of common passwords",
+        "Password found in list of common passwords",
     },
     {
 
@@ -308,7 +308,7 @@ const struct password_test sqlite_tests[] = {
         "test@EXAMPLE.ORG",
         "bitterbamne",
         KADM5_PASS_Q_DICT,
-        "password found in list of common passwords",
+        "Password found in list of common passwords",
     },
     {
 
@@ -316,6 +316,6 @@ const struct password_test sqlite_tests[] = {
         "test@EXAMPLE.ORG",
         "bitterbanqe",
         KADM5_PASS_Q_DICT,
-        "password found in list of common passwords",
+        "Password found in list of common passwords",
     },
 };

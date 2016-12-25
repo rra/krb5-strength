@@ -32,12 +32,20 @@ typedef struct krb5_pwqual_moddata_st *krb5_pwqual_moddata;
 #endif
 
 /* Error strings returned (and displayed to the user) for various failures. */
-#define ERROR_ASCII    "password contains non-ASCII or control characters"
-#define ERROR_DICT     "password found in list of common passwords"
-#define ERROR_LETTER   "password is only letters and spaces"
-#define ERROR_MINDIFF  "password does not contain enough unique characters"
-#define ERROR_SHORT    "password is too short"
-#define ERROR_USERNAME "password based on username or principal"
+#define ERROR_ASCII        "Password contains non-ASCII or control characters"
+#define ERROR_CLASS_LOWER  "Password must contain a lowercase letter"
+#define ERROR_CLASS_UPPER  "Password must contain an uppercase letter"
+#define ERROR_CLASS_DIGIT  "Password must contain a number"
+#define ERROR_CLASS_SYMBOL \
+    "Password must contain a space or punctuation character"
+#define ERROR_CLASS_MIN \
+    "Password must contain %lu types of characters (lowercase, uppercase," \
+    " numbers, symbols)"
+#define ERROR_DICT         "Password found in list of common passwords"
+#define ERROR_LETTER       "Password is only letters and spaces"
+#define ERROR_MINDIFF      "Password does not contain enough unique characters"
+#define ERROR_SHORT        "Password is too short"
+#define ERROR_USERNAME     "Password based on username or principal"
 
 /*
  * A character class rule, which consists of a minimum length to which the
@@ -53,6 +61,7 @@ struct class_rule {
     bool upper;
     bool digit;
     bool symbol;
+    unsigned long num_classes;
     struct class_rule *next;
 };
 
@@ -75,6 +84,7 @@ struct krb5_pwqual_moddata_st {
     bool nonletter;             /* Whether to require a non-letter */
     struct class_rule *rules;   /* Linked list of character class rules */
     char *dictionary;           /* Base path to CrackLib dictionary */
+    long cracklib_maxlen;       /* Longer passwords skip CrackLib checks */
     bool have_cdb;              /* Whether we have a CDB dictionary */
     int cdb_fd;                 /* File descriptor of CDB dictionary */
 #ifdef HAVE_CDB_H

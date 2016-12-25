@@ -428,6 +428,8 @@ Russ Allbery <eagle@eyrie.org>
 
 =head1 COPYRIGHT AND LICENSE
 
+Copyright 2016 Russ Allbery <eagle@eyrie.org>
+
 Copyright 2013, 2014 The Board of Trustees of the Leland Stanford Junior
 University
 
@@ -456,7 +458,7 @@ cdb(1), L<DBI>, L<DBD::SQLite>
 The cdb file format is defined at L<http://cr.yp.to/cdb.html>.
 
 The current version of this program is available from its web page at
-L<http://www.eyrie.org/~eagle/software/krb5-strength/> as part of the
+L<https://www.eyrie.org/~eagle/software/krb5-strength/> as part of the
 krb5-strength package.
 
 =cut

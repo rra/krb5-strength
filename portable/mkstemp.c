@@ -5,7 +5,7 @@
  * systems that don't have it.
  *
  * The canonical version of this file is maintained in the rra-c-util package,
- * which can be found at <http://www.eyrie.org/~eagle/software/rra-c-util/>.
+ * which can be found at <https://www.eyrie.org/~eagle/software/rra-c-util/>.
  *
  * Written by Russ Allbery <eagle@eyrie.org>
  *
@@ -23,7 +23,10 @@
 
 #include <errno.h>
 #include <fcntl.h>
-#include <sys/time.h>
+#ifdef HAVE_SYS_TIME_H
+# include <sys/time.h>
+#endif
+#include <time.h>
 
 /*
  * If we're running the test suite, rename mkstemp to avoid conflicts with the

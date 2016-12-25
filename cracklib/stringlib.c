@@ -14,14 +14,14 @@
  * 2009-10-14  Russ Allbery <eagle@eyrie.org>
  *   - Add ANSI C protototypes for all functions.
  *   - Remove unused Clone function.
+ * 2016-11-06  Russ Allbery <eagle@eyrie.org>
+ *   - Remove unused vers_id to silence GCC warnings.
  */
 
 #include <string.h>
 #include <stdlib.h>
 
 #include "packer.h"
-
-static const char vers_id[] = "stringlib.c : v2.3p2 Alec Muffett 18 May 1993";
 
 char
 Chop(char *string)

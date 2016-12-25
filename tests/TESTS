@@ -1,5 +1,6 @@
 docs/pod
 docs/pod-spelling
+docs/urls
 plugin/heimdal
 plugin/mit
 perl/critic

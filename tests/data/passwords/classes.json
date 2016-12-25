@@ -4,28 +4,28 @@
         "principal": "test@EXAMPLE.ORG",
         "password": "PASSWORD98!",
         "code": "KADM5_PASS_Q_CLASS",
-        "error": "password must contain a lowercase letter"
+        "error": "Password must contain a lowercase letter"
     },
     {
         "name": "no uppercase (11)",
         "principal": "test@EXAMPLE.ORG",
         "password": "password98!",
         "code": "KADM5_PASS_Q_CLASS",
-        "error": "password must contain an uppercase letter"
+        "error": "Password must contain an uppercase letter"
     },
     {
         "name": "no digit (11)",
         "principal": "test@EXAMPLE.ORG",
         "password": "passwordXX!",
         "code": "KADM5_PASS_Q_CLASS",
-        "error": "password must contain a number"
+        "error": "Password must contain a number"
     },
     {
         "name": "no symbol (11)",
         "principal": "test@EXAMPLE.ORG",
         "password": "passwordXX9",
         "code": "KADM5_PASS_Q_CLASS",
-        "error": "password must contain a space or punctuation character"
+        "error": "Password must contain a space or punctuation character"
     },
     {
         "name": "all classes (11)",
@@ -42,21 +42,21 @@
         "principal": "test@EXAMPLE.ORG",
         "password": "PASSWORD98!WORD",
         "code": "KADM5_PASS_Q_CLASS",
-        "error": "password must contain a lowercase letter"
+        "error": "Password must contain a lowercase letter"
     },
     {
         "name": "no uppercase (15)",
         "principal": "test@EXAMPLE.ORG",
         "password": "password98!word",
         "code": "KADM5_PASS_Q_CLASS",
-        "error": "password must contain an uppercase letter"
+        "error": "Password must contain an uppercase letter"
     },
     {
         "name": "no digit (15)",
         "principal": "test@EXAMPLE.ORG",
         "password": "passwordXX!word",
         "code": "KADM5_PASS_Q_CLASS",
-        "error": "password must contain a number"
+        "error": "Password must contain a number"
     },
     {
         "name": "no symbol (12)",
@@ -83,14 +83,14 @@
         "principal": "test@EXAMPLE.ORG",
         "password": "PASSWORD98!WORDWORD",
         "code": "KADM5_PASS_Q_CLASS",
-        "error": "password must contain a lowercase letter"
+        "error": "Password must contain a lowercase letter"
     },
     {
         "name": "no uppercase (19)",
         "principal": "test@EXAMPLE.ORG",
         "password": "password98!wordword",
         "code": "KADM5_PASS_Q_CLASS",
-        "error": "password must contain an uppercase letter"
+        "error": "Password must contain an uppercase letter"
     },
     {
         "name": "no digit (16)",
@@ -146,5 +146,29 @@
         "name": "all classes with space (20)",
         "principal": "test@EXAMPLE.ORG",
         "password": "pass wordX9wordwordw"
+    },
+    {
+        "name": "only lowercase (24)",
+        "principal": "test@EXAMPLE.ORG",
+        "password": "alllowercasewithclassreq",
+        "code": "KADM5_PASS_Q_CLASS",
+        "error": "Password must contain 3 types of characters (lowercase, uppercase, numbers, symbols)"
+    },
+    {
+        "name": "lower and uppercase (24)",
+        "principal": "test@EXAMPLE.ORG",
+        "password": "LowerUprcasewithclassreq",
+        "code": "KADM5_PASS_Q_CLASS",
+        "error": "Password must contain 3 types of characters (lowercase, uppercase, numbers, symbols)"
+    },
+    {
+        "name": "lower, uppercase, symbols (24)",
+        "principal": "test@EXAMPLE.ORG",
+        "password": "LowerUp!casewithclassreq"
+    },
+    {
+        "name": "only lowercase (25)",
+        "principal": "test@EXAMPLE.ORG",
+        "password": "alllowercasewithclassreqr"
     }
 ]

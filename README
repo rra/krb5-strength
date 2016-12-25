@@ -1,26 +1,24 @@
-                            krb5-strength 3.0
+                            krb5-strength 3.1
                (Kerberos password strength checking plugin)
-
                Maintained by Russ Allbery <eagle@eyrie.org>
 
-  Copyright 2006, 2007, 2009, 2010, 2012, 2013, 2014 The Board of Trustees
-  of the Leland Stanford Junior University.  Portions copyright 1993 Alec
-  Muffett.  Developed by Derrick Brashear and Ken Hornstein of Sine Nomine
-  Associates, on behalf of Stanford University.  This software is
-  distributed under a BSD-style license and under the Artistic License.
-  Please see the section LICENSE for more information.
+  Copyright 2016 Russ Allbery <eagle@eyrie.org>.  Copyright 2006-2007,
+  2009-2010, 2012-2014 The Board of Trustees of the Leland Stanford Junior
+  University.  Copyright 1993 Alec Muffett.  This software is distributed
+  under a BSD-style license.  Please see the section LICENSE below for
+  more information.
 
 BLURB
 
   krb5-strength provides a password quality plugin for the MIT Kerberos
-  KDC (specifically the kadmind server), an external password quality
-  program for use with Heimdal, and a per-principal password history
-  implementation for Heimdal.  Passwords can be tested with CrackLib,
-  checked against a CDB or SQLite database of known weak passwords with
-  some transformations, checked for length, checked for non-printable or
-  non-ASCII characters that may be difficult to enter reproducibly,
-  required to contain particular character classes, or any combination of
-  these tests.  It supports both Heimdal and MIT Kerberos (1.9 or later).
+  KDC (specifically the kadmind server) and Heimdal KDC, an external
+  password quality program for use with Heimdal, and a per-principal
+  password history implementation for Heimdal.  Passwords can be tested
+  with CrackLib, checked against a CDB or SQLite database of known weak
+  passwords with some transformations, checked for length, checked for
+  non-printable or non-ASCII characters that may be difficult to enter
+  reproducibly, required to contain particular character classes, or any
+  combination of these tests.
 
 DESCRIPTION
 
@@ -42,10 +40,14 @@ DESCRIPTION
   within edit distance one of a dictionary word.  It can also impose other
   programmatic checks on passwords such as character class requirements.
 
-  For Heimdal, it includes both a program usable as an external password
-  quality check and a plugin that implements the dynamic module API.  For
-  MIT Kerberos (1.9 or later), it includes a plugin for the password
-  quality (pwqual) plugin API.
+  If you're just now starting with password checking, I recommend using
+  the SQLite database with a large wordlist and minimum password lengths.
+  We found this produced the best results with the least user frustration.
+
+  For Heimdal, krb5-strength includes both a program usable as an external
+  password quality check and a plugin that implements the dynamic module
+  API.  For MIT Kerberos (1.9 or later), it includes a plugin for the
+  password quality (pwqual) plugin API.
 
   krb5-strength can be built with either the system CrackLib or with the
   modified version of CrackLib included in this package.  Note, however,
@@ -53,20 +55,20 @@ DESCRIPTION
   the distribution a strength-checking plugin and an external password
   check program that use the system CrackLib.  With Heimdal, it would
   probably be easier to use that plugin or program than build this package
-  unless you want the modified CrackLib.
+  unless you want the modified CrackLib, one of the other dictionary
+  types, or the additional character class and length checks.
 
   For information about the changes to the CrackLib included in this
   toolkit, see cracklib/HISTORY.  The primary changes are tighter rules,
   which are more aggressive at finding dictionary words with characters
   appended and prepended, which tighten the requirements for password
   entropy, and which add stricter rules for longer passwords.  They are
-  also minor changes to fix portability issues and remove some code that
-  doesn't make sense in the kadmind context.
-
-  Ideally, the changes to CrackLib should be added to the standard
-  CrackLib distribution by adding an additional interface to configure its
-  behavior, at which point this package can likely wither away in favor of
-  much simpler plugins that link to the standard CrackLib library.
+  also minor changes to fix portability issues, remove some code that
+  doesn't make sense in the kadmind context, and close a few security
+  issues.  The standard CrackLib distribution on at least some Linux
+  distributions now supports an additional interface to configure its
+  behavior, and krb5-strength should change in the future to use that
+  interface and drop the embedded copy.
 
   krb5-strength also includes a password history implementation for
   Heimdal.  This is separate from the password strength implementation but
@@ -91,8 +93,9 @@ REQUIREMENTS
   version should be supported, but note that some versions, particularly
   older versions close to the original code, do things like printing
   diagnostics to stderr, calling exit, and otherwise not being
-  well-behaved for use inside plugins or libraries.  If using a system
-  CrackLib library, use version 2.8.22 or later to avoid these problems.
+  well-behaved for use inside plugins or libraries.  They also have known
+  security vulnerabilities.  If using a system CrackLib library, use
+  version 2.8.22 or later to avoid these problems.
 
   You can also optionally build against the TinyCDB library, which
   provides support for simpler and faster password checking against a CDB
@@ -123,12 +126,12 @@ REQUIREMENTS
   The password history program, heimdal-history, requires Perl 5.010 or
   later plus the following CPAN modules:
 
-      DB_File::Lock
-      Crypt::PBKDF2
-      Getopt::Long::Descriptive
-      IPC::Run
-      JSON
-      Readonly
+  * DB_File::Lock
+  * Crypt::PBKDF2
+  * Getopt::Long::Descriptive
+  * IPC::Run
+  * JSON
+  * Readonly
 
   and their dependencies.
 
@@ -136,12 +139,12 @@ REQUIREMENTS
   dependencies of the heimdal-history program.  The following additional
   Perl modules will also be used by the test suite if present:
 
-      Perl6::Slurp
-      Test::MinimumVersion
-      Test::Perl::Critic
-      Test::Pod
-      Test::Spelling
-      Test::Strict
+  * Perl6::Slurp
+  * Test::MinimumVersion
+  * Test::Perl::Critic
+  * Test::Pod
+  * Test::Spelling
+  * Test::Strict
 
   All are available on CPAN.  Some tests will be skipped if the modules
   are not available.
@@ -153,36 +156,39 @@ REQUIREMENTS
   many problems, set the environment variable AUTHOR_TESTING to a true
   value.
 
-  To bootstrap from a Git checkout, or If you change the Automake files
+  To bootstrap from a Git checkout, or if you change the Automake files
   and need to regenerate Makefile.in, you will need Automake 1.11 or
   later.  For bootstrap or if you change configure.ac or any of the m4
   files it includes and need to regenerate configure or config.h.in, you
   will need Autoconf 2.64 or later.  You will also need Perl 5.010 or
   later and the DBI, DBD::SQLite, JSON, Perl6::Slurp, and Readonly modules
-  (from CPAN) to bootstrap the test suite data from a Git checkout.
+  (from CPAN) to generate man pages and bootstrap the test suite data from
+  a Git checkout.
 
-COMPILING AND INSTALLING
+BUILDING AND INSTALLATION
 
-  You can build and install the plugin with the standard commands:
+  You can build and install krb5-strength with the standard commands:
 
       ./configure
       make
       make install
 
-  Pass --enable-silent-rules to configure for a quieter build (similar to
-  the Linux kernel).  Use make warnings instead of make to build with full
-  GCC compiler warnings (requires a relatively current version of GCC).
+  If you are building from a Git clone, first run ./bootstrap in the
+  source directory to generate the build files.  make install will
+  probably have to be done as root.  Building outside of the source
+  directory is also supported, if you wish, by creating an empty directory
+  and then running configure with the correct relative path.
 
-  The last step will probably have to be done as root.  By default, the
-  plugin is installed as /usr/local/lib/krb5/plugins/pwqual/strength.so
-  and the Heimdal external password check function is installed as
-  /usr/local/bin/heimdal-strength.  You can change these paths with the
-  --prefix, --libdir, and --bindir options to configure.
+  By default, the Heimdal external password check function is installed as
+  /usr/local/bin/heimdal-strength, and the plugin is installed as
+  /usr/local/lib/krb5/plugins/pwqual/strength.so.  You can change these
+  paths with the --prefix, --libdir, and --bindir options to configure.
 
-  To build with the system version of CrackLib, pass --with-cracklib to
-  configure.  You can optionally add a directory, giving the root
-  directory where CrackLib was installed, or separately set the include
-  and library path with --with-cracklib-include and --with-cracklib-lib.
+  By default, the embedded version of CrackLib will be used.  To build
+  with the system version of CrackLib, pass --with-cracklib to configure.
+  You can optionally add a directory, giving the root directory where
+  CrackLib was installed, or separately set the include and library path
+  with --with-cracklib-include and --with-cracklib-lib.
 
   krb5-strength will automatically build with TinyCDB if it is found.  To
   specify the installation path of TinyCDB, use --with-tinycdb.  You can
@@ -195,13 +201,19 @@ COMPILING AND INSTALLING
   --with-sqlite-include and --with-sqlite-lib.
 
   Normally, configure will use krb5-config to determine the flags to use
-  to compile with your Kerberos libraries.  If krb5-config isn't found, it
-  will look for the standard Kerberos libraries in locations already
-  searched by your compiler.  If the the krb5-config script first in your
-  path is not the one corresponding to the Kerberos libraries you want to
-  use or if your Kerberos libraries and includes aren't in a location
-  searched by default by your compiler, you need to specify a different
-  Kerberos installation root via --with-krb5=PATH.  For example:
+  to compile with your Kerberos libraries.  To specify a particular
+  krb5-config script to use, either set the PATH_KRB5_CONFIG environment
+  variable or pass it to configure like:
+
+      ./configure PATH_KRB5_CONFIG=/path/to/krb5-config
+
+  If krb5-config isn't found, configure will look for the standard
+  Kerberos libraries in locations already searched by your compiler.  If
+  the the krb5-config script first in your path is not the one
+  corresponding to the Kerberos libraries you want to use, or if your
+  Kerberos libraries and includes aren't in a location searched by default
+  by your compiler, you need to specify a different Kerberos installation
+  root via --with-krb5=PATH.  For example:
 
       ./configure --with-krb5=/usr/pubsw
 
@@ -209,11 +221,6 @@ COMPILING AND INSTALLING
   library directory with --with-krb5-include and --with-krb5-lib.  You may
   need to do this if Autoconf can't figure out whether to use lib, lib32,
   or lib64 on your platform.
-
-  To specify a particular krb5-config script to use, either set the
-  PATH_KRB5_CONFIG environment variable or pass it to configure like:
-
-      ./configure PATH_KRB5_CONFIG=/path/to/krb5-config
 
   To not use krb5-config and force library probing even if there is a
   krb5-config script on your path, set PATH_KRB5_CONFIG to a nonexistent
@@ -224,308 +231,84 @@ COMPILING AND INSTALLING
   krb5-config is not used and library probing is always done if either
   --with-krb5-include or --with-krb5-lib are given.
 
+  Pass --enable-silent-rules to configure for a quieter build (similar to
+  the Linux kernel).  Use make warnings instead of make to build with full
+  GCC compiler warnings (requires a relatively current version of GCC).
+
   You can pass the --enable-reduced-depends flag to configure to try to
   minimize the shared library dependencies encoded in the binaries.  This
-  omits from the link line all the libraries included solely because the
-  Kerberos libraries depend on them and instead links the programs only
-  against libraries whose APIs are called directly.  This will only work
-  with shared Kerberos libraries and will only work on platforms where
-  shared libraries properly encode their own dependencies (such as Linux).
-  It is intended primarily for building packages for Linux distributions
-  to avoid encoding unnecessary shared library dependencies that make
-  shared library migrations more difficult.  If none of the above made any
-  sense to you, don't bother with this flag.
+  omits from the link line all the libraries included solely because other
+  libraries depend on them and instead links the programs only against
+  libraries whose APIs are called directly.  This will only work with
+  shared libraries and will only work on platforms where shared libraries
+  properly encode their own dependencies (this includes most modern
+  platforms such as all Linux).  It is intended primarily for building
+  packages for Linux distributions to avoid encoding unnecessary shared
+  library dependencies that make shared library migrations more difficult.
+  If none of the above made any sense to you, don't bother with this flag.
 
-CONFIGURATION
+  After installing this software, see the man pages for krb5-strength,
+  heimdal-strength, and heimdal-history for configuration information.
 
-  First, build and install either a CrackLib dictionary as described in
-  REQUIREMENTS above, or build a CDB or SQLite dictionary with
-  krb5-strength-wordlist.  (Or any combination thereof.)  The CrackLib
-  dictionary will consist of three files, one each ending in *.hwm, *.pwd,
-  and *.pwi.  The CDB and SQLite dictionaries will be single files,
-  conventionally ending in *.cdb and *.sqlite respectively.  Install those
-  files somewhere on your system.  Then, follow the relevant instructions
-  below for either Heimdal or MIT Kerberos.
+TESTING
 
-  See "Other Settings" below for additional krb5.conf setting supported by
-  both Heimdal and MIT Kerberos.
+  krb5-strength comes with a test suite, which you can run after building
+  with:
 
- Heimdal
+      make check
 
-  There are two options: using an external password check program, or
-  using the plugin.  I recommend the external password check program
-  unless you encounter speed problems with that approach that cause
-  kpasswd to time out.
+  If a test fails, you can run a single test with verbose output via:
 
-  For either approach, first add a stanza like the following to the
-  [appdefaults] section of your /etc/krb5.conf (or wherever your krb5.conf
-  file is located):
+      tests/runtests -o <name-of-test>
 
-      krb5-strength = {
-          password_dictionary        = /path/to/cracklib/dictionary
-          password_dictionary_cdb    = /path/to/cdb/dictionary.cdb
-          password_dictionary_sqlite = /path/to/sqlite/dictionary.sqlite
-      }
-
-  The first setting configures a CrackLib dictionary, the second a CDB
-  dictionary, and the third a SQLite dictionary.  The provided path should
-  be the full path to the dictionary files, omitting the trailing *.hwm,
-  *.pwd, and *.pwi extensions for the CrackLib dictionary.  You can use
-  any combination of the three settings.  If you use more than one,
-  CrackLib will be checked first, then CDB, and then SQLite as
-  appropriate.
-
-  When checking against a CDB database, the password, the password with
-  the first character removed, the last character removed, the first and
-  last characters removed, the first two characters removed, and the last
-  two characters removed will all be checked against the dictionary.
-
-  When checking a SQLite database, the password will be rejected if it is
-  within edit distance one of any word in the dictionary, meaning that the
-  database word can be formed from the password by deleting, adding, or
-  changing a single character.
-
-  Then, for the external password checking program, add a new section (or
-  modify the existing [password_quality] section) to look like the
-  following:
-
-      [password_quality]
-          policies         = external-check
-          external_program = /usr/local/bin/heimdal-strength
-
-  You can, of course, combine this policy with others.  Replace the path
-  with the full path to wherever you have installed heimdal-strength.  You
-  can put this section in your kdc.conf instead of krb5.conf if you
-  prefer.
-
-  If you want to instead use the module, use the following section
-  instead:
-
-      [password_quality]
-          policies         = krb5-strength
-          policy_libraries = /usr/local/lib/krb5/plugins/pwqual/strength.so
-
-  in either krb5.conf or kdc.conf.  Note that some older versions of
-  Heimdal have a bug in the support for loading modules when
-  policy_libraries is set.  If you get an error like:
-
-      didn't find `kadm5_password_verifier' symbol in `(null)'
-
-  you may have to omit policy_libraries in your configuration and instead
-  pass the --check-library argument to kpasswdd specifying the library to
-  load.
-
-  Additional configuration is required to use the history implementation.
-  Ensure that its dependencies are installed, and then examine the local
-  configuration settings at the top of the heimdal-history program.  By
-  default, it requires a _history user and _history group be present on
-  the system, and all history information will be read and written as that
-  user and group.  It also requires a nobody user and nogroup group to be
-  present, and all strength checking will be done as that user and group.
-  It uses various files in /var/lib/heimdal-history to store history and
-  statistical information by default, so if using the defaults, create
-  that directory and ensure it is writable by the _history user.
-
-  Once that setup is done, change your [password_quality] configuration
-  to:
-
-      [password_quality]
-          policies         = external-check
-          external_program = /usr/local/bin/heimdal-history
-
-  The heimdal-history program will automatically also run heimdal-strength
-  as well, looking for it in /usr/local/bin, /usr/bin, and /bin.  Change
-  the PATH setting at the top of the script if you have different
-  requirements.  You should continue to configure heimdal-strength as if
-  you were running it directly.
-
- MIT Kerberos
-
-  To add this module to the list of password quality checks, add a section
-  to krb5.conf (or to a separate kdc.conf if you use that) like:
-
-      [plugins]
-          pwqual = {
-              module = strength:/usr/local/lib/krb5/plugins/pwqual/strength.so
-          }
-
-  to register the plugin.
-
-  There are two ways to tell where the dictionary is.  One option is to
-  use krb5.conf (and in this case you must use krb5.conf, even if you use
-  a separate kdc.conf file).  For this approach, add the following to the
-  [appdefaults] section:
-
-      krb5-strength = {
-          password_dictionary        = /path/to/cracklib/dictionary
-          password_dictionary_cdb    = /path/to/cdb/dictionary.cdb
-          password_dictionary_sqlite = /path/to/sqlite/dictionary.sqlite
-      }
-
-  The first setting configures a CrackLib dictionary, the second a CDB
-  dictionary, and the third a SQLite dictionary.  The provided path should
-  be the full path to the dictionary files, omitting the trailing *.hwm,
-  *.pwd, and *.pwi extensions for the CrackLib dictionary.  You can use
-  any combination of the three settings.  If you use more than one,
-  CrackLib will be checked first, then CDB, and then SQLite as
-  appropriate.
-
-  When checking against a CDB database, the password, the password with
-  the first character removed, the last character removed, the first and
-  last characters removed, the first two characters removed, and the last
-  two characters removed will all be checked against the dictionary.
-
-  When checking a SQLite database, the password will be rejected if it is
-  within edit distance one of any word in the dictionary, meaning that the
-  database word can be formed from the password by deleting, adding, or
-  changing a single character.
-
-  The second option is to use the normal dict_path setting.  In the
-  [realms] section of your krb5.conf kdc.conf, under the appropriate realm
-  or realms, specify the path to the dictionary:
-
-      dict_file = /path/to/cracklib/dictionary
-
-  This will be taken as a CrackLib dictionary path, the same as the
-  setting for password_dictionary above.  The provided path should be the
-  full path to the dictionary files, omitting the trailing *.hwm, *.pwd,
-  or *.pwi extension.  However, be aware that, if you use this approach,
-  you will probably want to disable the built-in standard dict pwqual
-  plugin by adding the line:
-
-      disable = dict
-
-  to the pwqual block of the [plugins] section as shown above.  Otherwise,
-  it will also try to load a dictionary at the same path to do simple
-  dictionary matching.
-
-  You can also mix and match these settings, by using dict_path for the
-  CrackLib dictionary path and krb5.conf for the CDB or SQLite dictionary
-  paths.  If both settings are used for the CrackLib path, krb5.conf
-  overrides the dict_path setting (so that dict_path can be used for other
-  password quality modules).  There is no way to specify a CDB or SQLite
-  dictionary via the dict_path setting.
-
- Other Settings
-
-  The following additional settings are supported in the [appdefaults]
-  section of krb5.conf when running under either Heimdal or MIT Kerberos.
-
-  minimum_different
-
-      If set to a numeric value, passwords with fewer than this number of
-      unique characters will be rejected.  This can be used to reject, for
-      example, passwords that are long strings of the same character or
-      repetitions of small numbers of characters, which may be too easy to
-      guess.
-
-  minimum_length
-
-      If set to a numeric value, passwords with fewer than that number of
-      characters will be rejected, independent of any length restrictions
-      in CrackLib.  Note that this setting does not bypass the minimum
-      length requirements in CrackLib itself (which, for the version
-      embedded in this package, is eight characters).
-
-  require_ascii_printable
-
-      If set to a true boolean value, rejects any password that contains
-      non-ASCII characters or ASCII control characters.  Spaces are
-      allowed; tabs are not (at least assuming the POSIX C locale).  No
-      canonicalization or character set is defined for Kerberos passwords
-      in general, so you may want to reject non-ASCII characters to avoid
-      interoperability problems with computers with different default
-      character sets or Unicode normalization forms.
-
-  require_classes
-
-      This option allows specification of more complex character class
-      requirements.  The value of this parameter should be one or more
-      whitespace-separated rule.  Each rule has the syntax:
-
-          [<min>-<max>:]<class>[,<class>...]
-
-      where <class> is one of "upper", "lower", "digit", or "symbol"
-      (without the quote marks).  The symbol class includes all characters
-      other than alphanumeric characters, including space.  The listed
-      classes must appear in the password.  Separate multiple required
-      classes with a comma (and no space).
-
-      The character class checks will be done in whatever locale the
-      plugin or password check program is run in, which will normally be
-      the POSIX C locale but may be different depending on local
-      configuration.
-
-      A simple example:
-
-          require_classes = upper,lower,digit
-
-      This requires all passwords contain at least one uppercase letter,
-      at least one lowercase letter, and at least one digit.
-
-      If present, <min> and <max> specify the minimum password length and
-      maximum password length to which this rule applies.  This allows one
-      to specify character class requirements that change with password
-      length.  So, for example:
-
-          require_classes = 8-19:upper,lower 8-15:digit 8-11:symbol
-
-      requires all passwords from 8 to 11 characters long contain all four
-      character classes, passwords from 12 to 15 characters long contain
-      upper and lower case and a digit, and passwords from 16 to 19
-      characters long contain both upper and lower case.  Passowrds longer
-      than 20 characters have no character class restrictions.  (This
-      example is probably used in conjunction with minimum_length = 8.)
-
-  require_non_letter
-
-      If set to a true boolean value, the password must contain at least
-      one character that is not a letter (uppercase or lowercase) or a
-      space.  This may be helpful in combination with passphrases; users
-      may choose a stock English phrase, and this will force at least some
-      additional complexity.
-
-  You can omit any dictionary setting and only use the above settings, in
-  which case only the above checks and checks for passwords based on the
-  principal will be done, bypassing any dictionary check.  (But for that
-  simple style of password strength checking, there are probably better
-  strength checking plugins already available.)
+  Do this instead of running the test program directly since it will
+  ensure that necessary environment variables are set up.
 
 SUPPORT
 
   The krb5-strength web page at:
 
-      http://www.eyrie.org/~eagle/software/krb5-strength/
+      https://www.eyrie.org/~eagle/software/krb5-strength/
 
   will always have the current version of this package, the current
   documentation, and pointers to any additional resources.
 
-  I welcome bug reports and patches for this package at eagle@eyrie.org.
+  For bug tracking, use the issue tracker on GitHub:
+
+      https://github.com/rra/krb5-strength/issues
+
   However, please be aware that I tend to be extremely busy and work
-  projects often take priority.  I'll save your mail and get to it as soon
-  as I can, but it may take me a couple of months.
+  projects often take priority.  I'll save your report and get to it as
+  soon as I can, but it may take me a couple of months.
 
 SOURCE REPOSITORY
 
   krb5-strength is maintained using Git.  You can access the current
-  source by cloning the repository at:
+  source on GitHub at:
 
-      git://git.eyrie.org/kerberos/krb5-strength.git
+      https://github.com/rra/krb5-strength
+
+  or by cloning the repository at:
+
+      https://git.eyrie.org/git/kerberos/krb5-strength.git
 
   or view the repository via the web at:
 
-      http://git.eyrie.org/?p=kerberos/krb5-strength.git
+      https://git.eyrie.org/?p=devel/krb5-strength.git
 
-  When contributing modifications, either patches (possibly generated by
-  git format-patch) or Git pull requests are welcome.
+  The eyrie.org repository is the canonical one, maintained by the author,
+  but using GitHub is probably more convenient for most purposes.  Pull
+  requests are gratefully reviewed and normally accepted.
 
 LICENSE
 
   The krb5-strength package as a whole is covered by the following
   copyright statement and license:
 
-    Copyright 2006, 2007, 2009, 2010, 2012, 2013, 2014
+    Copyright 2016 Russ Allbery <eagle@eyrie.org>
+    Copyright 2006-2007, 2009-2010, 2012-2014
         The Board of Trustees of the Leland Stanford Junior University
+    Copyright 1993 Alec Muffett
 
     Permission is hereby granted, free of charge, to any person obtaining
     a copy of this software and associated documentation files (the
@@ -546,19 +329,21 @@ LICENSE
     TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
     SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-  The embedded version of CrackLib (all files in the cracklib
-  subdirectory) is covered by the Artistic license.  See the file
-  cracklib/LICENCE for more information.  Combined derivative works that
-  include this code, such as binaries built with the embedded CrackLib,
-  will need to follow the terms of the Artistic license as well as the
-  above license.
+    Developed by Derrick Brashear and Ken Hornstein of Sine Nomine
+    Associates, on behalf of Stanford University.
 
-  All other individual files without an explicit exception below are
-  released under this license.  Some files may have additional copyright
-  holders as noted in those files.  There is detailed information about
-  the licensing of each file in the LICENSE file in this distribution.
+    The embedded version of CrackLib (all files in the cracklib
+    subdirectory) is covered by the Artistic license.  See the file
+    cracklib/LICENCE for more information.  Combined derivative works that
+    include this code, such as binaries built with the embedded CrackLib,
+    will need to follow the terms of the Artistic license as well as the
+    above license.
 
   Some files in this distribution are individually released under
   different licenses, all of which are compatible with the above general
   package license but which may require preservation of additional
-  notices.  All required notices are preserved in the LICENSE file.
+  notices.  All required notices, and detailed information about the
+  licensing of each file, are recorded in the LICENSE file.
+
+  For any copyright range specified by files in this package as YYYY-ZZZZ,
+  the range specifies every single year in that closed interval.

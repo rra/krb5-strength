@@ -11,10 +11,10 @@
  * mkstemp.
  *
  * The canonical version of this file is maintained in the rra-c-util package,
- * which can be found at <http://www.eyrie.org/~eagle/software/rra-c-util/>.
+ * which can be found at <https://www.eyrie.org/~eagle/software/rra-c-util/>.
  *
  * Written by Russ Allbery <eagle@eyrie.org>
- * Copyright 2002, 2004, 2005, 2013 Russ Allbery <eagle@eyrie.org>
+ * Copyright 2002, 2004, 2005, 2013, 2016 Russ Allbery <eagle@eyrie.org>
  * Copyright 2009, 2010, 2011, 2013, 2014
  *     The Board of Trustees of the Leland Stanford Junior University
  *
@@ -47,8 +47,11 @@
 # include <sys/select.h>
 #endif
 #include <sys/stat.h>
-#include <sys/time.h>
+#ifdef HAVE_SYS_TIME_H
+# include <sys/time.h>
+#endif
 #include <sys/wait.h>
+#include <time.h>
 
 #include <tests/tap/basic.h>
 #include <tests/tap/process.h>
@@ -131,6 +134,8 @@ run_child_function(test_function_type function, void *data, int *status,
         count = 0;
         do {
             ret = read(fds[0], buf + count, buflen - count - 1);
+            if (SSIZE_MAX - count <= ret)
+                bail("maximum output size exceeded in run_child_function");
             if (ret > 0)
                 count += ret;
             if (count >= buflen - 1) {
@@ -138,7 +143,7 @@ run_child_function(test_function_type function, void *data, int *status,
                 buf = brealloc(buf, buflen);
             }
         } while (ret > 0);
-        buf[count < 0 ? 0 : count] = '\0';
+        buf[count] = '\0';
         if (waitpid(child, &rval, 0) == (pid_t) -1)
             sysbail("waitpid failed");
         close(fds[0]);
@@ -228,6 +233,10 @@ static void
 process_free(struct process *process)
 {
     struct process **prev;
+
+    /* Do nothing if called with a NULL argument. */
+    if (process == NULL)
+        return;
 
     /* Remove the process from the global list. */
     prev = &processes;
@@ -392,7 +401,7 @@ static struct process *
 process_start_internal(const char *const argv[], const char *pidfile,
                        bool fakeroot)
 {
-    size_t i, size;
+    size_t i;
     int log_fd;
     const char *name;
     struct timeval tv;
@@ -422,8 +431,7 @@ process_start_internal(const char *const argv[], const char *pidfile,
     if (fakeroot) {
         for (i = 0; argv[i] != NULL; i++)
             ;
-        size = 2 + i + 1;
-        fakeroot_argv = bmalloc(size * sizeof(const char *));
+        fakeroot_argv = bcalloc(2 + i + 1, sizeof(const char *));
         fakeroot_argv[0] = path_fakeroot;
         fakeroot_argv[1] = "--";
         for (i = 0; argv[i] != NULL; i++)

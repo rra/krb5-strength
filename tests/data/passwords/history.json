@@ -8,7 +8,7 @@
         "name": "repeating the same password",
         "principal": "someuser@EXAMPLE.ORG",
         "password": "password",
-        "error": "password was previously used"
+        "error": "Password was previously used"
     },
     {
         "name": "different password works",
@@ -19,13 +19,13 @@
         "name": "now that one fails",
         "principal": "someuser@EXAMPLE.ORG",
         "password": "password2",
-        "error": "password was previously used"
+        "error": "Password was previously used"
     },
     {
         "name": "previous password still fails",
         "principal": "someuser@EXAMPLE.ORG",
         "password": "password",
-        "error": "password was previously used"
+        "error": "Password was previously used"
     },
     {
         "name": "succeeds for different user",
@@ -36,6 +36,6 @@
         "name": "based on principal",
         "principal": "someuser@EXAMPLE.ORG",
         "password": "someuser",
-        "error": "password based on username or principal"
+        "error": "Password based on username or principal"
     }
 ]

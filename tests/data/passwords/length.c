@@ -20,7 +20,7 @@ const struct password_test length_tests[] = {
         "test@EXAMPLE.COM",
         "vUCZ2aX$Y.e",
         KADM5_PASS_Q_TOOSHORT,
-        "password is too short",
+        "Password is too short",
     },
     {
 
