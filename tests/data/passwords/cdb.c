@@ -28,7 +28,7 @@ const struct password_test cdb_tests[] = {
         "test@EXAMPLE.ORG",
         "password",
         KADM5_PASS_Q_DICT,
-        "password found in list of common passwords",
+        "Password found in list of common passwords",
     },
     {
 
@@ -36,7 +36,7 @@ const struct password_test cdb_tests[] = {
         "test@EXAMPLE.ORG",
         "bitterbane",
         KADM5_PASS_Q_DICT,
-        "password found in list of common passwords",
+        "Password found in list of common passwords",
     },
     {
 
@@ -44,7 +44,7 @@ const struct password_test cdb_tests[] = {
         "test@EXAMPLE.ORG",
         "1bitterbane",
         KADM5_PASS_Q_DICT,
-        "password found in list of common passwords",
+        "Password found in list of common passwords",
     },
     {
 
@@ -52,7 +52,7 @@ const struct password_test cdb_tests[] = {
         "test@EXAMPLE.ORG",
         "bitterbane1",
         KADM5_PASS_Q_DICT,
-        "password found in list of common passwords",
+        "Password found in list of common passwords",
     },
     {
 
@@ -60,7 +60,7 @@ const struct password_test cdb_tests[] = {
         "test@EXAMPLE.ORG",
         "abbitterbane",
         KADM5_PASS_Q_DICT,
-        "password found in list of common passwords",
+        "Password found in list of common passwords",
     },
     {
 
@@ -68,7 +68,7 @@ const struct password_test cdb_tests[] = {
         "test@EXAMPLE.ORG",
         "bitterbane12",
         KADM5_PASS_Q_DICT,
-        "password found in list of common passwords",
+        "Password found in list of common passwords",
     },
     {
 
@@ -76,7 +76,7 @@ const struct password_test cdb_tests[] = {
         "test@EXAMPLE.ORG",
         "'bitterbane'",
         KADM5_PASS_Q_DICT,
-        "password found in list of common passwords",
+        "Password found in list of common passwords",
     },
     {
 

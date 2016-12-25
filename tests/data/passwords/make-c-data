@@ -42,12 +42,12 @@ Readonly my $HEADER => <<'END_HEADER';
 END_HEADER
 
 # The list of attributes, in order, whose values go into the C struct.
-Readonly my @ATTRIBUTES = qw(name principal password code error);
+Readonly my @ATTRIBUTES => qw(name principal password code error);
 
 # A hash of attributes that should be put in the C struct as they literally
 # appear in the JSON, rather than as strings.  (In other words, attributes
 # that are numbers or C constants.)  Only the keys are of interest.
-Readonly my %IS_LITERAL_ATTRIBUTE = (code => 1);
+Readonly my %IS_LITERAL_ATTRIBUTE => (code => 1);
 
 ##############################################################################
 # Functions

@@ -9,6 +9,9 @@
 /*
  * Modified as part of the krb5-strength project as follows:
  *
+ * 2016-08-17  Howard Guo <hguo@suse.com>
+ *   - Double the length of buffers in Mangle to provide enough space to
+ *     handle duplicating rules.
  * 2007-03-22  Russ Allbery <eagle@eyrie.org>
  *   - Cap deletion of leading or trailing characters at one more than half
  *     the length of the password string and no more than five characters.
@@ -22,9 +25,10 @@
  *   - Make internal functions static.
  *   - Remove unused variables.
  *   - Changed a variable to unsigned to avoid gcc warnings.
+ * 2016-11-06  Russ Allbery <eagle@eyrie.org>
+ *   - Remove unused vers_id to silence GCC warnings.
+ *   - Added GCC __attribute__ marker on Debug() function.
  */
-
-static const char vers_id[] = "rules.c : v5.0p3 Alec Muffett 20 May 1993";
 
 #include <stdarg.h>
 
@@ -36,7 +40,7 @@ static const char vers_id[] = "rules.c : v5.0p3 Alec Muffett 20 May 1993";
 
 #include "packer.h"
 
-static void
+static void __attribute__((__format__(printf, 2, 3)))
 Debug(int val, const char *fmt, ...)
 {
     if (val < 2) {
@@ -438,9 +442,8 @@ Mangle(const char *input, const char *control)
     int limit, min_to_shift;
     register int j;
     const char *ptr;
-    static char area[STRINGSIZE];
-    char area2[STRINGSIZE];
-    area[0] = '\0';
+    static char area[STRINGSIZE * 2] = "";
+    char area2[STRINGSIZE * 2] = "";
     strcpy(area, input);
 
     j = strlen(input);

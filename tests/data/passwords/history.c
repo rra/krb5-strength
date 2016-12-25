@@ -28,7 +28,7 @@ const struct password_test history_tests[] = {
         "someuser@EXAMPLE.ORG",
         "password",
         0,
-        "password was previously used",
+        "Password was previously used",
     },
     {
 
@@ -44,7 +44,7 @@ const struct password_test history_tests[] = {
         "someuser@EXAMPLE.ORG",
         "password2",
         0,
-        "password was previously used",
+        "Password was previously used",
     },
     {
 
@@ -52,7 +52,7 @@ const struct password_test history_tests[] = {
         "someuser@EXAMPLE.ORG",
         "password",
         0,
-        "password was previously used",
+        "Password was previously used",
     },
     {
 
@@ -68,6 +68,6 @@ const struct password_test history_tests[] = {
         "someuser@EXAMPLE.ORG",
         "someuser",
         0,
-        "password based on username or principal",
+        "Password based on username or principal",
     },
 };

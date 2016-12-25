@@ -168,13 +168,13 @@ main(void)
      * with CrackLib, CDB, and SQLite configurations.
      */
     count = 2 * ARRAY_SIZE(cracklib_tests);
+    count += 2 * ARRAY_SIZE(length_tests);
     count += ARRAY_SIZE(cdb_tests);
     count += ARRAY_SIZE(sqlite_tests);
     count += ARRAY_SIZE(classes_tests);
-    count += ARRAY_SIZE(length_tests);
     count += ARRAY_SIZE(letter_tests);
     count += 3 * ARRAY_SIZE(principal_tests);
-    plan(2 + 7 + count * 2);
+    plan(2 + 8 + count * 2);
 
     /* Start with the krb5.conf that contains no dictionary configuration. */
     path = test_file_path("data/krb5.conf");
@@ -244,6 +244,33 @@ main(void)
         is_password_test(ctx, vtable, data, &cracklib_tests[i]);
     vtable->close(ctx, data);
 
+    /*
+     * Add length restrictions and a maximum length for CrackLib.  This should
+     * reject passwords as too short, but let through a password that's
+     * actually in the CrackLib dictionary.
+     */
+    setup_argv[5] = (char *) "minimum_length";
+    setup_argv[6] = (char *) "12";
+    setup_argv[7] = (char *) "cracklib_maxlen";
+    setup_argv[8] = (char *) "11";
+    setup_argv[9] = NULL;
+    run_setup((const char **) setup_argv);
+
+    /* Obtain a new Kerberos context with that krb5.conf file. */
+    krb5_free_context(ctx);
+    code = krb5_init_context(&ctx);
+    if (code != 0)
+        bail_krb5(ctx, code, "cannot initialize Kerberos context");
+
+    /* Run all of the length tests. */
+    code = vtable->open(ctx, NULL, &data);
+    is_int(0, code, "Plugin initialization (length)");
+    if (code != 0)
+        bail("cannot continue after plugin initialization failure");
+    for (i = 0; i < ARRAY_SIZE(length_tests); i++)
+        is_password_test(ctx, vtable, data, &length_tests[i]);
+    vtable->close(ctx, data);
+
     /* Add simple character class configuration to krb5.conf. */
     setup_argv[5] = (char *) "minimum_different";
     setup_argv[6] = (char *) "8";
@@ -274,7 +301,7 @@ main(void)
      * the dictionary configuration.
      */
     setup_argv[3] = (char *) "require_classes";
-    setup_argv[4] = (char *) "8-19:lower,upper 8-15:digit 8-11:symbol";
+    setup_argv[4] = (char *) "8-19:lower,upper 8-15:digit 8-11:symbol 24-24:3";
     setup_argv[5] = NULL;
     run_setup((const char **) setup_argv);
 
@@ -288,15 +315,12 @@ main(void)
     code = vtable->open(ctx, NULL, &data);
     is_int(0, code, "Plugin initialization (complex character class)");
     if (code != 0)
-        bail("cannot continue after plugin initialization failure");
+        bail_krb5(ctx, code, "plugin initialization failure");
     for (i = 0; i < ARRAY_SIZE(classes_tests); i++)
         is_password_test(ctx, vtable, data, &classes_tests[i]);
     vtable->close(ctx, data);
 
-    /*
-     * Add length restrictions.  This should only do length checks without any
-     * dictionary checks.
-     */
+    /* Re-run the length restriction checks with no dictionary at all. */
     setup_argv[3] = (char *) "minimum_length";
     setup_argv[4] = (char *) "12";
     setup_argv[5] = NULL;

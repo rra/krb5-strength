@@ -12,7 +12,7 @@
  *      buffer = xmalloc(1024);
  *      xrealloc(buffer, 2048);
  *      free(buffer);
- *      buffer = xcalloc(1024);
+ *      buffer = xcalloc(1, 1024);
  *      free(buffer);
  *      buffer = xstrdup(string);
  *      free(buffer);
@@ -32,6 +32,10 @@
  * system resources return.  If the handler returns, the interrupted memory
  * allocation function will try its allocation again (calling the handler
  * again if it still fails).
+ *
+ * xreallocarray behaves the same as the OpenBSD reallocarray function but for
+ * the same error checking, which in turn is the same as realloc but with
+ * calloc-style arguments and size overflow checking.
  *
  * xstrndup behaves like xstrdup but only copies the given number of
  * characters.  It allocates an additional byte over its second argument and
@@ -56,9 +60,10 @@
  * line number to these functions.
  *
  * The canonical version of this file is maintained in the rra-c-util package,
- * which can be found at <http://www.eyrie.org/~eagle/software/rra-c-util/>.
+ * which can be found at <https://www.eyrie.org/~eagle/software/rra-c-util/>.
  *
- * Copyright 2012, 2013
+ * Copyright 2015 Russ Allbery <eagle@eyrie.org>
+ * Copyright 2012, 2013, 2014
  *     The Board of Trustees of the Leland Stanford Junior University
  * Copyright (c) 2004, 2005, 2006
  *     by Internet Systems Consortium, Inc. ("ISC")
@@ -152,6 +157,20 @@ x_realloc(void *p, size_t size, const char *file, int line)
 }
 
 
+void *
+x_reallocarray(void *p, size_t n, size_t size, const char *file, int line)
+{
+    void *newp;
+
+    newp = reallocarray(p, n, size);
+    while (newp == NULL && size > 0 && n > 0) {
+        (*xmalloc_error_handler)("reallocarray", n * size, file, line);
+        newp = reallocarray(p, n, size);
+    }
+    return newp;
+}
+
+
 char *
 x_strdup(const char *s, const char *file, int line)
 {
@@ -240,6 +259,7 @@ x_asprintf(char **strp, const char *file, int line, const char *fmt, ...)
         status = vasprintf(strp, fmt, args_copy);
         va_end(args_copy);
     }
+    va_end(args);
 }
 #else /* !(HAVE_C99_VAMACROS || HAVE_GNU_VAMACROS) */
 void
@@ -262,5 +282,6 @@ x_asprintf(char **strp, const char *fmt, ...)
         status = vasprintf(strp, fmt, args_copy);
         va_end(args_copy);
     }
+    va_end(args);
 }
 #endif /* !(HAVE_C99_VAMACROS || HAVE_GNU_VAMACROS) */

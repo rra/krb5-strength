@@ -1,5 +1,67 @@
                     User-Visible krb5-strength Changes
 
+krb5-strength 3.1 (2016-12-25)
+
+    A new configuration option, cracklib_maxlen, can be set to skip
+    CrackLib checks of passwords longer than that length.  The CrackLib
+    rules were designed in a world in which most passwords were four to
+    eight characters long and tend to spuriously reject longer passwords.
+    SQLite dictionaries work better for checking longer passwords and
+    passphrases.  Patch from Jorj Bauer.
+
+    The require_classes configuration option can now require a particular
+    number of character classes in the password (whatever those classes
+    are).  Patch from Toby Blake.
+
+    Change the error messages returned for passwords that fail strength
+    checking to start with a capital letter.  This appears to be more
+    consistent with the error message conventions used inside Heimdal.
+
+    Change the DB_File::Lock calling method in heimdal-history to work
+    properly with the (buggy) CPAN version of DB_File::Lock, instead of
+    relying on Debian's patched version.  Thanks to Bernt Jernberg for the
+    report.
+
+    Apply the SuSE patch for a buffer overflow when using duplicate rules
+    to the embedded CrackLib.  No duplicating rules are used in the rule
+    set included with this package, and this package doesn't expose the
+    general API, so this was not exploitable, but best to close the latent
+    issue.  (The other recent CrackLib vulnerability, CVE-2016-6318,
+    doesn't apply since all the GECOS manipulation code was removed from
+    the embedded CrackLib in this package.)
+
+    Patch the mkdict and packer in the embedded copy of CrackLib to force
+    C locale when sorting (avoiding a corrupted dictionary) and warn and
+    skip out-of-order words rather than creating a corrupted dictionary.
+    Patch from Mark Sirota.
+
+    Configuration instrutions are now in the heimdal-history and
+    heimdal-strength man pages and a new krb5-strength man page (which
+    documents configuration of the KDC plugin) instead of the README file
+    to make it more accessible after the software has been installed.
+
+    Update to rra-c-util 6.2:
+
+    * Use calloc in preference to malloc wherever appropriate.
+    * Use reallocarray in preference to realloc wherever appropriate.
+    * Suppress warnings from Kerberos headers under make warnings.
+    * Support the embedded Kerberos in Solaris 10 in library probes.
+    * Add missing va_end in xasprintf implementation.
+    * Fix logic in Test::RRA::Automake for new Automake dist checking.
+    * Fix all return-value checks for snprintf to avoid off-by-one error.
+    * Update warning flags for make warnings to GCC 6.1.0.
+    * Fix Test::RRA::Config for new "do" semantics in Perl 5.22.2.
+    * Add a new test for obsolete eyrie.org URLs.
+    * Require Test::Strict 0.25 or newer for Perl strictness checks.
+
+    Update to C TAP Harness 4.1:
+
+    * Replace all remaining uses of sprintf.
+    * Test lists may now have comments and blank lines.
+    * runtests -v will show the complete output from a test.
+    * Fix segfault in runtests when given an empty test list.
+    * Tests use C_TAP_SOURCE and C_TAP_BUILD instead of SOURCE and BUILD.
+
 krb5-strength 3.0 (2014-03-25)
 
     The krb5-strength plugin and heimdal-strength program now support a

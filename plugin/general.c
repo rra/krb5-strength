@@ -60,6 +60,9 @@ strength_init(krb5_context ctx, const char *dictionary,
     if (code != 0)
         goto fail;
 
+    /* Get CrackLib maximum length from krb5.conf. */
+    strength_config_number(ctx, "cracklib_maxlen", &data->cracklib_maxlen);
+
     /*
      * Try to initialize CDB, CrackLib, and SQLite dictionaries.  These
      * functions handle their own configuration parsing and will do nothing if

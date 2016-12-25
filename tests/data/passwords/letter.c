@@ -20,7 +20,7 @@ const struct password_test letter_tests[] = {
         "test@EXAMPLE.ORG",
         "عربى",
         KADM5_PASS_Q_GENERIC,
-        "password contains non-ASCII or control characters",
+        "Password contains non-ASCII or control characters",
     },
     {
 
@@ -28,7 +28,7 @@ const struct password_test letter_tests[] = {
         "test@EXAMPLE.ORG",
         "ouchDartetch",
         KADM5_PASS_Q_GENERIC,
-        "password contains non-ASCII or control characters",
+        "Password contains non-ASCII or control characters",
     },
     {
 
@@ -36,7 +36,7 @@ const struct password_test letter_tests[] = {
         "test@EXAMPLE.ORG",
         "	ouchDartetch",
         KADM5_PASS_Q_GENERIC,
-        "password contains non-ASCII or control characters",
+        "Password contains non-ASCII or control characters",
     },
     {
 
@@ -44,7 +44,7 @@ const struct password_test letter_tests[] = {
         "test@EXAMPLE.ORG",
         "ouchDartetch",
         KADM5_PASS_Q_CLASS,
-        "password is only letters and spaces",
+        "Password is only letters and spaces",
     },
     {
 
@@ -52,7 +52,7 @@ const struct password_test letter_tests[] = {
         "test@EXAMPLE.ORG",
         "the perils of all good dogs",
         KADM5_PASS_Q_CLASS,
-        "password is only letters and spaces",
+        "Password is only letters and spaces",
     },
     {
 
@@ -76,7 +76,7 @@ const struct password_test letter_tests[] = {
         "test@EXAMPLE.ORG",
         "11111111111111111111",
         KADM5_PASS_Q_CLASS,
-        "password does not contain enough unique characters",
+        "Password does not contain enough unique characters",
     },
     {
 
@@ -84,7 +84,7 @@ const struct password_test letter_tests[] = {
         "test@EXAMPLE.ORG",
         "1b1b1b1b1b1b1b1b1b1b",
         KADM5_PASS_Q_CLASS,
-        "password does not contain enough unique characters",
+        "Password does not contain enough unique characters",
     },
     {
 
@@ -92,7 +92,7 @@ const struct password_test letter_tests[] = {
         "test@EXAMPLE.ORG",
         "1bc1bc1bc1bc1bc1bc1b",
         KADM5_PASS_Q_CLASS,
-        "password does not contain enough unique characters",
+        "Password does not contain enough unique characters",
     },
     {
 
@@ -100,7 +100,7 @@ const struct password_test letter_tests[] = {
         "test@EXAMPLE.ORG",
         "1bcd1bcd1bcd1bcd1bcd",
         KADM5_PASS_Q_CLASS,
-        "password does not contain enough unique characters",
+        "Password does not contain enough unique characters",
     },
     {
 
@@ -108,7 +108,7 @@ const struct password_test letter_tests[] = {
         "test@EXAMPLE.ORG",
         "1bcde1bcde1bcde1bcde",
         KADM5_PASS_Q_CLASS,
-        "password does not contain enough unique characters",
+        "Password does not contain enough unique characters",
     },
     {
 
@@ -116,7 +116,7 @@ const struct password_test letter_tests[] = {
         "test@EXAMPLE.ORG",
         "1bcdef1bcdef1bcdef1b",
         KADM5_PASS_Q_CLASS,
-        "password does not contain enough unique characters",
+        "Password does not contain enough unique characters",
     },
     {
 
@@ -124,7 +124,7 @@ const struct password_test letter_tests[] = {
         "test@EXAMPLE.ORG",
         "1cdbfge1cdbeg1fcdbef",
         KADM5_PASS_Q_CLASS,
-        "password does not contain enough unique characters",
+        "Password does not contain enough unique characters",
     },
     {
 

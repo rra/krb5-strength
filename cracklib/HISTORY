@@ -21,6 +21,13 @@ following modifications have been made:
  * Close the dictionary after each password lookup.
  * Set hidden visibility on all CrackLib symbols.
  * Close the wfp file handle on PWClose if it's open.
+ * Applied various patches from distributions for security vulnerabilities.
+ * Changed the type of some variables to size_t to avoid truncation.
+ * Forced locale in mkdict to avoid problems with non-C-locale sort.
+ * Added a warning to packer if processing out-of-order words.
+
+See the leading comments in each source file for a more detailed timeline
+and list of changes.
 
 Below is the original changelog for CrackLib:
 

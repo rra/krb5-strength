@@ -6,7 +6,7 @@
  * (favoring the Heimdal API as the exposed one).
  *
  * The canonical version of this file is maintained in the rra-c-util package,
- * which can be found at <http://www.eyrie.org/~eagle/software/rra-c-util/>.
+ * which can be found at <https://www.eyrie.org/~eagle/software/rra-c-util/>.
  *
  * Written by Russ Allbery <eagle@eyrie.org>
  *
@@ -53,20 +53,6 @@
 /* Heimdal doesn't define KADM5_MISSING_KRB5_CONF_PARAMS. */
 #ifndef KADM5_MISSING_KRB5_CONF_PARAMS
 # define KADM5_MISSING_KRB5_CONF_PARAMS KADM5_MISSING_CONF_PARAMS
-#endif
-
-/*
- * Heimdal provides _ctx functions that take an existing context.  MIT always
- * requires the context be passed in.  Code should use the _ctx variant, and
- * the below will fix it up if built against MIT.
- *
- * MIT also doesn't have a const prototype for the server argument, so cast it
- * so that we can use the KADM5_ADMIN_SERVICE define.
- */
-#ifndef HAVE_KADM5_INIT_WITH_SKEY_CTX
-# define kadm5_init_with_skey_ctx(c, u, k, s, p, sv, av, h) \
-    kadm5_init_with_skey((c), (u), (k), (char *) (s), (p), (sv), (av), NULL, \
-                         (h))
 #endif
 
 #endif /* !PORTABLE_KADMIN_H */

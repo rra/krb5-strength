@@ -2,8 +2,10 @@
  * Prototypes for message and error reporting (possibly fatal).
  *
  * The canonical version of this file is maintained in the rra-c-util package,
- * which can be found at <http://www.eyrie.org/~eagle/software/rra-c-util/>.
+ * which can be found at <https://www.eyrie.org/~eagle/software/rra-c-util/>.
  *
+ * Written by Russ Allbery <eagle@eyrie.org>
+ * Copyright 2015 Russ Allbery <eagle@eyrie.org>
  * Copyright 2008, 2010, 2013, 2014
  *     The Board of Trustees of the Leland Stanford Junior University
  * Copyright (c) 2004, 2005, 2006
@@ -84,24 +86,25 @@ void message_handlers_reset(void);
  * argument list, and the errno setting if any.
  */
 void message_log_stdout(size_t, const char *, va_list, int)
-    __attribute__((__nonnull__));
+    __attribute__((__format__(printf, 2, 0), __nonnull__));
 void message_log_stderr(size_t, const char *, va_list, int)
-    __attribute__((__nonnull__));
+    __attribute__((__format__(printf, 2, 0), __nonnull__));
 void message_log_syslog_debug(size_t, const char *, va_list, int)
-    __attribute__((__nonnull__));
+    __attribute__((__format__(printf, 2, 0), __nonnull__));
 void message_log_syslog_info(size_t, const char *, va_list, int)
-    __attribute__((__nonnull__));
+    __attribute__((__format__(printf, 2, 0), __nonnull__));
 void message_log_syslog_notice(size_t, const char *, va_list, int)
-    __attribute__((__nonnull__));
+    __attribute__((__format__(printf, 2, 0), __nonnull__));
 void message_log_syslog_warning(size_t, const char *, va_list, int)
-    __attribute__((__nonnull__));
+    __attribute__((__format__(printf, 2, 0), __nonnull__));
 void message_log_syslog_err(size_t, const char *, va_list, int)
-    __attribute__((__nonnull__));
+    __attribute__((__format__(printf, 2, 0), __nonnull__));
 void message_log_syslog_crit(size_t, const char *, va_list, int)
-    __attribute__((__nonnull__));
+    __attribute__((__format__(printf, 2, 0), __nonnull__));
 
 /* The type of a message handler. */
-typedef void (*message_handler_func)(size_t, const char *, va_list, int);
+typedef void (*message_handler_func)(size_t, const char *, va_list, int)
+    __attribute__((__format__(printf, 2, 0)));
 
 /* If non-NULL, called before exit and its return value passed to exit. */
 extern int (*message_fatal_cleanup)(void);

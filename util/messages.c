@@ -51,10 +51,11 @@
  * va_list, and the applicable errno value (if any).
  *
  * The canonical version of this file is maintained in the rra-c-util package,
- * which can be found at <http://www.eyrie.org/~eagle/software/rra-c-util/>.
+ * which can be found at <https://www.eyrie.org/~eagle/software/rra-c-util/>.
  *
  * Written by Russ Allbery <eagle@eyrie.org>
- * Copyright 2008, 2009, 2010, 2013
+ * Copyright 2015, 2016 Russ Allbery <eagle@eyrie.org>
+ * Copyright 2008, 2009, 2010, 2013, 2014
  *     The Board of Trustees of the Leland Stanford Junior University
  * Copyright (c) 2004, 2005, 2006
  *     by Internet Systems Consortium, Inc. ("ISC")
@@ -131,7 +132,7 @@ message_handlers(message_handler_func **list, unsigned int count, va_list args)
 
     if (*list != stdout_handlers && *list != stderr_handlers)
         free(*list);
-    *list = xmalloc(sizeof(message_handler_func) * (count + 1));
+    *list = xcalloc(count + 1, sizeof(message_handler_func));
     for (i = 0; i < count; i++)
         (*list)[i] = (message_handler_func) va_arg(args, message_handler_func);
     (*list)[count] = NULL;
@@ -225,7 +226,7 @@ message_log_stderr(size_t len UNUSED, const char *fmt, va_list args, int err)
  * This needs further attention on Windows.  For example, it currently doesn't
  * log the errno information.
  */
-static void
+static void __attribute__((__format__(printf, 3, 0)))
 message_log_syslog(int pri, size_t len, const char *fmt, va_list args, int err)
 {
     char *buffer;
@@ -238,7 +239,7 @@ message_log_syslog(int pri, size_t len, const char *fmt, va_list args, int err)
         exit(message_fatal_cleanup ? (*message_fatal_cleanup)() : 1);
     }
     status = vsnprintf(buffer, len + 1, fmt, args);
-    if (status < 0) {
+    if (status < 0 || (size_t) status >= len + 1) {
         warn("failed to format output with vsnprintf in syslog handler");
         free(buffer);
         return;

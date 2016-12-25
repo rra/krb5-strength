@@ -12,7 +12,7 @@
  * are available.
  *
  * The canonical version of this file is maintained in the rra-c-util package,
- * which can be found at <http://www.eyrie.org/~eagle/software/rra-c-util/>.
+ * which can be found at <https://www.eyrie.org/~eagle/software/rra-c-util/>.
  *
  * Written by Russ Allbery <eagle@eyrie.org>
  * Copyright 2006, 2007, 2009, 2010, 2011, 2012, 2013, 2014
@@ -55,7 +55,9 @@
  * Disable the requirement that format strings be literals, since it's easier
  * to handle the possible patterns for kinit commands as an array.
  */
-#pragma GCC diagnostic ignored "-Wformat-nonliteral"
+#if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ > 2) || defined(__clang__)
+# pragma GCC diagnostic ignored "-Wformat-nonliteral"
+#endif
 
 
 /*
@@ -219,6 +221,8 @@ kerberos_free(void)
         free(config->userprinc);
         free(config->username);
         free(config->password);
+        free(config->pkinit_principal);
+        free(config->pkinit_cert);
         free(config);
         config = NULL;
     }
@@ -349,6 +353,31 @@ kerberos_setup(enum kerberos_needs needs)
         config->realm++;
     }
     test_file_path_free(path);
+
+    /*
+     * If we have PKINIT configuration, read it and fill out the relevant
+     * members of our config struct.
+     */
+    path = test_file_path("config/pkinit-principal");
+    if (path != NULL)
+        file = fopen(path, "r");
+    if (file != NULL) {
+        if (fgets(buffer, sizeof(buffer), file) == NULL)
+            bail("cannot read %s", path);
+        if (buffer[strlen(buffer) - 1] != '\n')
+            bail("no newline in %s", path);
+        buffer[strlen(buffer) - 1] = '\0';
+        fclose(file);
+        test_file_path_free(path);
+        path = test_file_path("config/pkinit-cert");
+        if (path != NULL) {
+            config->pkinit_principal = bstrdup(buffer);
+            config->pkinit_cert = bstrdup(path);
+        }
+    }
+    test_file_path_free(path);
+    if (config->pkinit_cert == NULL && (needs & TAP_KRB_NEEDS_PKINIT) != 0)
+        skip_all("PKINIT tests not configured");
 
     /*
      * Register the cleanup function so that the caller doesn't have to do
