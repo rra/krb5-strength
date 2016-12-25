@@ -13,7 +13,7 @@ override_dh_auto_configure:
 	dh_auto_configure -- --enable-reduced-depends --with-cracklib
 
 override_dh_auto_install:
-	dh_auto_install --parallel
+	dh_auto_install
 	rm debian/$(PACKAGE)/usr/lib/*/krb5/plugins/pwqual/*.la
 
 override_dh_installchangelogs:
