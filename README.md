@@ -238,8 +238,8 @@ path:
 `--with-krb5-include` or `--with-krb5-lib` are given.
 
 Pass `--enable-silent-rules` to configure for a quieter build (similar to
-the Linux kernel).  Use make warnings instead of make to build with full
-GCC compiler warnings (requires a relatively current version of GCC).
+the Linux kernel).  Use `make warnings` instead of `make` to build with
+full GCC compiler warnings (requires a relatively current version of GCC).
 
 You can pass the `--enable-reduced-depends` flag to configure to try to
 minimize the shared library dependencies encoded in the binaries.  This
@@ -284,8 +284,8 @@ pointers to any additional resources.
 For bug tracking, use the [issue tracker on
 GitHub](https://github.com/rra/krb5-strength/issues).  However, please be
 aware that I tend to be extremely busy and work projects often take
-priority.  I'll save your mail and get to it as soon as I can, but it may
-take me a couple of months.
+priority.  I'll save your report and get to it as soon as I can, but it
+may take me a couple of months.
 
 ## Source Repository
 
