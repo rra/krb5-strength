@@ -4,8 +4,7 @@ Priority: extra
 Maintainer: Russ Allbery <rra@debian.org>
 Build-Depends:
  cracklib-runtime,
- debhelper (>= 9),
- dh-autoreconf,
+ debhelper (>= 10),
  libcdb-dev,
  libcrack2-dev,
  libcrypt-pbkdf2-perl,
