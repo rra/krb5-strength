@@ -10,6 +10,8 @@ krb5-strength (3.1-1) UNRELEASED; urgency=medium
     - Configuration instructions are now provided in installed man pages,
       including a new krb5-strength man page, to make them more accessible
       after installation.
+  * Re-enable treating test suite failures as package build failures now
+    that bug #724570 in CrackLib was fixed in Debian.
   * Switch to the DEP-14 branch layout and update debian/gbp.conf and
     Vcs-Git accordingly.
   * Prefer *.tar.xz in debian/watch to match packaging.

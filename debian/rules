@@ -12,12 +12,6 @@ override_dh_auto_configure:
 	dh_auto_configure --parallel -- --enable-reduced-depends \
 	    --with-cracklib
 
-override_dh_auto_test:
-	-dh_auto_test --parallel
-	@echo ''
-	@echo 'TEST ERRORS TEMPORARILY IGNORED DUE TO #724570'
-	@echo ''
-
 override_dh_auto_install:
 	dh_auto_install --parallel
 	rm debian/$(PACKAGE)/usr/lib/*/krb5/plugins/pwqual/*.la
