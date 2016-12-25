@@ -1,0 +1,66 @@
+From: Russ Allbery <eagle@eyrie.org>
+Date: Sun, 25 Dec 2016 11:50:14 -0800
+Subject: Change CrackLib tests for system CrackLib
+
+The upstream test suite contains a few tests that fail with the
+normal system CrackLib rules.  Modify them to expect passes so
+that we can run the full test suite during the build.
+
+Also remove CrackLib when testing character classes, since it
+rejects the passwords used for minimum_different testing as too
+simplistic.
+---
+ tests/data/passwords/cracklib.json |  8 ++------
+ tests/plugin/mit-t.c               | 12 ++++++------
+ 2 files changed, 8 insertions(+), 12 deletions(-)
+
+diff --git a/tests/data/passwords/cracklib.json b/tests/data/passwords/cracklib.json
+index 037a70f..b69e700 100644
+--- a/tests/data/passwords/cracklib.json
++++ b/tests/data/passwords/cracklib.json
+@@ -22,9 +22,7 @@
+     {
+         "name": "in dictionary (repeated)",
+         "principal": "test@EXAMPLE.ORG",
+-        "password": "stanfordstanford",
+-        "code": "KADM5_PASS_Q_GENERIC",
+-        "error": "it is based on a (duplicated) dictionary word"
++        "password": "stanfordstanford"
+     },
+     {
+         "name": "in dictionary (reversed)",
+@@ -36,9 +34,7 @@
+     {
+         "name": "seven characters",
+         "principal": "test@EXAMPLE.ORG",
+-        "password": "dfareas",
+-        "code": "KADM5_PASS_Q_GENERIC",
+-        "error": "it is too short"
++        "password": "dfareas"
+     },
+     {
+         "name": "four characters",
+diff --git a/tests/plugin/mit-t.c b/tests/plugin/mit-t.c
+index 7eba594..4406e38 100644
+--- a/tests/plugin/mit-t.c
++++ b/tests/plugin/mit-t.c
+@@ -272,13 +272,13 @@ main(void)
+     vtable->close(ctx, data);
+ 
+     /* Add simple character class configuration to krb5.conf. */
+-    setup_argv[5] = (char *) "minimum_different";
+-    setup_argv[6] = (char *) "8";
+-    setup_argv[7] = (char *) "require_ascii_printable";
++    setup_argv[3] = (char *) "minimum_different";
++    setup_argv[4] = (char *) "8";
++    setup_argv[5] = (char *) "require_ascii_printable";
++    setup_argv[6] = (char *) "true";
++    setup_argv[7] = (char *) "require_non_letter";
+     setup_argv[8] = (char *) "true";
+-    setup_argv[9] = (char *) "require_non_letter";
+-    setup_argv[10] = (char *) "true";
+-    setup_argv[11] = NULL;
++    setup_argv[9] = NULL;
+     run_setup((const char **) setup_argv);
+ 
+     /* Obtain a new Kerberos context with that krb5.conf file. */
