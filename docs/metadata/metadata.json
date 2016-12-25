@@ -44,6 +44,9 @@
         "tarname": "krb5-strength",
         "version": "krb5-strength",
     },
+    "packaging": {
+        "debian": "krb5-strength",
+    },
     "docs": {
         "user": [
             {
