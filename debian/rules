@@ -1,7 +1,7 @@
 #!/usr/bin/make -f
 
 # Add hardening build flags.
-export DEB_BUILD_MAINT_OPTIONS = hardening=+bindnow,+pie
+export DEB_BUILD_MAINT_OPTIONS = hardening=+all
 
 PACKAGE := $(shell dh_listpackages)
 
