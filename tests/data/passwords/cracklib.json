@@ -22,9 +22,7 @@
     {
         "name": "in dictionary (repeated)",
         "principal": "test@EXAMPLE.ORG",
-        "password": "stanfordstanford",
-        "code": "KADM5_PASS_Q_GENERIC",
-        "error": "it is based on a (duplicated) dictionary word"
+        "password": "stanfordstanford"
     },
     {
         "name": "in dictionary (reversed)",
@@ -36,9 +34,7 @@
     {
         "name": "seven characters",
         "principal": "test@EXAMPLE.ORG",
-        "password": "dfareas",
-        "code": "KADM5_PASS_Q_GENERIC",
-        "error": "it is too short"
+        "password": "dfareas"
     },
     {
         "name": "four characters",
