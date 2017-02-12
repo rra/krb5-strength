@@ -296,7 +296,7 @@ repository at:
 https://git.eyrie.org/git/kerberos/krb5-strength.git
 
 or [view the repository on the
-web](https://git.eyrie.org/?p=devel/krb5-strength.git).
+web](https://git.eyrie.org/?p=kerberos/krb5-strength.git).
 
 The eyrie.org repository is the canonical one, maintained by the author,
 but using GitHub is probably more convenient for most purposes.  Pull

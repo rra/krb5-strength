@@ -35,7 +35,7 @@
     "vcs": {
         "type": "Git",
         "url": "https://git.eyrie.org/git/kerberos/krb5-strength.git",
-        "browse": "https://git.eyrie.org/?p=devel/krb5-strength.git",
+        "browse": "https://git.eyrie.org/?p=kerberos/krb5-strength.git",
         "github": "rra/krb5-strength",
         "openhub": "https://www.openhub.net/p/krb5-strength",
     },
@@ -62,7 +62,7 @@
                 "title": "krb5-strength plugin",
             },
             {
-                "name": "krb5-strength-wordlist",
+                "name": "wordlist",
                 "title": "krb5-strength-wordlist",
             },
         ],
