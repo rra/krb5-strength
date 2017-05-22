@@ -139,11 +139,19 @@ void strength_close_cdb(krb5_context, krb5_pwqual_moddata);
  * CrackLib handling.  strength_init_cracklib gets the dictionary
  * configuration does some sanity checks on it, and strength_check_cracklib
  * checks the password against CrackLib.
+ *
+ * If not built with CrackLib support, provide a stub for check.  init is
+ * always a real function, which reports an error if CrackLib is requested and
+ * not availble.
  */
 krb5_error_code strength_init_cracklib(krb5_context, krb5_pwqual_moddata,
                                        const char *dictionary);
+#ifdef HAVE_CRACKLIB
 krb5_error_code strength_check_cracklib(krb5_context, krb5_pwqual_moddata,
                                         const char *password);
+#else
+# define strength_check_cracklib(c, d, p) 0
+#endif
 
 /*
  * SQLite handling.  strength_init_sqlite gets the database configuration and

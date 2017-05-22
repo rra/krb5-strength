@@ -72,7 +72,7 @@ strength_init_sqlite(krb5_context ctx, krb5_pwqual_moddata data UNUSED)
     /* Get CDB dictionary path from krb5.conf. */
     strength_config_string(ctx, "password_dictionary_sqlite", &path);
 
-    /* If it was set, report an error, since we don't have CDB support. */
+    /* If it was set, report an error, since we don't have SQLite support. */
     if (path == NULL)
         return 0;
     free(path);

@@ -1,5 +1,11 @@
                     User-Visible krb5-strength Changes
 
+krb5-strength 3.2 (unreleased)
+
+    Support building without CrackLib support by passing
+    --without-cracklib to configure.  This makes the code a bit simpler
+    and lighter if you don't intend to ever use the CrackLib support.
+
 krb5-strength 3.1 (2016-12-25)
 
     A new configuration option, cracklib_maxlen, can be set to skip

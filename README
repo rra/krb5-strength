@@ -188,7 +188,9 @@ BUILDING AND INSTALLATION
   with the system version of CrackLib, pass --with-cracklib to configure.
   You can optionally add a directory, giving the root directory where
   CrackLib was installed, or separately set the include and library path
-  with --with-cracklib-include and --with-cracklib-lib.
+  with --with-cracklib-include and --with-cracklib-lib.  You can also
+  build without any CrackLib support by passing --without-cracklib to
+  configure.
 
   krb5-strength will automatically build with TinyCDB if it is found.  To
   specify the installation path of TinyCDB, use --with-tinycdb.  You can

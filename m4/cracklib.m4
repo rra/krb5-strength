@@ -67,6 +67,7 @@ AC_DEFUN([_RRA_LIB_CRACKLIB_CHECK],
 dnl The main macro.
 AC_DEFUN([RRA_LIB_CRACKLIB],
 [rra_system_cracklib=
+ rra_no_cracklib=
  rra_cracklib_root=
  rra_cracklib_libdir=
  rra_cracklib_includedir=
@@ -81,6 +82,7 @@ AC_DEFUN([RRA_LIB_CRACKLIB],
     [AS_HELP_STRING([--with-cracklib@<:@=DIR@:>@],
         [Use system CrackLib instead of embedded copy])],
     [AS_IF([test x"$withval" != xno], [rra_system_cracklib=yes])
+     AS_IF([test x"$withval" == xno], [rra_no_cracklib=yes])
      AS_IF([test x"$withval" != xyes && test x"$withval" != xno],
         [rra_cracklib_root="$withval"])])
  AC_ARG_WITH([cracklib-include],
@@ -94,7 +96,10 @@ AC_DEFUN([RRA_LIB_CRACKLIB],
     [AS_IF([test x"$withval" != xyes && test x"$withval" != xno],
         [rra_cracklib_libdir="$withval"])])
 
- AM_CONDITIONAL([EMBEDDED_CRACKLIB], [test x"$rra_system_cracklib" != xyes])
+ AS_IF([test x"$rra_no_cracklib" != xyes],
+     [AC_DEFINE([HAVE_CRACKLIB], 1, [Define if CrackLib is available.])])
+ AM_CONDITIONAL([EMBEDDED_CRACKLIB],
+     [test x"$rra_system_cracklib" != xyes && test x"$rra_no_cracklib" != xyes])
  AS_IF([test x"$rra_system_cracklib" = xyes],
      [_RRA_LIB_CRACKLIB_PATHS
       CRACKLIB_LIBS="-lcrack"

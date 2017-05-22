@@ -2,6 +2,7 @@
  * Test for the MIT Kerberos shared module API.
  *
  * Written by Russ Allbery <eagle@eyrie.org>
+ * Copyright 2017 Russ Allbery <eagle@eyrie.org>
  * Copyright 2010, 2013, 2014
  *     The Board of Trustees of the Leland Stanford Junior University
  *
@@ -201,33 +202,45 @@ main(void)
     if (code != 0)
         bail("cannot continue after plugin initialization failure");
 
-    /* Now, run all of the tests, with principal tests. */
-    for (i = 0; i < ARRAY_SIZE(cracklib_tests); i++)
-        is_password_test(ctx, vtable, data, &cracklib_tests[i]);
+    /* Run the principal tests. */
     for (i = 0; i < ARRAY_SIZE(principal_tests); i++)
         is_password_test(ctx, vtable, data, &principal_tests[i]);
+
+    /* Run the CrackLib tests if CrackLib is available, otherwise skip them. */
+#ifdef HAVE_CRACKLIB
+    for (i = 0; i < ARRAY_SIZE(cracklib_tests); i++)
+        is_password_test(ctx, vtable, data, &cracklib_tests[i]);
+#else
+    count = ARRAY_SIZE(cracklib_tests);
+    skip_block(count * 2, "not built with CrackLib support");
+#endif
 
     /* Close that initialization of the plugin and destroy that context. */
     vtable->close(ctx, data);
     krb5_free_context(ctx);
     ctx = NULL;
 
-    /* Set up our krb5.conf with the dictionary configuration. */
+    /* Set up our krb5.conf with a base configuration. */
     tmpdir = test_tmpdir();
     setup_argv[0] = test_file_path("data/make-krb5-conf");
     if (setup_argv[0] == NULL)
         bail("cannot find data/make-krb5-conf in the test suite");
     setup_argv[1] = path;
     setup_argv[2] = tmpdir;
-    setup_argv[3] = (char *) "password_dictionary";
-    setup_argv[4] = dictionary;
-    setup_argv[5] = NULL;
-    run_setup((const char **) setup_argv);
+    setup_argv[3] = NULL;
 
     /* Point KRB5_CONFIG at the newly-generated krb5.conf file. */
     basprintf(&krb5_config, "KRB5_CONFIG=%s/krb5.conf", tmpdir);
     putenv(krb5_config);
     free(krb5_config_empty);
+
+#ifdef HAVE_CRACKLIB
+
+    /* Add CrackLib configuration. */
+    setup_argv[3] = (char *) "password_dictionary";
+    setup_argv[4] = dictionary;
+    setup_argv[5] = NULL;
+    run_setup((const char **) setup_argv);
 
     /* Obtain a new Kerberos context with that krb5.conf file. */
     krb5_free_context(ctx);
@@ -271,14 +284,22 @@ main(void)
         is_password_test(ctx, vtable, data, &length_tests[i]);
     vtable->close(ctx, data);
 
-    /* Add simple character class configuration to krb5.conf. */
-    setup_argv[5] = (char *) "minimum_different";
-    setup_argv[6] = (char *) "8";
-    setup_argv[7] = (char *) "require_ascii_printable";
+#else
+
+    /* Otherwise mark the CrackLib tests as skipped. */
+    count = ARRAY_SIZE(cracklib_tests) + ARRAY_SIZE(length_tests);
+    skip_block(count * 2 + 1, "not built with CrackLib support");
+
+#endif /* !HAVE_CRACKLIB */
+
+    /* Switch to simple character class configuration in krb5.conf. */
+    setup_argv[3] = (char *) "minimum_different";
+    setup_argv[4] = (char *) "8";
+    setup_argv[5] = (char *) "require_ascii_printable";
+    setup_argv[6] = (char *) "true";
+    setup_argv[7] = (char *) "require_non_letter";
     setup_argv[8] = (char *) "true";
-    setup_argv[9] = (char *) "require_non_letter";
-    setup_argv[10] = (char *) "true";
-    setup_argv[11] = NULL;
+    setup_argv[9] = NULL;
     run_setup((const char **) setup_argv);
 
     /* Obtain a new Kerberos context with that krb5.conf file. */
@@ -296,10 +317,7 @@ main(void)
         is_password_test(ctx, vtable, data, &letter_tests[i]);
     vtable->close(ctx, data);
 
-    /*
-     * Add complex character class configuration to krb5.conf but drop
-     * the dictionary configuration.
-     */
+    /* Add complex character class configuration to krb5.conf. */
     setup_argv[3] = (char *) "require_classes";
     setup_argv[4] = (char *) "8-19:lower,upper 8-15:digit 8-11:symbol 24-24:3";
     setup_argv[5] = NULL;
