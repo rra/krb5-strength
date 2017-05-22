@@ -43,18 +43,14 @@ my @TESTS = (
     },
     {
         title  => 'CrackLib tests',
-        config => {
-            password_dictionary => "$DATADIR/dictionary",
-        },
-        needs => 'CrackLib',
-        tests => [qw(cracklib principal)],
+        config => { password_dictionary => "$DATADIR/dictionary" },
+        needs  => 'CrackLib',
+        tests  => [qw(cracklib principal)],
     },
     {
         title  => 'Password length tests',
-        config => {
-            minimum_length => 12,
-        },
-        tests => [qw(length)],
+        config => { minimum_length => 12 },
+        tests  => [qw(length)],
     },
     {
         title  => 'Password length tests with cracklib_maxlen',
@@ -84,10 +80,9 @@ my @TESTS = (
         tests => [qw(classes)],
     },
     {
-        title  => 'CDB tests',
-        config => {
-            password_dictionary_cdb => test_file_path('data/wordlist.cdb'),
-        },
+        title => 'CDB tests',
+        config =>
+          { password_dictionary_cdb => test_file_path('data/wordlist.cdb') },
         tests => [qw(cdb principal)],
     },
     {
