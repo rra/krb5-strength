@@ -9,6 +9,8 @@ krb5-strength (3.1-2) UNRELEASED; urgency=medium
   * Update to debhelper compatibility levl V11.
   * Bump debian/watch version to 4 and use https.
   * Add upstream-vcs-tag configuration to debian/gbp.conf.
+  * Remove obsolete debian/source/options that was forcing the compression
+    format to xz (now the default).
   * Refresh upstream signing key.
 
  -- Russ Allbery <rra@debian.org>  Fri, 31 Aug 2018 16:48:21 -0700
