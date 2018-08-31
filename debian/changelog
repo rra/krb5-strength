@@ -190,4 +190,3 @@ krb5-passwd-strength (0.2-1) unstable; urgency=low
   * Initial release.
 
  -- Russ Allbery <rra@debian.org>  Thu, 22 Jun 2006 15:07:03 -0700
-
