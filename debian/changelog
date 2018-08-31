@@ -8,6 +8,7 @@ krb5-strength (3.1-2) UNRELEASED; urgency=medium
     - Change priority to optional.
   * Update to debhelper compatibility levl V11.
   * Bump debian/watch version to 4 and use https.
+  * Refresh upstream signing key.
 
  -- Russ Allbery <rra@debian.org>  Fri, 31 Aug 2018 16:48:21 -0700
 
