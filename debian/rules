@@ -3,6 +3,9 @@
 # Add hardening build flags.
 export DEB_BUILD_MAINT_OPTIONS = hardening=+all
 
+# Enable verbose test output.
+export C_TAP_VERBOSE = 1
+
 PACKAGE := $(shell dh_listpackages)
 
 %:
@@ -15,6 +18,3 @@ override_dh_auto_configure:
 override_dh_auto_install:
 	dh_auto_install
 	rm debian/$(PACKAGE)/usr/lib/*/krb5/plugins/pwqual/*.la
-
-override_dh_installchangelogs:
-	dh_installchangelogs NEWS
