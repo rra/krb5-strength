@@ -4,7 +4,7 @@ Priority: optional
 Maintainer: Russ Allbery <rra@debian.org>
 Build-Depends:
  cracklib-runtime,
- debhelper (>= 10),
+ debhelper (>= 11),
  libcdb-dev,
  libcrack2-dev,
  libcrypt-pbkdf2-perl,
