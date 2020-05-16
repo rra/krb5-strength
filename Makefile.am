@@ -195,6 +195,14 @@ endif
 check-local: $(check_PROGRAMS) tests/data/dictionary.pwd
 	cd tests && ./runtests -l $(abs_top_srcdir)/tests/TESTS
 
+# Used by maintainers to check the source code with cppcheck.
+check-cppcheck:
+	cd $(abs_top_srcdir) &&						\
+	    find . -name .git -prune -o -name '*.[ch]' -print		\
+	    | cppcheck -q --force --error-exitcode=2 --file-list=-	\
+		--suppressions-list=tests/data/cppcheck.supp		\
+		--enable=warning,performance,portability,style
+
 # Used by maintainers to run the main test suite under valgrind.  Suppress
 # the xmalloc and pod-spelling tests because the former won't work properly
 # under valgrind (due to increased memory usage) and the latter is pointless

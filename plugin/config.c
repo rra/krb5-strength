@@ -68,7 +68,7 @@ default_realm(krb5_context ctx)
         return NULL;
     code = krb5_get_default_realm(ctx, &realm);
     if (code != 0) {
-        free(realm);
+        free(realm_data);
         return NULL;
     }
     realm_data->magic = KV5M_DATA;
