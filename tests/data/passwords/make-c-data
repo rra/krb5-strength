@@ -5,6 +5,8 @@
 # The canonical representation of our password tests is in JSON, but I don't
 # want to require a JSON parser for the C tests to run.  This script reads the
 # JSON input and generates a C data structure that holds all of the tests.
+#
+# SPDX-License-Identifier: MIT
 
 use 5.010;
 use autodie;
@@ -31,10 +33,12 @@ Readonly my $HEADER => <<'END_HEADER';
  * for the use in C test programs.  To make changes, modify the original
  * JSON source or (more rarely) the make-c-data script and run it again.
  *
+ * Written by Russ Allbery <eagle@eyrie.org>
+ * Copyright 2020 Russ Allbery <eagle@eyrie.org>
  * Copyright 2013
  *     The Board of Trustees of the Leland Stanford Junior University
  *
- * See LICENSE for licensing terms.
+ * SPDX-License-Identifier: MIT
  */
 
 #include <tests/data/passwords/tests.h>
@@ -135,6 +139,7 @@ my $tests_ref = load_password_tests($datafile);
 my $name = basename($datafile);
 $name =~ s{ [.]json \z }{}xms;
 print_fh(\*STDOUT, $HEADER);
+say_fh(\*STDOUT, "extern const struct password_test ${name}_tests[];");
 say_fh(\*STDOUT, "const struct password_test ${name}_tests[] = {");
 
 # Print out the test data.
@@ -194,6 +199,8 @@ code field.
 Russ Allbery <eagle@eyrie.org>
 
 =head1 COPYRIGHT AND LICENSE
+
+Copyright 2020 Russ Alllbery <eagle@eyrie.org>
 
 Copyright 2013 The Board of Trustees of the Leland Stanford Junior
 University

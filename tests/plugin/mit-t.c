@@ -71,7 +71,7 @@ load_plugin(krb5_context ctx, void **handle)
     char *path;
     krb5_error_code code;
     krb5_pwqual_vtable vtable = NULL;
-    krb5_error_code (*init)(krb5_context, int, int, krb5_plugin_vtable);
+    pwqual_strength_initvt *init;
 
     /* Load the module. */
     path = test_file_path("../plugin/.libs/strength.so");
@@ -83,7 +83,7 @@ load_plugin(krb5_context ctx, void **handle)
     test_file_path_free(path);
 
     /* Find the entry point function. */
-    init = dlsym(*handle, "pwqual_strength_initvt");
+    init = (pwqual_strength_initvt *) dlsym(*handle, "pwqual_strength_initvt");
     if (init == NULL)
         bail("cannot get pwqual_strength_initvt symbol: %s", dlerror());
 

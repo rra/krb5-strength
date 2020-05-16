@@ -379,7 +379,8 @@ found:
     code = strength_error_dict(ctx, ERROR_DICT);
 
 fail:
-    memset(prefix, 0, length);
+    if (prefix != NULL)
+        memset(prefix, 0, length);
     memset(drowssap, 0, length);
     free(prefix);
     free(drowssap);

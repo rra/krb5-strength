@@ -31,6 +31,7 @@
  * 2020-05-16  Russ Allbery <eagle@eyrie.org>
  *   - Change variables from int to size_t to silence warnings.
  *   - Add missing break to RULE_MFIRST and RULE_MLAST handling.
+ *   - Remove break after return to silence Clang warnings.
  */
 
 #include <stdarg.h>
@@ -362,7 +363,6 @@ MatchClass(char class, char input)
     default:
 	Debug(1, "MatchClass: unknown class %c\n", class);
 	return (0);
-	break;
     }
 
     if (isupper(class))
@@ -832,7 +832,6 @@ Mangle(const char *input, const char *control)
 	default:
 	    Debug(1, "Mangle: unknown command %c in %s\n", *ptr, control);
 	    return ((char *) 0);
-	    break;
 	}
     }
     if (!area[0])		/* have we deweted de poor widdle fing away? */
