@@ -258,7 +258,8 @@ strength_check_sqlite(krb5_context ctx, krb5_pwqual_moddata data,
                       const char *password)
 {
     krb5_error_code code;
-    size_t length, prefix_length, suffix_length;
+    size_t length;
+    int prefix_length, suffix_length;
     char *prefix = NULL;
     char *drowssap = NULL;
     bool found = false;
@@ -272,13 +273,14 @@ strength_check_sqlite(krb5_context ctx, krb5_pwqual_moddata data,
      * Determine the length of the prefix and suffix into which we'll divide
      * the string.  Passwords shorter than two characters cannot be
      * meaningfully checked using this method and cause boundary condition
-     * problems.
+     * problems.  Passwords longer than INT_MAX cannot be passed to the SQLite
+     * library.
      */
     length = strlen(password);
-    if (length < 2)
+    if (length < 2 || length > INT_MAX)
         return 0;
-    prefix_length = length / 2;
-    suffix_length = length - prefix_length;
+    prefix_length = (int) length / 2;
+    suffix_length = (int) length - prefix_length;
 
     /* Obtain the reversed password, used for suffix checks. */
     drowssap = reverse_string(password);

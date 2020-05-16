@@ -4,9 +4,9 @@
  * This file is part of C TAP Harness.  The current version plus supporting
  * documentation is at <https://www.eyrie.org/~eagle/software/c-tap-harness/>.
  *
- * Copyright 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016
- *     Russ Allbery <eagle@eyrie.org>
- * Copyright 2001, 2002, 2004, 2005, 2006, 2007, 2008, 2011, 2012, 2014
+ * Written by Russ Allbery <eagle@eyrie.org>
+ * Copyright 2009-2019 Russ Allbery <eagle@eyrie.org>
+ * Copyright 2001-2002, 2004-2008, 2011-2012, 2014
  *     The Board of Trustees of the Leland Stanford Junior University
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
@@ -26,6 +26,8 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
+ *
+ * SPDX-License-Identifier: MIT
  */
 
 #ifndef TAP_BASIC_H
@@ -87,15 +89,21 @@ void skip_block(unsigned long count, const char *reason, ...)
     __attribute__((__format__(printf, 2, 3)));
 
 /*
- * Check an expected value against a seen value.  Returns true if the test
- * passes and false if it fails.
+ * Compare two values.  Returns true if the test passes and false if it fails.
+ * is_bool takes an int since the bool type isn't fully portable yet, but
+ * interprets both arguments for their truth value, not for their numeric
+ * value.
  */
-int is_int(long wanted, long seen, const char *format, ...)
+int is_bool(int, int, const char *format, ...)
     __attribute__((__format__(printf, 3, 4)));
-int is_string(const char *wanted, const char *seen, const char *format, ...)
+int is_int(long, long, const char *format, ...)
     __attribute__((__format__(printf, 3, 4)));
-int is_hex(unsigned long wanted, unsigned long seen, const char *format, ...)
+int is_string(const char *, const char *, const char *format, ...)
     __attribute__((__format__(printf, 3, 4)));
+int is_hex(unsigned long, unsigned long, const char *format, ...)
+    __attribute__((__format__(printf, 3, 4)));
+int is_blob(const void *, const void *, size_t, const char *format, ...)
+    __attribute__((__format__(printf, 4, 5)));
 
 /* Bail out with an error.  sysbail appends strerror(errno). */
 void bail(const char *format, ...)
@@ -134,6 +142,14 @@ char *bstrndup(const char *, size_t)
     __attribute__((__malloc__, __nonnull__, __warn_unused_result__));
 
 /*
+ * Macros that cast the return value from b* memory functions, making them
+ * usable in C++ code and providing some additional type safety.
+ */
+#define bcalloc_type(n, type) ((type *) bcalloc((n), sizeof(type)))
+#define breallocarray_type(p, n, type) \
+    ((type *) breallocarray((p), (n), sizeof(type)))
+
+/*
  * Find a test file under C_TAP_BUILD or C_TAP_SOURCE, returning the full
  * path.  The returned path should be freed with test_file_path_free().
  */
@@ -156,10 +172,20 @@ void test_tmpdir_free(char *path);
  * The function must return void and will be passed two arguments: an int that
  * will be true if the test completed successfully and false otherwise, and an
  * int that will be true if the cleanup function is run in the primary process
- * (the one that called plan or plan_lazy) and false otherwise.
+ * (the one that called plan or plan_lazy) and false otherwise.  If
+ * test_cleanup_register_with_data is used instead, a generic pointer can be
+ * provided and will be passed to the cleanup function as a third argument.
+ *
+ * test_cleanup_register_with_data is the better API and should have been the
+ * only API.  test_cleanup_register was an API error preserved for backward
+ * cmpatibility.
  */
 typedef void (*test_cleanup_func)(int, int);
+typedef void (*test_cleanup_func_with_data)(int, int, void *);
+
 void test_cleanup_register(test_cleanup_func) __attribute__((__nonnull__));
+void test_cleanup_register_with_data(test_cleanup_func_with_data, void *)
+    __attribute__((__nonnull__));
 
 END_DECLS
 

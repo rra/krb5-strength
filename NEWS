@@ -6,6 +6,29 @@ krb5-strength 3.2 (unreleased)
     --without-cracklib to configure.  This makes the code a bit simpler
     and lighter if you don't intend to ever use the CrackLib support.
 
+    Update to rra-c-util 8.2:
+
+    * Implement explicit_bzero with memset if it is not available.
+    * Reformat all C source using clang-format 10.
+    * Work around Test::Strict not skipping .git directories.
+    * Fix warnings with perltidy 20190601 and Perl::Critic 1.134.
+    * Improve check for obsolete strings.
+    * Use a more standard all-permissive license.
+    * Add SPDX-License-Identifier headers to all substantial source files.
+    * Skip more build system files when running the test suite.
+    * Fix warnings with Clang 10, GCC 10, and the Clang static analyzer.
+    * Exclude more valgrind false positives with Kerberos libraries.
+
+    Update to C TAP Harness 4.7:
+
+    * Fix warnings with GCC 10.
+    * Reformat all C source using clang-format 10.
+    * Fixed malloc error checking in bstrndup.
+    * Add support for valgrind testing via test list options.
+    * Report test failures as left and right, not wanted and seen.
+    * Fix is_string comparisons involving NULL pointers and "(null)".
+    * Add SPDX-License-Identifier headers to all substantial source files.
+
 krb5-strength 3.1 (2016-12-25)
 
     A new configuration option, cracklib_maxlen, can be set to skip

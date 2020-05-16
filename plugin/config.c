@@ -78,7 +78,7 @@ default_realm(krb5_context ctx)
         krb5_free_default_realm(ctx, realm);
         return NULL;
     }
-    realm_data->length = strlen(realm);
+    realm_data->length = (unsigned int) strlen(realm);
     krb5_free_default_realm(ctx, realm);
     return realm_data;
 }

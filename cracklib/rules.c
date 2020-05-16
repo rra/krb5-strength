@@ -86,8 +86,8 @@ Debug(int val, const char *fmt, ...)
 static int
 Suffix(const char *myword, const char *suffix)
 {
-    register int i;
-    register int j;
+    register size_t i;
+    register size_t j;
     i = strlen(myword);
     j = strlen(suffix);
 
@@ -104,8 +104,8 @@ Suffix(const char *myword, const char *suffix)
 char *
 Reverse(const char *str)
 {
-    register int i;
-    register int j;
+    register size_t i;
+    register size_t j;
     static char area[STRINGSIZE];
     j = i = strlen(str);
     while (*str)
@@ -173,7 +173,7 @@ Capitalise(const char *str)
 static char *
 Pluralise(const char *string)
 {
-    register int length;
+    register size_t length;
     static char area[STRINGSIZE];
     length = strlen(string);
     strcpy(area, string);
@@ -439,8 +439,9 @@ Char2Int(char character)
 char *
 Mangle(const char *input, const char *control)
 {
-    int limit, min_to_shift;
-    register int j;
+    int limit;
+    size_t min_to_shift;
+    register size_t j;
     const char *ptr;
     static char area[STRINGSIZE * 2] = "";
     char area2[STRINGSIZE * 2] = "";
@@ -786,6 +787,8 @@ Mangle(const char *input, const char *control)
 		    }
 		}
 	    }
+            break;
+
 	case RULE_MLAST:
 	    if (!ptr[1] || (ptr[1] == RULE_CLASS && !ptr[2]))
 	    {
@@ -821,6 +824,7 @@ Mangle(const char *input, const char *control)
 		    }
 		}
 	    }
+            break;
 
 	default:
 	    Debug(1, "Mangle: unknown command %c in %s\n", *ptr, control);

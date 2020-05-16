@@ -5,9 +5,8 @@
  * which can be found at <https://www.eyrie.org/~eagle/software/rra-c-util/>.
  *
  * Written by Russ Allbery <eagle@eyrie.org>
- * Copyright 2000, 2001, 2002, 2003, 2004, 2005, 2006
- *     Russ Allbery <eagle@eyrie.org>
- * Copyright 2009, 2010
+ * Copyright 2000-2006, 2018-2020 Russ Allbery <eagle@eyrie.org>
+ * Copyright 2009-2010
  *     The Board of Trustees of the Leland Stanford Junior University
  * Copyright 1995 Patrick Powell
  * Copyright 2001 Hrvoje Niksic
@@ -15,6 +14,8 @@
  * This code is based on code written by Patrick Powell (papowell@astart.com)
  * It may be used for any purpose as long as this notice remains intact
  * on all source code distributions
+ *
+ * There is no SPDX-License-Identifier registered for this license.
  */
 
 #include <config.h>
@@ -39,56 +40,58 @@ int test_vsnprintf(char *str, size_t count, const char *fmt, va_list args);
 
 static const char string[] = "abcdefghijklmnopqrstuvwxyz0123456789";
 
+/* clang-format off */
+
 static const char *const fp_formats[] = {
-    "%-1.5f", "%1.5f", "%31.9f", "%10.5f", "% 10.5f", "%+22.9f", "%+4.9f",
-    "%01.3f", "%3.1f", "%3.2f",  "%.0f",   "%.1f",    "%f",
-
-/* %e and %g formats aren't really implemented yet. */
-#if 0
-    "%-1.5e",   "%1.5e",    "%31.9e",   "%10.5e",   "% 10.5e",  "%+22.9e",
-    "%+4.9e",   "%01.3e",   "%3.1e",    "%3.2e",    "%.0e",     "%.1e",
-    "%e",
-    "%-1.5g",   "%1.5g",    "%31.9g",   "%10.5g",   "% 10.5g",  "%+22.9g",
-    "%+4.9g",   "%01.3g",   "%3.1g",    "%3.2g",    "%.0g",     "%.1g",
-    "%g",
-#endif
-    NULL};
+    "%-1.5f",   "%1.5f",    "%31.6f",   "%10.5f",   "% 10.5f",  "%+22.6f",
+    "%+4.6f",   "%01.3f",   "%3.1f",    "%3.2f",    "%.0f",     "%.1f",
+    "%f",
+    NULL
+};
 static const char *const int_formats[] = {
-    "%-1.5d",   "%1.5d",  "%31.9d", "%5.5d", "%10.5d", "% 10.5d",
-    "%+22.30d", "%01.3d", "%4d",    "%d",    "%ld",    NULL};
+    "%-1.5d",   "%1.5d",    "%31.9d",   "%5.5d",    "%10.5d",   "% 10.5d",
+    "%+22.30d", "%01.3d",   "%4d",      "%d",       "%ld",      NULL
+};
 static const char *const uint_formats[] = {
-    "%-1.5lu",  "%1.5lu",   "%31.9lu", "%5.5lu", "%10.5lu",
-    "% 10.5lu", "%+6.30lu", "%01.3lu", "%4lu",   "%lu",
-    "%4lx",     "%4lX",     "%01.3lx", "%1lo",   NULL};
+    "%-1.5lu",  "%1.5lu",   "%31.9lu",  "%5.5lu",   "%10.5lu",  "% 10.5lu",
+    "%+6.30lu", "%01.3lu",  "%4lu",     "%lu",      "%4lx",     "%4lX",
+    "%01.3lx",  "%1lo",     NULL
+};
 static const char *const llong_formats[] = {
-    "%lld",      "%-1.5lld",   "%1.5lld",  "%123.9lld", "%5.5lld", "%10.5lld",
-    "% 10.5lld", "%+22.33lld", "%01.3lld", "%4lld",     NULL};
+    "%lld",     "%-1.5lld",  "%1.5lld",    "%123.9lld",  "%5.5lld",
+    "%10.5lld", "% 10.5lld", "%+22.33lld", "%01.3lld",   "%4lld",
+    NULL
+};
 static const char *const ullong_formats[] = {
-    "%llu",     "%-1.5llu",  "%1.5llu",    "%123.9llu", "%5.5llu",
-    "%10.5llu", "% 10.5llu", "%+22.33llu", "%01.3llu",  "%4llu",
-    "%llx",     "%llo",      NULL};
+    "%llu",     "%-1.5llu",  "%1.5llu",    "%123.9llu",  "%5.5llu",
+    "%10.5llu", "% 10.5llu", "%+22.33llu", "%01.3llu",   "%4llu",
+    "%llx",     "%llo",      NULL
+};
 
-static const double fp_nums[] = {-1.5, 134.21, 91340.2, 341.1234, 0203.9,
-                                 0.96, 0.996,  0.9996,  1.996,    4.136,
-                                 0.1,  0.01,   0.001,   10.1,     0};
-static long int_nums[] = {-1, 134, 91340, 341, 0203, 0};
+static const double fp_nums[] = {
+    -1.5, 134.21, 91340.2, 341.1234, 0203.9, 0.96, 0.996, 0.9996, 1.996,
+    4.136, 0.1, 0.01, 0.001, 10.1, 0
+};
+static long int_nums[] = {
+    -1, 134, 91340, 341, 0203, 0
+};
 static unsigned long uint_nums[] = {
-    (unsigned long) -1, 134, 91340, 341, 0203, 0};
-static long long llong_nums[] = {~(long long) 0, /* All-1 bit pattern. */
-                                 (~(unsigned long long) 0)
-                                     >> 1, /* Largest signed long long. */
-                                 -150,
-                                 134,
-                                 91340,
-                                 341,
-                                 0};
+    (unsigned long) -1, 134, 91340, 341, 0203, 0
+};
+static long long llong_nums[] = {
+    ~(long long) 0,                     /* All-1 bit pattern. */
+    (~(unsigned long long) 0) >> 1,     /* Largest signed long long. */
+    -150, 134, 91340, 341,
+    0
+};
 static unsigned long long ullong_nums[] = {
-    ~(unsigned long long) 0,        /* All-1 bit pattern. */
-    (~(unsigned long long) 0) >> 1, /* Largest signed long long. */
-    134,
-    91340,
-    341,
-    0};
+    ~(unsigned long long) 0,            /* All-1 bit pattern. */
+    (~(unsigned long long) 0) >> 1,     /* Largest signed long long. */
+    134, 91340, 341,
+    0
+};
+
+/* clang-format on */
 
 
 static void
@@ -152,7 +155,7 @@ main(void)
                 string, &lcount);
     is_int(0, count, "correct output from two %%n");
     is_int(31, lcount, "correct output from long %%ln");
-    test_format(true, "(null)", 6, "%s", NULL);
+    test_format(true, "(null)", 6, "%s", (char *) NULL);
 
     for (i = 0; fp_formats[i] != NULL; i++)
         for (j = 0; j < ARRAY_SIZE(fp_nums); j++) {

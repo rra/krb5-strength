@@ -3,6 +3,7 @@
 # Test suite for Heimdal per-principal history.
 #
 # Written by Russ Allbery <eagle@eyrie.org>
+# Copyright 2020 Russ Allbery <eagle@eyrie.org>
 # Copyright 2014
 #     The Board of Trustees of the Leland Stanford Junior University
 #
@@ -14,10 +15,11 @@ use warnings;
 
 use lib "$ENV{SOURCE}/tap/perl";
 
-use Fcntl qw(O_CREAT O_RDWR);
-use Test::More;
 use Test::RRA qw(use_prereq);
 use Test::RRA::Automake qw(test_file_path test_tmpdir);
+
+use Fcntl qw(O_CREAT O_RDWR);
+use Test::More;
 
 # Not all of these are used by the test suite, but the rest are required to
 # run the program we're testing, so make sure they can all be loaded.
@@ -101,7 +103,7 @@ sub check_password {
     is($status, $test_ref->{status} || 0, "$test_ref->{name} (status)");
     if (defined($test_ref->{error})) {
         is($err, $test_ref->{error}, '...error message');
-        is($out, q{}, '...no output');
+        is($out, q{},                '...no output');
     } else {
         is($err, q{},        '...no errors');
         is($out, 'APPROVED', '...approved');

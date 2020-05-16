@@ -313,7 +313,7 @@ sub find_iteration_count {
     require Benchmark;
     my $iterations = $HASH_ITERATIONS;
     while (1) {
-        my $hash = sub { password_hash($password, $iterations) };
+        my $hash  = sub { password_hash($password, $iterations) };
         my $times = Benchmark::timethis(20, $hash, q{}, 'none');
 
         # Extract the CPU time from the formatted time string.  This will be
@@ -498,7 +498,7 @@ sub strength_check {
 
     # Run the external quality checking program.  If we're root, we'll run it
     # as the strength checking user and group.
-    my $in = "principal: $principal\nnew-password: $password\nend\n";
+    my $in   = "principal: $principal\nnew-password: $password\nend\n";
     my $init = sub { drop_privileges($STRENGTH_USER, $STRENGTH_GROUP) };
     my ($out, $err);
     run([$path, $principal], \$in, \$out, \$err, init => $init);

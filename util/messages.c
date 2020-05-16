@@ -54,13 +54,11 @@
  * which can be found at <https://www.eyrie.org/~eagle/software/rra-c-util/>.
  *
  * Written by Russ Allbery <eagle@eyrie.org>
- * Copyright 2015, 2016 Russ Allbery <eagle@eyrie.org>
- * Copyright 2008, 2009, 2010, 2013, 2014
+ * Copyright 2015-2016, 2020 Russ Allbery <eagle@eyrie.org>
+ * Copyright 2008-2010, 2013-2014
  *     The Board of Trustees of the Leland Stanford Junior University
- * Copyright (c) 2004, 2005, 2006
- *     by Internet Systems Consortium, Inc. ("ISC")
- * Copyright (c) 1991, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001,
- *     2002, 2003 by The Internet Software Consortium and Rich Salz
+ * Copyright 2004-2006 Internet Systems Consortium, Inc. ("ISC")
+ * Copyright 1991, 1994-2003 The Internet Software Consortium and Rich Salz
  *
  * This code is derived from software contributed to the Internet Software
  * Consortium by Rich Salz.
@@ -76,6 +74,8 @@
  * LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE
  * OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
  * PERFORMANCE OF THIS SOFTWARE.
+ *
+ * SPDX-License-Identifier: ISC
  */
 
 #include <config.h>
@@ -140,15 +140,18 @@ message_handlers(message_handler_func **list, unsigned int count, va_list args)
  * duplication since we can't assume variadic macros, but I can at least make
  * it easier to write and keep them consistent.
  */
-#define HANDLER_FUNCTION(type)                            \
-    void message_handlers_##type(unsigned int count, ...) \
-    {                                                     \
-        va_list args;                                     \
-                                                          \
-        va_start(args, count);                            \
-        message_handlers(&type##_handlers, count, args);  \
-        va_end(args);                                     \
+/* clang-format off */
+#define HANDLER_FUNCTION(type)                              \
+    void                                                    \
+    message_handlers_ ## type(unsigned int count, ...)      \
+    {                                                       \
+        va_list args;                                       \
+                                                            \
+        va_start(args, count);                              \
+        message_handlers(& type ## _handlers, count, args); \
+        va_end(args);                                       \
     }
+/* clang-format on */
 HANDLER_FUNCTION(debug)
 HANDLER_FUNCTION(notice)
 HANDLER_FUNCTION(warn)
@@ -263,17 +266,20 @@ message_log_syslog(int pri, size_t len, const char *fmt, va_list args, int err)
  * Do the same sort of wrapper to generate all of the separate syslog logging
  * functions.
  */
-#define SYSLOG_FUNCTION(name, type)                                           \
-    void message_log_syslog_##name(size_t l, const char *f, va_list a, int e) \
-    {                                                                         \
-        message_log_syslog(LOG_##type, l, f, a, e);                           \
+/* clang-format off */
+#define SYSLOG_FUNCTION(name, type)                                        \
+    void                                                                   \
+    message_log_syslog_ ## name(size_t l, const char *f, va_list a, int e) \
+    {                                                                      \
+        message_log_syslog(LOG_ ## type, l, f, a, e);                      \
     }
-SYSLOG_FUNCTION(debug, DEBUG)
-SYSLOG_FUNCTION(info, INFO)
-SYSLOG_FUNCTION(notice, NOTICE)
+SYSLOG_FUNCTION(debug,   DEBUG)
+SYSLOG_FUNCTION(info,    INFO)
+SYSLOG_FUNCTION(notice,  NOTICE)
 SYSLOG_FUNCTION(warning, WARNING)
-SYSLOG_FUNCTION(err, ERR)
-SYSLOG_FUNCTION(crit, CRIT)
+SYSLOG_FUNCTION(err,     ERR)
+SYSLOG_FUNCTION(crit,    CRIT)
+/* clang-format on */
 
 
 /*

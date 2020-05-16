@@ -25,6 +25,8 @@ following modifications have been made:
  * Changed the type of some variables to size_t to avoid truncation.
  * Forced locale in mkdict to avoid problems with non-C-locale sort.
  * Added a warning to packer if processing out-of-order words.
+ * Added cast of CRACK_TOLOWER and CRACK_TOUPPER to char.
+ * Added missing break to RULE_MFIRST "(" and RULE_MLAST ")" handling.
 
 See the leading comments in each source file for a more detailed timeline
 and list of changes.

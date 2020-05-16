@@ -3,7 +3,7 @@
 # Test suite for krb5-strength-wordlist filtering functions.
 #
 # Written by Russ Allbery <eagle@eyrie.org>
-# Copyright 2016 Russ Allbery <eagle@eyrie.org>
+# Copyright 2016, 2020 Russ Allbery <eagle@eyrie.org>
 # Copyright 2014
 #     The Board of Trustees of the Leland Stanford Junior University
 #
@@ -15,10 +15,11 @@ use warnings;
 
 use lib "$ENV{SOURCE}/tap/perl";
 
-use Encode qw(encode);
-use Test::More;
 use Test::RRA qw(use_prereq);
 use Test::RRA::Automake qw(automake_setup test_file_path test_tmpdir);
+
+use Encode qw(encode);
+use Test::More;
 
 # Load prerequisite modules.
 use_prereq('IPC::Run',     'run');

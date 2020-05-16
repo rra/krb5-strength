@@ -1,6 +1,5 @@
 docs/pod
 docs/pod-spelling
-docs/urls
 plugin/heimdal
 plugin/mit
 perl/critic
@@ -10,6 +9,7 @@ portable/asprintf
 portable/mkstemp
 portable/snprintf
 portable/strndup
+style/obsolete-strings
 tools/heimdal-history
 tools/heimdal-strength
 tools/wordlist

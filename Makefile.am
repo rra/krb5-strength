@@ -16,10 +16,10 @@ EXTRA_DIST = .clang-format .gitignore .travis.yml README.md LICENSE	    \
 	tests/data/perl.conf tests/data/perlcriticrc tests/data/perltidyrc  \
 	tests/data/valgrind.supp tests/data/wordlist			    \
 	tests/data/wordlist.cdb tests/data/wordlist.sqlite		    \
-	tests/docs/pod-spelling-t tests/docs/pod-t tests/docs/urls-t	    \
-	tests/perl/critic-t tests/perl/minimum-version-t		    \
-	tests/perl/strict-t tests/tap/libtap.sh tests/tap/perl/Test/RRA.pm  \
-	tests/tap/perl/Test/RRA/Config.pm				    \
+	tests/docs/pod-spelling-t tests/docs/pod-t tests/perl/critic-t	    \
+	tests/perl/minimum-version-t tests/perl/strict-t		    \
+	tests/style/obsolete-strings-t tests/tap/libtap.sh		    \
+	tests/tap/perl/Test/RRA.pm tests/tap/perl/Test/RRA/Config.pm	    \
 	tests/tap/perl/Test/RRA/Automake.pm tests/tools/heimdal-history-t   \
 	tests/tools/heimdal-strength-t tests/tools/wordlist-cdb-t	    \
 	tests/tools/wordlist-sqlite-t tests/tools/wordlist-t		    \
@@ -202,7 +202,7 @@ check-local: $(check_PROGRAMS) tests/data/dictionary.pwd
 check-valgrind: $(check_PROGRAMS) tests/data/dictionary.pwd
 	rm -rf $(abs_top_builddir)/tmp-valgrind
 	mkdir $(abs_top_builddir)/tmp-valgrind
-	env RRA_MAINTAINER_TESTS= valgrind --leak-check=full		\
+	env valgrind --leak-check=full		\
 	    --show-reachable=yes --trace-children=yes			\
 	    --log-file=$(abs_top_builddir)/tmp-valgrind/log.%p		\
 	    --suppressions=$(abs_top_srcdir)/tests/data/valgrind.supp	\
