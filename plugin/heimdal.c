@@ -113,6 +113,7 @@ static struct kadm5_pw_policy_check_func functions[] = {
     {"krb5-strength", heimdal_pwcheck},
     {NULL, NULL}
 };
+extern struct kadm5_pw_policy_verifier kadm5_password_verifier;
 struct kadm5_pw_policy_verifier kadm5_password_verifier = {
     "krb5-strength",
     KADM5_PASSWD_VERSION_V1,
