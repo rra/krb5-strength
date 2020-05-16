@@ -32,6 +32,9 @@ AC_PROG_INSTALL
 AM_DISABLE_STATIC
 LT_INIT
 
+dnl Only used for the test suite.
+AC_PATH_PROG([PATH_VALGRIND], [valgrind])
+
 dnl External libraries.
 RRA_LIB_CDB_OPTIONAL
 RRA_LIB_CRACKLIB

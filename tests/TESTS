@@ -15,21 +15,22 @@
 docs/pod
 docs/pod-spelling
 docs/spdx-license
-plugin/heimdal
-plugin/mit
+plugin/heimdal          valgrind
+plugin/mit              valgrind
 perl/critic
 perl/minimum-version
 perl/strict
-portable/asprintf
-portable/mkstemp
-portable/snprintf
-portable/strndup
+portable/asprintf       valgrind
+portable/mkstemp        valgrind
+portable/snprintf       valgrind
+portable/strndup        valgrind
 style/obsolete-strings
 tools/heimdal-history
 tools/heimdal-strength
 tools/wordlist
 tools/wordlist-cdb
 tools/wordlist-sqlite
-util/messages
-util/messages-krb5
+util/messages           valgrind
+util/messages-krb5      valgrind
 util/xmalloc
+valgrind/logs

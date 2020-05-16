@@ -87,4 +87,4 @@ ok_program 'Database does not contain password' 100 '' \
 # Clean up.
 rm -f "$tmpdir/wordlist.cdb"
 rm -f "$tmpdir/wordlist"
-rmdir "$tmpdir" 2>/dev/null
+rmdir "$tmpdir" 2>/dev/null || true
