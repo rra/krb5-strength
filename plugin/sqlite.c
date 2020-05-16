@@ -368,8 +368,8 @@ strength_check_sqlite(krb5_context ctx, krb5_pwqual_moddata data,
         goto found;
 
     /* No match.  Clean up and return success. */
-    memset(prefix, 0, length);
-    memset(drowssap, 0, length);
+    explicit_bzero(prefix, length);
+    explicit_bzero(drowssap, length);
     free(prefix);
     free(drowssap);
     return 0;
@@ -380,8 +380,8 @@ found:
 
 fail:
     if (prefix != NULL)
-        memset(prefix, 0, length);
-    memset(drowssap, 0, length);
+        explicit_bzero(prefix, length);
+    explicit_bzero(drowssap, length);
     free(prefix);
     free(drowssap);
     return code;

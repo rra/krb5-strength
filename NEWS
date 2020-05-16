@@ -6,6 +6,10 @@ krb5-strength 3.2 (unreleased)
     --without-cracklib to configure.  This makes the code a bit simpler
     and lighter if you don't intend to ever use the CrackLib support.
 
+    Use explicit_bzero instead of memset, where available, to overwrite
+    copies of passwords before freeing memory.  This reduces the lifetime
+    of passwords in memory.
+
     Update to rra-c-util 8.2:
 
     * Implement explicit_bzero with memset if it is not available.
