@@ -8,12 +8,13 @@
 # See LICENSE for licensing terms.
 
 ACLOCAL_AMFLAGS = -I m4
-EXTRA_DIST = .clang-format .gitignore .travis.yml README.md LICENSE	    \
-	bootstrap cracklib/HISTORY cracklib/LICENCE cracklib/README	    \
-	cracklib/genrules.pl cracklib/mkdict docs/krb5-strength.5.in	    \
-	docs/krb5-strength.pod docs/metadata tests/README tests/TESTS	    \
-	tests/data/krb5.conf tests/data/make-krb5-conf tests/data/passwords \
-	tests/data/perl.conf tests/data/perlcriticrc tests/data/perltidyrc  \
+EXTRA_DIST = .clang-format .github .gitignore README.md LICENSE bootstrap   \
+	ci/README ci/install ci/test cracklib/HISTORY cracklib/LICENCE	    \
+	cracklib/README cracklib/genrules.pl cracklib/mkdict		    \
+	docs/krb5-strength.5.in docs/krb5-strength.pod docs/metadata	    \
+	tests/README tests/TESTS tests/data/krb5.conf			    \
+	tests/data/make-krb5-conf tests/data/passwords tests/data/perl.conf \
+	tests/data/perlcriticrc tests/data/perltidyrc			    \
 	tests/data/valgrind.supp tests/data/wordlist			    \
 	tests/data/wordlist.cdb tests/data/wordlist.sqlite		    \
 	tests/docs/pod-spelling-t tests/docs/pod-t tests/perl/critic-t	    \
