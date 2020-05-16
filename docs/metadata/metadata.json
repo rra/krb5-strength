@@ -6,7 +6,7 @@
     "copyrights": [
         {
             "holder": "Russ Allbery <eagle@eyrie.org>",
-            "years": "2016",
+            "years": "2016, 2020",
         },
         {
             "holder": "The Board of Trustees of the Leland Stanford Junior University",
@@ -19,13 +19,14 @@
     ],
     "license": "Expat",
     "build": {
-        "lancaster": true,
-        "autotools": true,
-        "automake": "1.11",
         "autoconf": "2.64",
-        "type": "Autoconf",
-        "reduced_depends": true,
+        "automake": "1.11",
+        "autotools": true,
         "kerberos": true,
+        "lancaster": true,
+        "reduced_depends": true,
+        "type": "Autoconf",
+        "valgrind": true,
     },
     "support": {
         "email": "eagle@eyrie.org",
@@ -38,6 +39,9 @@
         "browse": "https://git.eyrie.org/?p=kerberos/krb5-strength.git",
         "github": "rra/krb5-strength",
         "openhub": "https://www.openhub.net/p/krb5-strength",
+        "status": {
+            "workflow": "build",
+        },
     },
     "distribution": {
         "section": "kerberos",
