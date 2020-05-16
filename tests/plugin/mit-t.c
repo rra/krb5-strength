@@ -3,10 +3,10 @@
  *
  * Written by Russ Allbery <eagle@eyrie.org>
  * Copyright 2017, 2020 Russ Allbery <eagle@eyrie.org>
- * Copyright 2010, 2013, 2014
+ * Copyright 2010, 2013-2014
  *     The Board of Trustees of the Leland Stanford Junior University
  *
- * See LICENSE for licensing terms.
+ * SPDX-License-Identifier: MIT
  */
 
 #include <config.h>

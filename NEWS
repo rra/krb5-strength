@@ -10,6 +10,9 @@ krb5-strength 3.2 (unreleased)
     copies of passwords before freeing memory.  This reduces the lifetime
     of passwords in memory.
 
+    Add SPDX-License-Identifier headers to all substantial source files
+    other than those in the bundled version of CrackLib.
+
     Update to rra-c-util 8.2:
 
     * Implement explicit_bzero with memset if it is not available.

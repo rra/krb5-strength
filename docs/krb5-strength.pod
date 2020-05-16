@@ -2,6 +2,7 @@
 Allbery CDB CrackLib Heimdal KDC KDCs canonicalization cracklib-format
 cracklib-packer heimdal-strength heimdal-history kadmind kpasswd kpasswdd
 krb5-strength mkdict pwqual cracklib-runtime krb5-strength-wordlist
+SPDX-License-Identifier FSFAP
 
 =head1 NAME
 
@@ -315,13 +316,15 @@ Russ Allbery <eagle@eyrie.org>
 
 Copyright 2016 Russ Allbery <eagle@eyrie.org>
 
-Copyright 2006, 2007, 2009, 2010, 2012, 2013, 2014 The Board of Trustees
-of the Leland Stanford Junior University
+Copyright 2006-2007, 2009-2010, 2012-2014 The Board of Trustees of the
+Leland Stanford Junior University
 
 Copying and distribution of this file, with or without modification, are
 permitted in any medium without royalty provided the copyright notice and
 this notice are preserved.  This file is offered as-is, without any
 warranty.
+
+SPDX-License-Identifier: FSFAP
 
 =head1 SEE ALSO
 

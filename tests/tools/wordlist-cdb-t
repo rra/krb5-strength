@@ -3,10 +3,10 @@
 # Test suite for the CDB handling in the krb5-strength-wordlist utility.
 #
 # Written by Russ Allbery <eagle@eyrie.org>
-# Copyright 2013, 2014
+# Copyright 2013-2014
 #     The Board of Trustees of the Leland Stanford Junior University
 #
-# See LICENSE for licensing terms.
+# SPDX-License-Identifier: MIT
 
 . "$SOURCE/tap/libtap.sh"
 cd "$BUILD"

@@ -5,7 +5,7 @@ dnl Copyright 2016, 2020 Russ Allbery <eagle@eyrie.org>
 dnl Copyright 2006-2007, 2009-2010, 2012-2014
 dnl     The Board of Trustees of the Leland Stanford Junior University
 dnl
-dnl See LICENSE for licensing terms.
+dnl SPDX-License-Identifier: MIT
 
 dnl Basic Autoconf configuration.
 AC_PREREQ([2.64])
