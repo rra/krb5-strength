@@ -138,20 +138,6 @@ later plus the following CPAN modules:
 
 and their dependencies.
 
-To run the test suite, you will need Perl 5.010 or later and the
-dependencies of the `heimdal-history` program.  The following additional
-Perl modules will also be used by the test suite if present:
-
-* Perl6::Slurp
-* Test::MinimumVersion
-* Test::Perl::Critic
-* Test::Pod
-* Test::Spelling
-* Test::Strict
-
-All are available on CPAN.  Some tests will be skipped if the modules are
-not available.
-
 To bootstrap from a Git checkout, or if you change the Automake files and
 need to regenerate Makefile.in, you will need Automake 1.11 or later.  For
 bootstrap or if you change configure.ac or any of the m4 files it includes
@@ -274,6 +260,20 @@ If a test fails, you can run a single test with verbose output via:
 
 Do this instead of running the test program directly since it will ensure
 that necessary environment variables are set up.
+
+To run the test suite, you will need Perl 5.010 or later and the
+dependencies of the `heimdal-history` program.  The following additional
+Perl modules will also be used by the test suite if present:
+
+* Perl6::Slurp
+* Test::MinimumVersion
+* Test::Perl::Critic
+* Test::Pod
+* Test::Spelling
+* Test::Strict
+
+All are available on CPAN.  Some tests will be skipped if the modules are
+not available.
 
 To enable tests that don't detect functionality problems but are used to
 sanity-check the release, set the environment variable `RELEASE_TESTING`

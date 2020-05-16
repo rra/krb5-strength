@@ -53,17 +53,3 @@ later plus the following CPAN modules:
 * Readonly
 
 and their dependencies.
-
-To run the test suite, you will need Perl 5.010 or later and the
-dependencies of the `heimdal-history` program.  The following additional
-Perl modules will also be used by the test suite if present:
-
-* Perl6::Slurp
-* Test::MinimumVersion
-* Test::Perl::Critic
-* Test::Pod
-* Test::Spelling
-* Test::Strict
-
-All are available on CPAN.  Some tests will be skipped if the modules
-are not available.
