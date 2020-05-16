@@ -28,6 +28,9 @@
  * 2016-11-06  Russ Allbery <eagle@eyrie.org>
  *   - Remove unused vers_id to silence GCC warnings.
  *   - Added GCC __attribute__ marker on Debug() function.
+ * 2020-05-16  Russ Allbery <eagle@eyrie.org>
+ *   - Change variables from int to size_t to silence warnings.
+ *   - Add missing break to RULE_MFIRST and RULE_MLAST handling.
  */
 
 #include <stdarg.h>
