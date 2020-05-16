@@ -1,7 +1,7 @@
 For Heimdal, you may use either the external password quality check tool,
 installed as heimdal-strength, or the plugin as you choose.  It has been
 tested with Heimdal 1.2.1 and later, but has not recently been tested with
-versions prior to 1.5.
+versions prior to 7.0.
 
 For MIT Kerberos, version 1.9 or higher is required for the password
 quality plugin interface.  MIT Kerberos does not support an external
@@ -34,7 +34,7 @@ distribution); the database format is compatible.
 For building a CDB or SQLite dictionary, use the provided
 `krb5-strength-wordlist` program.  For CDB dictionries, the `cdb` utility
 must be on your `PATH`.  For SQLite, the DBI and DBD::SQLite Perl modules
-are required.  `krb5-strength-wordlist` requires Perl 5.006 or later.
+are required.  `krb5-strength-wordlist` requires Perl 5.010 or later.
 
 For a word list to use as source for the dictionary, you can use
 `/usr/share/dict/words` if it's available on your system, but it would be

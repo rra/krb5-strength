@@ -12,7 +12,8 @@
 # Declarations and configuration
 ##############################################################################
 
-require 5.006;
+require 5.010;
+use autodie;
 use strict;
 use warnings;
 
@@ -42,16 +43,16 @@ my $SQLITE_INSERT = q{
 # Utility functions
 ##############################################################################
 
-# print with error checking and an explicit file handle.
+# say with error checking and an explicit file handle.
 #
 # $fh   - Output file handle
 # @args - Remaining arguments to print
 #
 # Returns: undef
 #  Throws: Text exception on output failure
-sub print_fh {
+sub say_fh {
     my ($fh, @args) = @_;
-    print {$fh} @args or croak('print failed');
+    say {$fh} @args or croak("say failed: $!");
     return;
 }
 
@@ -81,8 +82,7 @@ sub write_cdb {
     if (-f $tmp) {
         die "$0: temporary output file $tmp already exists\n";
     }
-    open(my $tmp_fh, '>', $tmp)
-      or die "$0: cannot create output file $tmp: $!\n";
+    open(my $tmp_fh, '>', $tmp);
 
     # Walk through the input word list and write each word that passes the
     # filter to the output file handle as CDB data.
@@ -90,19 +90,19 @@ sub write_cdb {
         chomp($word);
         next if !$filter->($word);
         my $length = length($word);
-        print_fh($tmp_fh, "+$length,1:$word->1\n");
+        say_fh($tmp_fh, "+$length,1:$word->1");
     }
 
     # Add a trailing newline, required by the CDB data format, and close.
-    print_fh($tmp_fh, "\n");
-    close($tmp_fh) or die "$0: cannot write to temporary file $tmp: $!\n";
+    say_fh($tmp_fh, q{});
+    close($tmp_fh);
 
     # Run cdb to turn the result into a CDB database.  Ignore duplicate keys.
     system($CDB, '-c', '-u', $output, $tmp) == 0
       or die "$0: cdb -c failed\n";
 
     # Remove the temporary file and return.
-    unlink($tmp) or die "$0: cannot remove temporary file $tmp: $!\n";
+    unlink($tmp);
     return;
 }
 
@@ -169,19 +169,18 @@ sub write_sqlite {
 #  Throws: Text exception on output failure
 sub write_wordlist {
     my ($in_fh, $output, $filter) = @_;
-    open(my $out_fh, '>', $output)
-      or die "$0: cannot create output file $output: $!\n";
+    open(my $out_fh, '>', $output);
 
     # Walk through the input word list and write each word that passes the
     # filter to the output file handle.
     while (defined(my $word = <$in_fh>)) {
         chomp($word);
         next if !$filter->($word);
-        print_fh($out_fh, "$word\n");
+        say_fh($out_fh, $word);
     }
 
     # All done.
-    close($out_fh) or die "$0: cannot write to output file $output: $!\n";
+    close($out_fh);
     return;
 }
 
@@ -254,7 +253,7 @@ my @options = (
 Getopt::Long::config('bundling', 'no_ignore_case');
 GetOptions(\%config, @options);
 if ($config{manual}) {
-    print_fh(\*STDOUT, "Feeding myself to perldoc, please wait...\n");
+    say_fh(\*STDOUT, 'Feeding myself to perldoc, please wait...');
     exec('perldoc', '-t', $fullpath);
 }
 if (@ARGV != 1) {
@@ -271,8 +270,7 @@ my $input = $ARGV[0];
 my $filter = build_filter(\%config);
 
 # Process the input file into either wordlist output or a CDB file.
-open(my $in_fh, '<', $input)
-  or die "$0: cannot open input file $input: $!\n";
+open(my $in_fh, '<', $input);
 if ($config{output}) {
     write_wordlist($in_fh, $config{output}, $filter);
 } elsif ($config{cdb}) {
@@ -280,7 +278,7 @@ if ($config{output}) {
 } elsif ($config{sqlite}) {
     write_sqlite($in_fh, $config{sqlite}, $filter);
 }
-close($in_fh) or die "$0: cannot read all of input file $input: $!\n";
+close($in_fh);
 
 # All done.
 exit(0);
