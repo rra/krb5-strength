@@ -24,11 +24,11 @@
 
 /* When using the embedded CrackLib, we need to provide our own prototype. */
 #ifdef HAVE_CRACKLIB
-# ifdef HAVE_CRACK_H
-#  include <crack.h>
-# else
+#    ifdef HAVE_CRACK_H
+#        include <crack.h>
+#    else
 extern const char *FascistCheck(const char *password, const char *dict);
-# endif
+#    endif
 #endif
 
 
@@ -49,8 +49,9 @@ strength_init_cracklib(krb5_context ctx, krb5_pwqual_moddata data UNUSED,
     if (path == NULL)
         return 0;
     free(path);
-    krb5_set_error_message(ctx, KADM5_BAD_SERVER_PARAMS, "CrackLib dictionary"
-                           " requested but not built with CrackLib support");
+    krb5_set_error_message(ctx, KADM5_BAD_SERVER_PARAMS,
+                           "CrackLib dictionary requested but not built with"
+                           " CrackLib support");
     return KADM5_BAD_SERVER_PARAMS;
 }
 #endif

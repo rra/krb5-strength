@@ -15,7 +15,7 @@
 #include <dlfcn.h>
 #include <errno.h>
 #ifdef HAVE_KADM5_KADM5_PWCHECK_H
-# include <kadm5/kadm5-pwcheck.h>
+#    include <kadm5/kadm5-pwcheck.h>
 #endif
 
 #include <tests/tap/basic.h>
@@ -187,7 +187,7 @@ main(void)
     for (i = 0; i < ARRAY_SIZE(principal_tests); i++)
         is_password_test(verifier, &principal_tests[i]);
 
-#ifdef HAVE_CRACKLIB
+#    ifdef HAVE_CRACKLIB
 
     /* Add CrackLib tests. */
     setup_argv[3] = (char *) "password_dictionary";
@@ -218,13 +218,13 @@ main(void)
     /* Free the memory allocated for the CrackLib test. */
     free(setup_argv[4]);
 
-#else
+#    else
 
     /* Otherwise, mark the CrackLib tests as skipped. */
     count = ARRAY_SIZE(cracklib_tests) + ARRAY_SIZE(length_tests);
     skip_block(count * 2, "not built with CDB support");
 
-#endif /* !HAVE_CRACKLIB */
+#    endif /* !HAVE_CRACKLIB */
 
     /* Add simple character class restrictions. */
     setup_argv[3] = (char *) "minimum_different";
@@ -260,7 +260,7 @@ main(void)
     for (i = 0; i < ARRAY_SIZE(length_tests); i++)
         is_password_test(verifier, &length_tests[i]);
 
-#ifdef HAVE_CDB
+#    ifdef HAVE_CDB
 
     /* If built with CDB, set up krb5.conf to use a CDB dictionary instead. */
     setup_argv[3] = (char *) "password_dictionary_cdb";
@@ -277,15 +277,15 @@ main(void)
     for (i = 0; i < ARRAY_SIZE(principal_tests); i++)
         is_password_test(verifier, &principal_tests[i]);
 
-#else /* !HAVE_CDB */
+#    else /* !HAVE_CDB */
 
     /* Otherwise, mark the CDB tests as skipped. */
     count = ARRAY_SIZE(cdb_tests) + ARRAY_SIZE(principal_tests);
     skip_block(count * 2, "not built with CDB support");
 
-#endif /* !HAVE_CDB */
+#    endif /* !HAVE_CDB */
 
-#ifdef HAVE_SQLITE
+#    ifdef HAVE_SQLITE
 
     /*
      * If built with SQLite, set up krb5.conf to use a SQLite dictionary
@@ -307,13 +307,13 @@ main(void)
     for (i = 0; i < ARRAY_SIZE(principal_tests); i++)
         is_password_test(verifier, &principal_tests[i]);
 
-#else /* !HAVE_SQLITE */
+#    else /* !HAVE_SQLITE */
 
     /* Otherwise, mark the SQLite tests as skipped. */
     count = ARRAY_SIZE(sqlite_tests) + ARRAY_SIZE(principal_tests);
     skip_block(count * 2, "not built with SQLite support");
 
-#endif /* !HAVE_SQLITE */
+#    endif /* !HAVE_SQLITE */
 
     /* Manually clean up after the results of make-krb5-conf. */
     basprintf(&path, "%s/krb5.conf", tmpdir);

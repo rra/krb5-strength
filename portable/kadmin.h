@@ -26,9 +26,9 @@
 
 #include <kadm5/admin.h>
 #ifdef HAVE_KADM5_KADM5_ERR_H
-# include <kadm5/kadm5_err.h>
+#    include <kadm5/kadm5_err.h>
 #else
-# include <kadm5/kadm_err.h>
+#    include <kadm5/kadm_err.h>
 #endif
 
 /*
@@ -38,21 +38,21 @@
  * general just in case.)
  */
 #ifndef KADM5_API_VERSION
-# ifdef KADM5_API_VERSION_3
-#  define KADM5_API_VERSION KADM5_API_VERSION_3
-# else
-#  define KADM5_API_VERSION KADM5_API_VERSION_2
-# endif
+#    ifdef KADM5_API_VERSION_3
+#        define KADM5_API_VERSION KADM5_API_VERSION_3
+#    else
+#        define KADM5_API_VERSION KADM5_API_VERSION_2
+#    endif
 #endif
 
 /* Heimdal doesn't define KADM5_PASS_Q_GENERIC. */
 #ifndef KADM5_PASS_Q_GENERIC
-# define KADM5_PASS_Q_GENERIC KADM5_PASS_Q_DICT
+#    define KADM5_PASS_Q_GENERIC KADM5_PASS_Q_DICT
 #endif
 
 /* Heimdal doesn't define KADM5_MISSING_KRB5_CONF_PARAMS. */
 #ifndef KADM5_MISSING_KRB5_CONF_PARAMS
-# define KADM5_MISSING_KRB5_CONF_PARAMS KADM5_MISSING_CONF_PARAMS
+#    define KADM5_MISSING_KRB5_CONF_PARAMS KADM5_MISSING_CONF_PARAMS
 #endif
 
 #endif /* !PORTABLE_KADMIN_H */

@@ -38,16 +38,16 @@
  * stripped-down version of config.h with a different name.
  */
 #ifndef CONFIG_H_INCLUDED
-# include <config.h>
+#    include <config.h>
 #endif
 #include <portable/macros.h>
 
 #if defined(HAVE_KRB5_H)
-# include <krb5.h>
+#    include <krb5.h>
 #elif defined(HAVE_KERBEROSV5_KRB5_H)
-# include <kerberosv5/krb5.h>
+#    include <kerberosv5/krb5.h>
 #else
-# include <krb5/krb5.h>
+#    include <krb5/krb5.h>
 #endif
 #include <stdlib.h>
 
@@ -62,7 +62,7 @@ BEGIN_DECLS
  * Kerberos library.  Use krb5_xfree instead.
  */
 #ifndef HAVE_KRB5_FREE_DEFAULT_REALM
-# define krb5_free_default_realm(c, r) krb5_xfree(r)
+#    define krb5_free_default_realm(c, r) krb5_xfree(r)
 #endif
 
 /*
@@ -73,16 +73,16 @@ BEGIN_DECLS
  * really do about it.
  */
 #ifndef HAVE_KRB5_FREE_STRING
-# ifdef HAVE_KRB5_XFREE
-#  define krb5_free_string(c, s) krb5_xfree(s)
-# else
-#  define krb5_free_string(c, s) free(s)
-# endif
+#    ifdef HAVE_KRB5_XFREE
+#        define krb5_free_string(c, s) krb5_xfree(s)
+#    else
+#        define krb5_free_string(c, s) free(s)
+#    endif
 #endif
 
 /* Heimdal: krb5_xfree, MIT: krb5_free_unparsed_name. */
 #ifdef HAVE_KRB5_XFREE
-# define krb5_free_unparsed_name(c, p) krb5_xfree(p)
+#    define krb5_free_unparsed_name(c, p) krb5_xfree(p)
 #endif
 
 /*
@@ -111,16 +111,17 @@ krb5_error_code krb5_get_init_creds_opt_alloc(krb5_context,
                                               krb5_get_init_creds_opt **);
 #endif
 #ifdef HAVE_KRB5_GET_INIT_CREDS_OPT_FREE
-# ifndef HAVE_KRB5_GET_INIT_CREDS_OPT_FREE_2_ARGS
-#  define krb5_get_init_creds_opt_free(c, o) krb5_get_init_creds_opt_free(o)
-# endif
+#    ifndef HAVE_KRB5_GET_INIT_CREDS_OPT_FREE_2_ARGS
+#        define krb5_get_init_creds_opt_free(c, o) \
+            krb5_get_init_creds_opt_free(o)
+#    endif
 #else
-# define krb5_get_init_creds_opt_free(c, o) free(o)
+#    define krb5_get_init_creds_opt_free(c, o) free(o)
 #endif
 
 /* Heimdal-specific. */
 #ifndef HAVE_KRB5_GET_INIT_CREDS_OPT_SET_DEFAULT_FLAGS
-# define krb5_get_init_creds_opt_set_default_flags(c, p, r, o) /* empty */
+#    define krb5_get_init_creds_opt_set_default_flags(c, p, r, o) /* empty */
 #endif
 
 /*
@@ -129,7 +130,7 @@ krb5_error_code krb5_get_init_creds_opt_alloc(krb5_context,
  * present in older MIT Kerberos libraries but not prototyped.
  */
 #if !HAVE_DECL_KRB5_KT_FREE_ENTRY
-# define krb5_kt_free_entry(c, e) krb5_free_keytab_entry_contents((c), (e))
+#    define krb5_kt_free_entry(c, e) krb5_free_keytab_entry_contents((c), (e))
 #endif
 
 /*

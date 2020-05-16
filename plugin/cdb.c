@@ -21,7 +21,7 @@
 #include <portable/system.h>
 
 #ifdef HAVE_CDB_H
-# include <cdb.h>
+#    include <cdb.h>
 #endif
 #include <errno.h>
 #include <fcntl.h>
@@ -47,8 +47,9 @@ strength_init_cdb(krb5_context ctx, krb5_pwqual_moddata data UNUSED)
     if (path == NULL)
         return 0;
     free(path);
-    krb5_set_error_message(ctx, KADM5_BAD_SERVER_PARAMS, "CDB dictionary"
-                           " requested but not built with CDB support");
+    krb5_set_error_message(ctx, KADM5_BAD_SERVER_PARAMS,
+                           "CDB dictionary requested but not built with CDB"
+                           " support");
     return KADM5_BAD_SERVER_PARAMS;
 }
 #endif
@@ -56,21 +57,6 @@ strength_init_cdb(krb5_context ctx, krb5_pwqual_moddata data UNUSED)
 
 /* Skip the rest of this file if CDB is not available. */
 #ifdef HAVE_CDB
-
-/*
- * Macro used to make password checks more readable.  Assumes that the found
- * and fail labels are available for the abort cases of finding a password or
- * failing to look it up.
- */
-# define CHECK_PASSWORD(ctx, data, password)                    \
-    do {                                                        \
-        code = in_cdb_dictionary(ctx, data, password, &found);  \
-        if (code != 0)                                          \
-            goto fail;                                          \
-        if (found)                                              \
-            goto found;                                         \
-    } while (0)
-
 
 /*
  * Look up a password in CDB and set the found parameter to true if it is
@@ -128,6 +114,21 @@ strength_init_cdb(krb5_context ctx, krb5_pwqual_moddata data)
     data->have_cdb = true;
     return 0;
 }
+
+
+/*
+ * Macro used to make password checks more readable.  Assumes that the found
+ * and fail labels are available for the abort cases of finding a password or
+ * failing to look it up.
+ */
+#    define CHECK_PASSWORD(ctx, data, password)                    \
+        do {                                                       \
+            code = in_cdb_dictionary(ctx, data, password, &found); \
+            if (code != 0)                                         \
+                goto fail;                                         \
+            if (found)                                             \
+                goto found;                                        \
+        } while (0)
 
 
 /*

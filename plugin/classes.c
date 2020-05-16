@@ -48,10 +48,14 @@ analyze_password(const char *password, struct password_classes *classes)
         else
             classes->symbol = true;
     }
-    if (classes->lower)  classes->num_classes++;
-    if (classes->upper)  classes->num_classes++;
-    if (classes->digit)  classes->num_classes++;
-    if (classes->symbol) classes->num_classes++;
+    if (classes->lower)
+        classes->num_classes++;
+    if (classes->upper)
+        classes->num_classes++;
+    if (classes->digit)
+        classes->num_classes++;
+    if (classes->symbol)
+        classes->num_classes++;
 }
 
 

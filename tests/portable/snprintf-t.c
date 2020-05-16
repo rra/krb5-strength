@@ -27,7 +27,7 @@
  * formats for easy testing.
  */
 #if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ > 2) || defined(__clang__)
-# pragma GCC diagnostic ignored "-Wformat-nonliteral"
+#    pragma GCC diagnostic ignored "-Wformat-nonliteral"
 #endif
 
 /*
@@ -40,11 +40,10 @@ int test_vsnprintf(char *str, size_t count, const char *fmt, va_list args);
 static const char string[] = "abcdefghijklmnopqrstuvwxyz0123456789";
 
 static const char *const fp_formats[] = {
-    "%-1.5f",   "%1.5f",    "%31.9f",   "%10.5f",   "% 10.5f",  "%+22.9f",
-    "%+4.9f",   "%01.3f",   "%3.1f",    "%3.2f",    "%.0f",     "%.1f",
-    "%f",
+    "%-1.5f", "%1.5f", "%31.9f", "%10.5f", "% 10.5f", "%+22.9f", "%+4.9f",
+    "%01.3f", "%3.1f", "%3.2f",  "%.0f",   "%.1f",    "%f",
 
-    /* %e and %g formats aren't really implemented yet. */
+/* %e and %g formats aren't really implemented yet. */
 #if 0
     "%-1.5e",   "%1.5e",    "%31.9e",   "%10.5e",   "% 10.5e",  "%+22.9e",
     "%+4.9e",   "%01.3e",   "%3.1e",    "%3.2e",    "%.0e",     "%.1e",
@@ -53,55 +52,48 @@ static const char *const fp_formats[] = {
     "%+4.9g",   "%01.3g",   "%3.1g",    "%3.2g",    "%.0g",     "%.1g",
     "%g",
 #endif
-    NULL
-};
+    NULL};
 static const char *const int_formats[] = {
-    "%-1.5d",   "%1.5d",    "%31.9d",   "%5.5d",    "%10.5d",   "% 10.5d",
-    "%+22.30d", "%01.3d",   "%4d",      "%d",       "%ld",      NULL
-};
+    "%-1.5d",   "%1.5d",  "%31.9d", "%5.5d", "%10.5d", "% 10.5d",
+    "%+22.30d", "%01.3d", "%4d",    "%d",    "%ld",    NULL};
 static const char *const uint_formats[] = {
-    "%-1.5lu",  "%1.5lu",   "%31.9lu",  "%5.5lu",   "%10.5lu",  "% 10.5lu",
-    "%+6.30lu", "%01.3lu",  "%4lu",     "%lu",      "%4lx",     "%4lX",
-    "%01.3lx",  "%1lo",     NULL
-};
+    "%-1.5lu",  "%1.5lu",   "%31.9lu", "%5.5lu", "%10.5lu",
+    "% 10.5lu", "%+6.30lu", "%01.3lu", "%4lu",   "%lu",
+    "%4lx",     "%4lX",     "%01.3lx", "%1lo",   NULL};
 static const char *const llong_formats[] = {
-    "%lld",     "%-1.5lld",  "%1.5lld",    "%123.9lld",  "%5.5lld",
-    "%10.5lld", "% 10.5lld", "%+22.33lld", "%01.3lld",   "%4lld",
-    NULL
-};
+    "%lld",      "%-1.5lld",   "%1.5lld",  "%123.9lld", "%5.5lld", "%10.5lld",
+    "% 10.5lld", "%+22.33lld", "%01.3lld", "%4lld",     NULL};
 static const char *const ullong_formats[] = {
-    "%llu",     "%-1.5llu",  "%1.5llu",    "%123.9llu",  "%5.5llu",
-    "%10.5llu", "% 10.5llu", "%+22.33llu", "%01.3llu",   "%4llu",
-    "%llx",     "%llo",      NULL
-};
+    "%llu",     "%-1.5llu",  "%1.5llu",    "%123.9llu", "%5.5llu",
+    "%10.5llu", "% 10.5llu", "%+22.33llu", "%01.3llu",  "%4llu",
+    "%llx",     "%llo",      NULL};
 
-static const double fp_nums[] = {
-    -1.5, 134.21, 91340.2, 341.1234, 0203.9, 0.96, 0.996, 0.9996, 1.996,
-    4.136, 0.1, 0.01, 0.001, 10.1, 0
-};
-static long int_nums[] = {
-    -1, 134, 91340, 341, 0203, 0
-};
+static const double fp_nums[] = {-1.5, 134.21, 91340.2, 341.1234, 0203.9,
+                                 0.96, 0.996,  0.9996,  1.996,    4.136,
+                                 0.1,  0.01,   0.001,   10.1,     0};
+static long int_nums[] = {-1, 134, 91340, 341, 0203, 0};
 static unsigned long uint_nums[] = {
-    (unsigned long) -1, 134, 91340, 341, 0203, 0
-};
-static long long llong_nums[] = {
-    ~(long long) 0,                     /* All-1 bit pattern. */
-    (~(unsigned long long) 0) >> 1,     /* Largest signed long long. */
-    -150, 134, 91340, 341,
-    0
-};
+    (unsigned long) -1, 134, 91340, 341, 0203, 0};
+static long long llong_nums[] = {~(long long) 0, /* All-1 bit pattern. */
+                                 (~(unsigned long long) 0)
+                                     >> 1, /* Largest signed long long. */
+                                 -150,
+                                 134,
+                                 91340,
+                                 341,
+                                 0};
 static unsigned long long ullong_nums[] = {
-    ~(unsigned long long) 0,            /* All-1 bit pattern. */
-    (~(unsigned long long) 0) >> 1,     /* Largest signed long long. */
-    134, 91340, 341,
-    0
-};
+    ~(unsigned long long) 0,        /* All-1 bit pattern. */
+    (~(unsigned long long) 0) >> 1, /* Largest signed long long. */
+    134,
+    91340,
+    341,
+    0};
 
 
 static void
-test_format(bool trunc, const char *expected, int count,
-            const char *format, ...)
+test_format(bool trunc, const char *expected, int count, const char *format,
+            ...)
 {
     char buf[128];
     int result;
@@ -123,12 +115,13 @@ main(void)
     long lcount;
     char lgbuf[128];
 
-    plan(8 +
-         (18 + (ARRAY_SIZE(fp_formats) - 1) * ARRAY_SIZE(fp_nums)
-          + (ARRAY_SIZE(int_formats) - 1) * ARRAY_SIZE(int_nums)
-          + (ARRAY_SIZE(uint_formats) - 1) * ARRAY_SIZE(uint_nums)
-          + (ARRAY_SIZE(llong_formats) - 1) * ARRAY_SIZE(llong_nums)
-          + (ARRAY_SIZE(ullong_formats) - 1) * ARRAY_SIZE(ullong_nums)) * 2);
+    plan(8
+         + (18 + (ARRAY_SIZE(fp_formats) - 1) * ARRAY_SIZE(fp_nums)
+            + (ARRAY_SIZE(int_formats) - 1) * ARRAY_SIZE(int_nums)
+            + (ARRAY_SIZE(uint_formats) - 1) * ARRAY_SIZE(uint_nums)
+            + (ARRAY_SIZE(llong_formats) - 1) * ARRAY_SIZE(llong_nums)
+            + (ARRAY_SIZE(ullong_formats) - 1) * ARRAY_SIZE(ullong_nums))
+               * 2);
 
     is_int(4, test_snprintf(NULL, 0, "%s", "abcd"), "simple string length");
     is_int(2, test_snprintf(NULL, 0, "%d", 20), "number length");
@@ -155,8 +148,8 @@ main(void)
                 string, -2.5);
     test_format(true, "abcdefghij4444", 14, "%.10s%n%d", string, &count, 4444);
     is_int(10, count, "correct output from %%n");
-    test_format(true, "abcdefghijklmnopqrstuvwxyz01234", 36, "%n%s%ln",
-                &count, string, &lcount);
+    test_format(true, "abcdefghijklmnopqrstuvwxyz01234", 36, "%n%s%ln", &count,
+                string, &lcount);
     is_int(0, count, "correct output from two %%n");
     is_int(31, lcount, "correct output from long %%ln");
     test_format(true, "(null)", 6, "%s", NULL);

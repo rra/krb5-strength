@@ -187,8 +187,10 @@ parse_class(krb5_context ctx, const char *spec, struct class_rule **rule)
         if (okay)
             spec = end + 1;
         else {
-            code = strength_error_config(ctx, "bad character class requirement"
-                                         " in configuration: %s", spec);
+            code = strength_error_config(ctx,
+                                         "bad character class requirement in"
+                                         " configuration: %s",
+                                         spec);
             goto fail;
         }
     }
@@ -214,15 +216,16 @@ parse_class(krb5_context ctx, const char *spec, struct class_rule **rule)
             (*rule)->digit = true;
         else if (strcmp(class, "symbol") == 0)
             (*rule)->symbol = true;
-	else if (isdigit((unsigned char) *class)) {
-	    okay = parse_number(class, &(*rule)->num_classes, &end);
-	    if (!okay || *end != '\0' || (*rule)->num_classes > MAX_CLASSES) {
-                code = strength_error_config(ctx, "bad character class minimum"
-                                             " in configuration: %s", class);
-		goto fail;
-	    }
-	}
-        else {
+        else if (isdigit((unsigned char) *class)) {
+            okay = parse_number(class, &(*rule)->num_classes, &end);
+            if (!okay || *end != '\0' || (*rule)->num_classes > MAX_CLASSES) {
+                code = strength_error_config(ctx,
+                                             "bad character class minimum in"
+                                             " configuration: %s",
+                                             class);
+                goto fail;
+            }
+        } else {
             code = strength_error_config(ctx, "unknown character class %s",
                                          class);
             goto fail;
@@ -302,8 +305,7 @@ fail:
  * allocation failed while parsing or while setting the default value.
  */
 krb5_error_code
-strength_config_list(krb5_context ctx, const char *opt,
-                     struct vector **result)
+strength_config_list(krb5_context ctx, const char *opt, struct vector **result)
 {
     realm_type realm;
     char *value = NULL;

@@ -1,15 +1,15 @@
 # Automake makefile for krb5-strength.
 #
 # Written by Russ Allbery <eagle@eyrie.org>
-# Copyright 2016 Russ Allbery <eagle@eyrie.org>
-# Copyright 2007, 2009, 2010, 2012, 2013, 2014
+# Copyright 2016, 2020 Russ Allbery <eagle@eyrie.org>
+# Copyright 2007, 2009-2010, 2012-2014
 #     The Board of Trustees of the Leland Stanford Junior University
 #
 # See LICENSE for licensing terms.
 
 ACLOCAL_AMFLAGS = -I m4
-EXTRA_DIST = .gitignore .travis.yml README.md LICENSE bootstrap		    \
-	cracklib/HISTORY cracklib/LICENCE cracklib/README		    \
+EXTRA_DIST = .clang-format .gitignore .travis.yml README.md LICENSE	    \
+	bootstrap cracklib/HISTORY cracklib/LICENCE cracklib/README	    \
 	cracklib/genrules.pl cracklib/mkdict docs/krb5-strength.5.in	    \
 	docs/krb5-strength.pod docs/metadata tests/README tests/TESTS	    \
 	tests/data/krb5.conf tests/data/make-krb5-conf tests/data/passwords \
@@ -208,3 +208,11 @@ check-valgrind: $(check_PROGRAMS) tests/data/dictionary.pwd
 	    --suppressions=$(abs_top_srcdir)/tests/data/valgrind.supp	\
 	    --trace-children-skip="/bin/sh,*/cat,*/diff,*/expr,*/grep,*/mkdir,*/rm,*/rmdir,*/sed,*/sleep,*/true,*/wc,*/docs/*-t,*/perl/*-t,*/data/make-krb5-conf,*/tools/heimdal-history-t,*/tools/wordlist*-t" \
 	    tests/runtests -l '$(abs_top_srcdir)/tests/TESTS'
+
+
+# Used by maintainers to reformat all source code using clang-format and
+# excluding some files.
+reformat:
+	find . -name '*.[ch]' \! -name snprintf.c \! -name krb5-profile.c \
+	    \! -path './cracklib/*' -print				  \
+	    | xargs clang-format-10 -style=file -i

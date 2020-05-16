@@ -2,7 +2,7 @@
  * Test for the MIT Kerberos shared module API.
  *
  * Written by Russ Allbery <eagle@eyrie.org>
- * Copyright 2017 Russ Allbery <eagle@eyrie.org>
+ * Copyright 2017, 2020 Russ Allbery <eagle@eyrie.org>
  * Copyright 2010, 2013, 2014
  *     The Board of Trustees of the Leland Stanford Junior University
  *
@@ -17,7 +17,7 @@
 #include <dlfcn.h>
 #include <errno.h>
 #ifdef HAVE_KRB5_PWQUAL_PLUGIN_H
-# include <krb5/pwqual_plugin.h>
+#    include <krb5/pwqual_plugin.h>
 #endif
 
 #include <tests/tap/basic.h>
@@ -151,7 +151,7 @@ main(void)
 {
     char *path, *dictionary, *krb5_config, *krb5_config_empty, *tmpdir;
     char *setup_argv[12];
-    const char*build;
+    const char *build;
     size_t i, count;
     krb5_context ctx;
     krb5_pwqual_vtable vtable;
@@ -206,14 +206,14 @@ main(void)
     for (i = 0; i < ARRAY_SIZE(principal_tests); i++)
         is_password_test(ctx, vtable, data, &principal_tests[i]);
 
+#    ifdef HAVE_CRACKLIB
     /* Run the CrackLib tests if CrackLib is available, otherwise skip them. */
-#ifdef HAVE_CRACKLIB
     for (i = 0; i < ARRAY_SIZE(cracklib_tests); i++)
         is_password_test(ctx, vtable, data, &cracklib_tests[i]);
-#else
+#    else
     count = ARRAY_SIZE(cracklib_tests);
     skip_block(count * 2, "not built with CrackLib support");
-#endif
+#    endif
 
     /* Close that initialization of the plugin and destroy that context. */
     vtable->close(ctx, data);
@@ -234,7 +234,7 @@ main(void)
     putenv(krb5_config);
     free(krb5_config_empty);
 
-#ifdef HAVE_CRACKLIB
+#    ifdef HAVE_CRACKLIB
 
     /* Add CrackLib configuration. */
     setup_argv[3] = (char *) "password_dictionary";
@@ -284,13 +284,13 @@ main(void)
         is_password_test(ctx, vtable, data, &length_tests[i]);
     vtable->close(ctx, data);
 
-#else
+#    else
 
     /* Otherwise mark the CrackLib tests as skipped. */
     count = ARRAY_SIZE(cracklib_tests) + ARRAY_SIZE(length_tests);
     skip_block(count * 2 + 1, "not built with CrackLib support");
 
-#endif /* !HAVE_CRACKLIB */
+#    endif /* !HAVE_CRACKLIB */
 
     /* Switch to simple character class configuration in krb5.conf. */
     setup_argv[3] = (char *) "minimum_different";
@@ -359,7 +359,7 @@ main(void)
         is_password_test(ctx, vtable, data, &length_tests[i]);
     vtable->close(ctx, data);
 
-#ifdef HAVE_CDB
+#    ifdef HAVE_CDB
 
     /* If built with CDB, set up krb5.conf to use a CDB dictionary instead. */
     test_file_path_free(dictionary);
@@ -388,15 +388,15 @@ main(void)
         is_password_test(ctx, vtable, data, &principal_tests[i]);
     vtable->close(ctx, data);
 
-#else /* !HAVE_CDB */
+#    else /* !HAVE_CDB */
 
     /* Otherwise, mark the CDB tests as skipped. */
     count = ARRAY_SIZE(cdb_tests) + ARRAY_SIZE(principal_tests);
     skip_block(count * 2 + 1, "not built with CDB support");
 
-#endif /* !HAVE_CDB */
+#    endif /* !HAVE_CDB */
 
-#ifdef HAVE_SQLITE
+#    ifdef HAVE_SQLITE
 
     /*
      * If built with SQLite, set up krb5.conf to use a SQLite dictionary
@@ -430,13 +430,13 @@ main(void)
         is_password_test(ctx, vtable, data, &principal_tests[i]);
     vtable->close(ctx, data);
 
-#else /* !HAVE_SQLITE */
+#    else /* !HAVE_SQLITE */
 
     /* Otherwise, mark the SQLite tests as skipped. */
     count = ARRAY_SIZE(sqlite_tests) + ARRAY_SIZE(principal_tests);
     skip_block(count * 2 + 1, "not built with SQLite support");
 
-#endif /* !HAVE_SQLITE */
+#    endif /* !HAVE_SQLITE */
 
     /* Manually clean up after the results of make-krb5-conf. */
     basprintf(&path, "%s/krb5.conf", tmpdir);

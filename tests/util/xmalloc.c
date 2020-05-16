@@ -35,7 +35,7 @@
 #include <ctype.h>
 #include <errno.h>
 #ifdef HAVE_SYS_TIME_H
-# include <sys/time.h>
+#    include <sys/time.h>
 #endif
 #include <time.h>
 
@@ -382,14 +382,22 @@ main(int argc, char *argv[])
     }
 
     switch (code) {
-    case 'c': exit(test_calloc(size) ? willfail : 1);
-    case 'm': exit(test_malloc(size) ? willfail : 1);
-    case 'r': exit(test_realloc(size) ? willfail : 1);
-    case 'y': exit(test_reallocarray(4, size / 4) ? willfail : 1);
-    case 's': exit(test_strdup(size) ? willfail : 1);
-    case 'n': exit(test_strndup(size) ? willfail : 1);
-    case 'a': exit(test_asprintf(size) ? willfail : 1);
-    case 'v': exit(test_vasprintf(size) ? willfail : 1);
+    case 'c':
+        exit(test_calloc(size) ? willfail : 1);
+    case 'm':
+        exit(test_malloc(size) ? willfail : 1);
+    case 'r':
+        exit(test_realloc(size) ? willfail : 1);
+    case 'y':
+        exit(test_reallocarray(4, size / 4) ? willfail : 1);
+    case 's':
+        exit(test_strdup(size) ? willfail : 1);
+    case 'n':
+        exit(test_strndup(size) ? willfail : 1);
+    case 'a':
+        exit(test_asprintf(size) ? willfail : 1);
+    case 'v':
+        exit(test_vasprintf(size) ? willfail : 1);
     default:
         die("Unknown mode %c", argv[1][0]);
         break;
