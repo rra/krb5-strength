@@ -23,7 +23,19 @@ if [ "$KERBEROS" = 'heimdal' ]; then
 else
     ./configure CC="$COMPILER"
 fi
-make warnings
 
-# Run tests.
-make check
+# Run the tests with valgrind for one of the compilers.  Arbitrarily
+# pick the GCC build.  (The assumption here is that other compilers won't
+# produce sufficiently different code as to create memory management
+# problems.)
+if [ "$COMPILER" = 'gcc' ]; then
+    make check-valgrind
+else
+    make check
+fi
+
+# Run some additional checks for one of the builds.  Arbitrarily pick the GCC
+# MIT build.
+if [ "$COMPILER" = 'gcc' ] && [ "$KERBEROS" = 'mit' ]; then
+    make check-cppcheck
+fi
