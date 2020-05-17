@@ -3,14 +3,14 @@
 set -e
 
 # Add a user to own the password history database.
-if ! getent passwd _history >/dev/null ; then
+if ! getent passwd _history >/dev/null; then
     echo 'Adding system user for password history' 1>&2
     adduser --disabled-login --quiet --system --no-create-home \
         --home /var/lib/heimdal-history --force-badname --group _history
 fi
 
 # Create the directory for the history database, owned by the history user.
-if [ ! -d /var/lib/heimdal-history ] ; then
+if [ ! -d /var/lib/heimdal-history ]; then
     mkdir /var/lib/heimdal-history
     chown _history:_history /var/lib/heimdal-history
 fi
