@@ -1,4 +1,4 @@
-# krb5-strength 3.1
+# krb5-strength 3.2
 
 [![Build
 status](https://github.com/rra/krb5-strength/workflows/build/badge.svg)](https://github.com/rra/krb5-strength/actions)

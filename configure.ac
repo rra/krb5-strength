@@ -9,7 +9,7 @@ dnl SPDX-License-Identifier: MIT
 
 dnl Basic Autoconf configuration.
 AC_PREREQ([2.64])
-AC_INIT([krb5-strength], [3.1], [eagle@eyrie.org])
+AC_INIT([krb5-strength], [3.2], [eagle@eyrie.org])
 AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_LIBOBJ_DIR([portable])
 AC_CONFIG_MACRO_DIR([m4])
