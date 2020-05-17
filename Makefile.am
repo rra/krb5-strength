@@ -12,19 +12,21 @@ EXTRA_DIST = .clang-format .github .gitignore README.md LICENSE bootstrap   \
 	ci/README ci/install ci/test cracklib/HISTORY cracklib/LICENCE	    \
 	cracklib/README cracklib/genrules.pl cracklib/mkdict		    \
 	docs/krb5-strength.5.in docs/krb5-strength.pod docs/metadata	    \
-	tests/README tests/TESTS tests/data/krb5.conf			    \
-	tests/data/make-krb5-conf tests/data/passwords tests/data/perl.conf \
-	tests/data/perlcriticrc tests/data/perltidyrc			    \
+	tests/README tests/TESTS tests/data/cppcheck.supp		    \
+	tests/data/krb5.conf tests/data/make-krb5-conf tests/data/passwords \
+	tests/data/perl.conf tests/data/perlcriticrc tests/data/perltidyrc  \
 	tests/data/valgrind.supp tests/data/wordlist			    \
 	tests/data/wordlist.cdb tests/data/wordlist.sqlite		    \
-	tests/docs/pod-spelling-t tests/docs/pod-t tests/perl/critic-t	    \
+	tests/docs/pod-spelling-t tests/docs/pod-t			    \
+	tests/docs/spdx-license-t tests/perl/critic-t			    \
 	tests/perl/minimum-version-t tests/perl/strict-t		    \
 	tests/style/obsolete-strings-t tests/tap/libtap.sh		    \
 	tests/tap/perl/Test/RRA.pm tests/tap/perl/Test/RRA/Config.pm	    \
 	tests/tap/perl/Test/RRA/Automake.pm tests/tools/heimdal-history-t   \
 	tests/tools/heimdal-strength-t tests/tools/wordlist-cdb-t	    \
 	tests/tools/wordlist-sqlite-t tests/tools/wordlist-t		    \
-	tests/util/xmalloc-t tools/heimdal-strength.pod
+	tests/util/xmalloc-t tests/valgrind/logs-t			    \
+	tools/heimdal-strength.pod
 
 # Do this globally.  Everything needs to find the Kerberos headers and
 # libraries, and if we're using the system CrackLib, TinyCDB, or SQLite, add
