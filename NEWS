@@ -44,6 +44,7 @@ krb5-strength 3.2 (2020-05-17)
     * Skip more build system files when running the test suite.
     * Fix warnings with Clang 10, GCC 10, and the Clang static analyzer.
     * Exclude more valgrind false positives with Kerberos libraries.
+    * Improve support for AIX's bundled Kerberos.
 
     Update to C TAP Harness 4.7:
 
