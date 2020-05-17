@@ -9,7 +9,7 @@
  * Copyright 2013
  *     The Board of Trustees of the Leland Stanford Junior University
  *
- * See LICENSE for licensing terms.
+ * SPDX-License-Identifier: MIT
  */
 
 #include <config.h>
@@ -19,7 +19,7 @@
 
 #include <errno.h>
 #ifdef HAVE_KRB5_PWQUAL_PLUGIN_H
-# include <krb5/pwqual_plugin.h>
+#    include <krb5/pwqual_plugin.h>
 #endif
 
 #include <plugin/internal.h>

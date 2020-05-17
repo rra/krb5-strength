@@ -2,10 +2,10 @@
  * Test for the Heimdal shared module API.
  *
  * Written by Russ Allbery <eagle@eyrie.org>
- * Copyright 2009, 2013, 2014
+ * Copyright 2009, 2013-2014
  *     The Board of Trustees of the Leland Stanford Junior University
  *
- * See LICENSE for licensing terms.
+ * SPDX-License-Identifier: MIT
  */
 
 #include <config.h>
@@ -15,7 +15,7 @@
 #include <dlfcn.h>
 #include <errno.h>
 #ifdef HAVE_KADM5_KADM5_PWCHECK_H
-# include <kadm5/kadm5-pwcheck.h>
+#    include <kadm5/kadm5-pwcheck.h>
 #endif
 
 #include <tests/tap/basic.h>
@@ -168,16 +168,14 @@ main(void)
     /* Load the plugin. */
     verifier = load_plugin(&handle);
 
-    /* Set up our krb5.conf with the dictionary configuration. */
+    /* Set up our krb5.conf with a basic configuration. */
     setup_argv[0] = test_file_path("data/make-krb5-conf");
     if (setup_argv[0] == NULL)
         bail("cannot find data/make-krb5-conf in the test suite");
     tmpdir = test_tmpdir();
     setup_argv[1] = path;
     setup_argv[2] = tmpdir;
-    setup_argv[3] = (char *) "password_dictionary";
-    basprintf(&setup_argv[4], "%s/data/dictionary", getenv("BUILD"));
-    setup_argv[5] = NULL;
+    setup_argv[3] = NULL;
     run_setup((const char **) setup_argv);
 
     /* Point KRB5_CONFIG at the newly-generated krb5.conf file. */
@@ -185,11 +183,28 @@ main(void)
     putenv(krb5_config);
     free(krb5_config_empty);
 
-    /* Now, run all of the tests. */
-    for (i = 0; i < ARRAY_SIZE(cracklib_tests); i++)
-        is_password_test(verifier, &cracklib_tests[i]);
+    /* Run principal tests. */
     for (i = 0; i < ARRAY_SIZE(principal_tests); i++)
         is_password_test(verifier, &principal_tests[i]);
+
+#    ifdef HAVE_CRACKLIB
+
+    /* Add CrackLib tests. */
+    setup_argv[3] = (char *) "password_dictionary";
+    basprintf(&setup_argv[4], "%s/data/dictionary", getenv("BUILD"));
+    setup_argv[5] = NULL;
+    run_setup((const char **) setup_argv);
+
+    /* Now, run all of the tests. */
+    for (i = 0; i < ARRAY_SIZE(cracklib_tests); i++) {
+#        ifdef HAVE_SYSTEM_CRACKLIB
+        if (cracklib_tests[i].skip_for_system_cracklib) {
+            skip_block(2, "not built with embedded CrackLib");
+            continue;
+        }
+#        endif
+        is_password_test(verifier, &cracklib_tests[i]);
+    }
 
     /*
      * Add length restrictions and a maximum length for CrackLib.  This should
@@ -207,14 +222,25 @@ main(void)
     for (i = 0; i < ARRAY_SIZE(length_tests); i++)
         is_password_test(verifier, &length_tests[i]);
 
+    /* Free the memory allocated for the CrackLib test. */
+    free(setup_argv[4]);
+
+#    else
+
+    /* Otherwise, mark the CrackLib tests as skipped. */
+    count = ARRAY_SIZE(cracklib_tests) + ARRAY_SIZE(length_tests);
+    skip_block(count * 2, "not built with CDB support");
+
+#    endif /* !HAVE_CRACKLIB */
+
     /* Add simple character class restrictions. */
-    setup_argv[5] = (char *) "minimum_different";
-    setup_argv[6] = (char *) "8";
-    setup_argv[7] = (char *) "require_ascii_printable";
+    setup_argv[3] = (char *) "minimum_different";
+    setup_argv[4] = (char *) "8";
+    setup_argv[5] = (char *) "require_ascii_printable";
+    setup_argv[6] = (char *) "true";
+    setup_argv[7] = (char *) "require_non_letter";
     setup_argv[8] = (char *) "true";
-    setup_argv[9] = (char *) "require_non_letter";
-    setup_argv[10] = (char *) "true";
-    setup_argv[11] = NULL;
+    setup_argv[9] = NULL;
     run_setup((const char **) setup_argv);
 
     /* Run the simple character class tests. */
@@ -222,7 +248,6 @@ main(void)
         is_password_test(verifier, &letter_tests[i]);
 
     /* Add complex character class restrictions and remove the dictionary. */
-    free(setup_argv[4]);
     setup_argv[3] = (char *) "require_classes";
     setup_argv[4] = (char *) "8-19:lower,upper 8-15:digit 8-11:symbol 24-24:3";
     setup_argv[5] = NULL;
@@ -242,7 +267,7 @@ main(void)
     for (i = 0; i < ARRAY_SIZE(length_tests); i++)
         is_password_test(verifier, &length_tests[i]);
 
-#ifdef HAVE_CDB
+#    ifdef HAVE_CDB
 
     /* If built with CDB, set up krb5.conf to use a CDB dictionary instead. */
     setup_argv[3] = (char *) "password_dictionary_cdb";
@@ -259,15 +284,15 @@ main(void)
     for (i = 0; i < ARRAY_SIZE(principal_tests); i++)
         is_password_test(verifier, &principal_tests[i]);
 
-#else /* !HAVE_CDB */
+#    else /* !HAVE_CDB */
 
     /* Otherwise, mark the CDB tests as skipped. */
     count = ARRAY_SIZE(cdb_tests) + ARRAY_SIZE(principal_tests);
     skip_block(count * 2, "not built with CDB support");
 
-#endif /* !HAVE_CDB */
+#    endif /* !HAVE_CDB */
 
-#ifdef HAVE_SQLITE
+#    ifdef HAVE_SQLITE
 
     /*
      * If built with SQLite, set up krb5.conf to use a SQLite dictionary
@@ -289,13 +314,13 @@ main(void)
     for (i = 0; i < ARRAY_SIZE(principal_tests); i++)
         is_password_test(verifier, &principal_tests[i]);
 
-#else /* !HAVE_SQLITE */
+#    else /* !HAVE_SQLITE */
 
     /* Otherwise, mark the SQLite tests as skipped. */
     count = ARRAY_SIZE(sqlite_tests) + ARRAY_SIZE(principal_tests);
     skip_block(count * 2, "not built with SQLite support");
 
-#endif /* !HAVE_SQLITE */
+#    endif /* !HAVE_SQLITE */
 
     /* Manually clean up after the results of make-krb5-conf. */
     basprintf(&path, "%s/krb5.conf", tmpdir);

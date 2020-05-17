@@ -5,14 +5,17 @@
  * for the use in C test programs.  To make changes, modify the original
  * JSON source or (more rarely) the make-c-data script and run it again.
  *
+ * Written by Russ Allbery <eagle@eyrie.org>
+ * Copyright 2020 Russ Allbery <eagle@eyrie.org>
  * Copyright 2013
  *     The Board of Trustees of the Leland Stanford Junior University
  *
- * See LICENSE for licensing terms.
+ * SPDX-License-Identifier: MIT
  */
 
 #include <tests/data/passwords/tests.h>
 
+extern const struct password_test length_tests[];
 const struct password_test length_tests[] = {
     {
 
@@ -21,6 +24,7 @@ const struct password_test length_tests[] = {
         "vUCZ2aX$Y.e",
         KADM5_PASS_Q_TOOSHORT,
         "Password is too short",
+        0,
     },
     {
 
@@ -29,6 +33,7 @@ const struct password_test length_tests[] = {
         "vUCZ2aX$Y.e1",
         0,
         NULL,
+        0,
     },
     {
 
@@ -37,5 +42,6 @@ const struct password_test length_tests[] = {
         "happenstance",
         0,
         NULL,
+        0,
     },
 };

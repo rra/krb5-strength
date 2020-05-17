@@ -5,14 +5,17 @@
  * for the use in C test programs.  To make changes, modify the original
  * JSON source or (more rarely) the make-c-data script and run it again.
  *
+ * Written by Russ Allbery <eagle@eyrie.org>
+ * Copyright 2020 Russ Allbery <eagle@eyrie.org>
  * Copyright 2013
  *     The Board of Trustees of the Leland Stanford Junior University
  *
- * See LICENSE for licensing terms.
+ * SPDX-License-Identifier: MIT
  */
 
 #include <tests/data/passwords/tests.h>
 
+extern const struct password_test cdb_tests[];
 const struct password_test cdb_tests[] = {
     {
 
@@ -21,6 +24,7 @@ const struct password_test cdb_tests[] = {
         "known good password",
         0,
         NULL,
+        0,
     },
     {
 
@@ -29,6 +33,7 @@ const struct password_test cdb_tests[] = {
         "password",
         KADM5_PASS_Q_DICT,
         "Password found in list of common passwords",
+        0,
     },
     {
 
@@ -37,6 +42,7 @@ const struct password_test cdb_tests[] = {
         "bitterbane",
         KADM5_PASS_Q_DICT,
         "Password found in list of common passwords",
+        0,
     },
     {
 
@@ -45,6 +51,7 @@ const struct password_test cdb_tests[] = {
         "1bitterbane",
         KADM5_PASS_Q_DICT,
         "Password found in list of common passwords",
+        0,
     },
     {
 
@@ -53,6 +60,7 @@ const struct password_test cdb_tests[] = {
         "bitterbane1",
         KADM5_PASS_Q_DICT,
         "Password found in list of common passwords",
+        0,
     },
     {
 
@@ -61,6 +69,7 @@ const struct password_test cdb_tests[] = {
         "abbitterbane",
         KADM5_PASS_Q_DICT,
         "Password found in list of common passwords",
+        0,
     },
     {
 
@@ -69,6 +78,7 @@ const struct password_test cdb_tests[] = {
         "bitterbane12",
         KADM5_PASS_Q_DICT,
         "Password found in list of common passwords",
+        0,
     },
     {
 
@@ -77,6 +87,7 @@ const struct password_test cdb_tests[] = {
         "'bitterbane'",
         KADM5_PASS_Q_DICT,
         "Password found in list of common passwords",
+        0,
     },
     {
 
@@ -85,5 +96,6 @@ const struct password_test cdb_tests[] = {
         "bitterbane123",
         0,
         NULL,
+        0,
     },
 };

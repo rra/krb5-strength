@@ -1,5 +1,61 @@
                     User-Visible krb5-strength Changes
 
+krb5-strength 3.2 (2020-05-17)
+
+    Add new -c (--check-only) option to heimdal-history to check whether a
+    password would be accepted without updating the history or password
+    length databases.  Based on work by macrotex.
+
+    Increase hash iterations for heimdal-history by roughly a factor of
+    four to increase the time required for a password hash to about 0.1
+    seconds on modern hardware.  This will affect newly-stored history
+    entries but will not invalidate existing password history entries.
+
+    Support building without CrackLib support by passing
+    --without-cracklib to configure.  This makes the code a bit simpler
+    and lighter if you don't intend to ever use the CrackLib support.
+
+    krb5-strength-wordlist now requires Perl 5.010 or later.
+
+    Use explicit_bzero instead of memset, where available, to overwrite
+    copies of passwords before freeing memory.  This reduces the lifetime
+    of passwords in memory.
+
+    Skip tests that require the stronger rule configuration in the
+    embedded CrackLib when built against system CrackLib.  This avoids
+    test failures when built with system CrackLib.
+
+    Rework the check-valgrind target to use the new C TAP Harness valgrind
+    support and automatically check the valgrind log files for errors at
+    the end of the test suite.
+
+    Add SPDX-License-Identifier headers to all substantial source files
+    other than those in the bundled version of CrackLib.
+
+    Update to rra-c-util 8.2:
+
+    * Implement explicit_bzero with memset if it is not available.
+    * Reformat all C source using clang-format 10.
+    * Work around Test::Strict not skipping .git directories.
+    * Fix warnings with perltidy 20190601 and Perl::Critic 1.134.
+    * Improve check for obsolete strings.
+    * Use a more standard all-permissive license.
+    * Add SPDX-License-Identifier headers to all substantial source files.
+    * Skip more build system files when running the test suite.
+    * Fix warnings with Clang 10, GCC 10, and the Clang static analyzer.
+    * Exclude more valgrind false positives with Kerberos libraries.
+    * Improve support for AIX's bundled Kerberos.
+
+    Update to C TAP Harness 4.7:
+
+    * Fix warnings with GCC 10.
+    * Reformat all C source using clang-format 10.
+    * Fixed malloc error checking in bstrndup.
+    * Add support for valgrind testing via test list options.
+    * Report test failures as left and right, not wanted and seen.
+    * Fix is_string comparisons involving NULL pointers and "(null)".
+    * Add SPDX-License-Identifier headers to all substantial source files.
+
 krb5-strength 3.1 (2016-12-25)
 
     A new configuration option, cracklib_maxlen, can be set to skip

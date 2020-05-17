@@ -5,14 +5,17 @@
  * for the use in C test programs.  To make changes, modify the original
  * JSON source or (more rarely) the make-c-data script and run it again.
  *
+ * Written by Russ Allbery <eagle@eyrie.org>
+ * Copyright 2020 Russ Allbery <eagle@eyrie.org>
  * Copyright 2013
  *     The Board of Trustees of the Leland Stanford Junior University
  *
- * See LICENSE for licensing terms.
+ * SPDX-License-Identifier: MIT
  */
 
 #include <tests/data/passwords/tests.h>
 
+extern const struct password_test principal_tests[];
 const struct password_test principal_tests[] = {
     {
 
@@ -21,6 +24,7 @@ const struct password_test principal_tests[] = {
         "someuser",
         KADM5_PASS_Q_GENERIC,
         "Password based on username or principal",
+        0,
     },
     {
 
@@ -29,6 +33,7 @@ const struct password_test principal_tests[] = {
         "resuemos",
         KADM5_PASS_Q_GENERIC,
         "Password based on username or principal",
+        0,
     },
     {
 
@@ -37,6 +42,7 @@ const struct password_test principal_tests[] = {
         "someuser123",
         KADM5_PASS_Q_GENERIC,
         "Password based on username or principal",
+        0,
     },
     {
 
@@ -45,6 +51,7 @@ const struct password_test principal_tests[] = {
         "test@EXAMPLE.ORG",
         KADM5_PASS_Q_GENERIC,
         "Password based on username or principal",
+        0,
     },
     {
 
@@ -53,6 +60,7 @@ const struct password_test principal_tests[] = {
         "123someuser",
         KADM5_PASS_Q_GENERIC,
         "Password based on username or principal",
+        0,
     },
     {
 
@@ -61,6 +69,7 @@ const struct password_test principal_tests[] = {
         "1someuser2",
         KADM5_PASS_Q_GENERIC,
         "Password based on username or principal",
+        0,
     },
     {
 
@@ -69,6 +78,7 @@ const struct password_test principal_tests[] = {
         "newexample",
         KADM5_PASS_Q_GENERIC,
         "Password based on username or principal",
+        0,
     },
     {
 
@@ -77,6 +87,7 @@ const struct password_test principal_tests[] = {
         "newexample123",
         KADM5_PASS_Q_GENERIC,
         "Password based on username or principal",
+        0,
     },
     {
 
@@ -85,6 +96,7 @@ const struct password_test principal_tests[] = {
         "123newexample",
         KADM5_PASS_Q_GENERIC,
         "Password based on username or principal",
+        0,
     },
     {
 
@@ -93,6 +105,7 @@ const struct password_test principal_tests[] = {
         "ELPMAXEWEN",
         KADM5_PASS_Q_GENERIC,
         "Password based on username or principal",
+        0,
     },
     {
 
@@ -101,6 +114,7 @@ const struct password_test principal_tests[] = {
         "ORG1791520",
         KADM5_PASS_Q_GENERIC,
         "Password based on username or principal",
+        0,
     },
     {
 
@@ -109,5 +123,6 @@ const struct password_test principal_tests[] = {
         "NewExample.Org",
         KADM5_PASS_Q_GENERIC,
         "Password based on username or principal",
+        0,
     },
 };

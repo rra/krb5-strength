@@ -5,14 +5,17 @@
  * for the use in C test programs.  To make changes, modify the original
  * JSON source or (more rarely) the make-c-data script and run it again.
  *
+ * Written by Russ Allbery <eagle@eyrie.org>
+ * Copyright 2020 Russ Allbery <eagle@eyrie.org>
  * Copyright 2013
  *     The Board of Trustees of the Leland Stanford Junior University
  *
- * See LICENSE for licensing terms.
+ * SPDX-License-Identifier: MIT
  */
 
 #include <tests/data/passwords/tests.h>
 
+extern const struct password_test classes_tests[];
 const struct password_test classes_tests[] = {
     {
 
@@ -21,6 +24,7 @@ const struct password_test classes_tests[] = {
         "PASSWORD98!",
         KADM5_PASS_Q_CLASS,
         "Password must contain a lowercase letter",
+        0,
     },
     {
 
@@ -29,6 +33,7 @@ const struct password_test classes_tests[] = {
         "password98!",
         KADM5_PASS_Q_CLASS,
         "Password must contain an uppercase letter",
+        0,
     },
     {
 
@@ -37,6 +42,7 @@ const struct password_test classes_tests[] = {
         "passwordXX!",
         KADM5_PASS_Q_CLASS,
         "Password must contain a number",
+        0,
     },
     {
 
@@ -45,6 +51,7 @@ const struct password_test classes_tests[] = {
         "passwordXX9",
         KADM5_PASS_Q_CLASS,
         "Password must contain a space or punctuation character",
+        0,
     },
     {
 
@@ -53,6 +60,7 @@ const struct password_test classes_tests[] = {
         "passwordX9!",
         0,
         NULL,
+        0,
     },
     {
 
@@ -61,6 +69,7 @@ const struct password_test classes_tests[] = {
         "pass wordX9",
         0,
         NULL,
+        0,
     },
     {
 
@@ -69,6 +78,7 @@ const struct password_test classes_tests[] = {
         "PASSWORD98!WORD",
         KADM5_PASS_Q_CLASS,
         "Password must contain a lowercase letter",
+        0,
     },
     {
 
@@ -77,6 +87,7 @@ const struct password_test classes_tests[] = {
         "password98!word",
         KADM5_PASS_Q_CLASS,
         "Password must contain an uppercase letter",
+        0,
     },
     {
 
@@ -85,6 +96,7 @@ const struct password_test classes_tests[] = {
         "passwordXX!word",
         KADM5_PASS_Q_CLASS,
         "Password must contain a number",
+        0,
     },
     {
 
@@ -93,6 +105,7 @@ const struct password_test classes_tests[] = {
         "passwordXX9w",
         0,
         NULL,
+        0,
     },
     {
 
@@ -101,6 +114,7 @@ const struct password_test classes_tests[] = {
         "passwordXX9word",
         0,
         NULL,
+        0,
     },
     {
 
@@ -109,6 +123,7 @@ const struct password_test classes_tests[] = {
         "passwordX9!word",
         0,
         NULL,
+        0,
     },
     {
 
@@ -117,6 +132,7 @@ const struct password_test classes_tests[] = {
         "pass wordX9word",
         0,
         NULL,
+        0,
     },
     {
 
@@ -125,6 +141,7 @@ const struct password_test classes_tests[] = {
         "PASSWORD98!WORDWORD",
         KADM5_PASS_Q_CLASS,
         "Password must contain a lowercase letter",
+        0,
     },
     {
 
@@ -133,6 +150,7 @@ const struct password_test classes_tests[] = {
         "password98!wordword",
         KADM5_PASS_Q_CLASS,
         "Password must contain an uppercase letter",
+        0,
     },
     {
 
@@ -141,6 +159,7 @@ const struct password_test classes_tests[] = {
         "passwordXX!wordw",
         0,
         NULL,
+        0,
     },
     {
 
@@ -149,6 +168,7 @@ const struct password_test classes_tests[] = {
         "passwordXX!wordword",
         0,
         NULL,
+        0,
     },
     {
 
@@ -157,6 +177,7 @@ const struct password_test classes_tests[] = {
         "passwordXX9wordword",
         0,
         NULL,
+        0,
     },
     {
 
@@ -165,6 +186,7 @@ const struct password_test classes_tests[] = {
         "passwordX9!wordword",
         0,
         NULL,
+        0,
     },
     {
 
@@ -173,6 +195,7 @@ const struct password_test classes_tests[] = {
         "pass wordX9wordword",
         0,
         NULL,
+        0,
     },
     {
 
@@ -181,6 +204,7 @@ const struct password_test classes_tests[] = {
         "PASSWORD98!WORDWORDW",
         0,
         NULL,
+        0,
     },
     {
 
@@ -189,6 +213,7 @@ const struct password_test classes_tests[] = {
         "password98!wordwordw",
         0,
         NULL,
+        0,
     },
     {
 
@@ -197,6 +222,7 @@ const struct password_test classes_tests[] = {
         "passwordXX!wordwordw",
         0,
         NULL,
+        0,
     },
     {
 
@@ -205,6 +231,7 @@ const struct password_test classes_tests[] = {
         "passwordXX9wordwordw",
         0,
         NULL,
+        0,
     },
     {
 
@@ -213,6 +240,7 @@ const struct password_test classes_tests[] = {
         "passwordX9!wordwordw",
         0,
         NULL,
+        0,
     },
     {
 
@@ -221,6 +249,7 @@ const struct password_test classes_tests[] = {
         "pass wordX9wordwordw",
         0,
         NULL,
+        0,
     },
     {
 
@@ -229,6 +258,7 @@ const struct password_test classes_tests[] = {
         "alllowercasewithclassreq",
         KADM5_PASS_Q_CLASS,
         "Password must contain 3 types of characters (lowercase, uppercase, numbers, symbols)",
+        0,
     },
     {
 
@@ -237,6 +267,7 @@ const struct password_test classes_tests[] = {
         "LowerUprcasewithclassreq",
         KADM5_PASS_Q_CLASS,
         "Password must contain 3 types of characters (lowercase, uppercase, numbers, symbols)",
+        0,
     },
     {
 
@@ -245,6 +276,7 @@ const struct password_test classes_tests[] = {
         "LowerUp!casewithclassreq",
         0,
         NULL,
+        0,
     },
     {
 
@@ -253,5 +285,6 @@ const struct password_test classes_tests[] = {
         "alllowercasewithclassreqr",
         0,
         NULL,
+        0,
     },
 };

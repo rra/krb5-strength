@@ -28,6 +28,10 @@
  * 2016-11-06  Russ Allbery <eagle@eyrie.org>
  *   - Remove unused vers_id to silence GCC warnings.
  *   - Added GCC __attribute__ marker on Debug() function.
+ * 2020-05-16  Russ Allbery <eagle@eyrie.org>
+ *   - Change variables from int to size_t to silence warnings.
+ *   - Add missing break to RULE_MFIRST and RULE_MLAST handling.
+ *   - Remove break after return to silence Clang warnings.
  */
 
 #include <stdarg.h>
@@ -86,8 +90,8 @@ Debug(int val, const char *fmt, ...)
 static int
 Suffix(const char *myword, const char *suffix)
 {
-    register int i;
-    register int j;
+    register size_t i;
+    register size_t j;
     i = strlen(myword);
     j = strlen(suffix);
 
@@ -104,8 +108,8 @@ Suffix(const char *myword, const char *suffix)
 char *
 Reverse(const char *str)
 {
-    register int i;
-    register int j;
+    register size_t i;
+    register size_t j;
     static char area[STRINGSIZE];
     j = i = strlen(str);
     while (*str)
@@ -173,7 +177,7 @@ Capitalise(const char *str)
 static char *
 Pluralise(const char *string)
 {
-    register int length;
+    register size_t length;
     static char area[STRINGSIZE];
     length = strlen(string);
     strcpy(area, string);
@@ -359,7 +363,6 @@ MatchClass(char class, char input)
     default:
 	Debug(1, "MatchClass: unknown class %c\n", class);
 	return (0);
-	break;
     }
 
     if (isupper(class))
@@ -439,8 +442,9 @@ Char2Int(char character)
 char *
 Mangle(const char *input, const char *control)
 {
-    int limit, min_to_shift;
-    register int j;
+    int limit;
+    size_t min_to_shift;
+    register size_t j;
     const char *ptr;
     static char area[STRINGSIZE * 2] = "";
     char area2[STRINGSIZE * 2] = "";
@@ -786,6 +790,8 @@ Mangle(const char *input, const char *control)
 		    }
 		}
 	    }
+            break;
+
 	case RULE_MLAST:
 	    if (!ptr[1] || (ptr[1] == RULE_CLASS && !ptr[2]))
 	    {
@@ -821,11 +827,11 @@ Mangle(const char *input, const char *control)
 		    }
 		}
 	    }
+            break;
 
 	default:
 	    Debug(1, "Mangle: unknown command %c in %s\n", *ptr, control);
 	    return ((char *) 0);
-	    break;
 	}
     }
     if (!area[0])		/* have we deweted de poor widdle fing away? */

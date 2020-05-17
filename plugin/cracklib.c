@@ -8,24 +8,57 @@
  * Developed by Derrick Brashear and Ken Hornstein of Sine Nomine Associates,
  *     on behalf of Stanford University
  * Extensive modifications by Russ Allbery <eagle@eyrie.org>
- * Copyright 2006, 2007, 2009, 2012, 2013
+ * Copyright 2017 Russ Allbery <eagle@eyrie.org>
+ * Copyright 2006-2007, 2009, 2012-2013
  *     The Board of Trustees of the Leland Stanford Junior University
  *
- * See LICENSE for licensing terms.
+ * SPDX-License-Identifier: MIT
  */
 
 #include <config.h>
+#include <portable/kadmin.h>
 #include <portable/system.h>
 
 #include <plugin/internal.h>
+#include <util/macros.h>
 
 /* When using the embedded CrackLib, we need to provide our own prototype. */
-#ifdef HAVE_CRACK_H
-# include <crack.h>
-#else
+#ifdef HAVE_CRACKLIB
+#    ifdef HAVE_CRACK_H
+#        include <crack.h>
+#    else
 extern const char *FascistCheck(const char *password, const char *dict);
+#    endif
 #endif
 
+
+/*
+ * Stub for strength_init_cracklib if not built with CrackLib support.
+ */
+#ifndef HAVE_CRACKLIB
+krb5_error_code
+strength_init_cracklib(krb5_context ctx, krb5_pwqual_moddata data UNUSED,
+                       const char *dictionary UNUSED)
+{
+    char *path = NULL;
+
+    /* Get CDB dictionary path from krb5.conf. */
+    strength_config_string(ctx, "password_dictionary", &path);
+
+    /* If it was set, report an error, since we don't have CrackLib support. */
+    if (path == NULL)
+        return 0;
+    free(path);
+    krb5_set_error_message(ctx, KADM5_BAD_SERVER_PARAMS,
+                           "CrackLib dictionary requested but not built with"
+                           " CrackLib support");
+    return KADM5_BAD_SERVER_PARAMS;
+}
+#endif
+
+
+/* Skip the rest of this file if CrackLib is not available. */
+#ifdef HAVE_CRACKLIB
 
 /*
  * Initialize the CrackLib dictionary.  Ensure that the dictionary file exists
@@ -100,3 +133,5 @@ strength_check_cracklib(krb5_context ctx, krb5_pwqual_moddata data,
     else
         return 0;
 }
+
+#endif /* HAVE_CRACKLIB */

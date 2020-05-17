@@ -1,29 +1,32 @@
 # Automake makefile for krb5-strength.
 #
 # Written by Russ Allbery <eagle@eyrie.org>
-# Copyright 2016 Russ Allbery <eagle@eyrie.org>
-# Copyright 2007, 2009, 2010, 2012, 2013, 2014
+# Copyright 2016, 2020 Russ Allbery <eagle@eyrie.org>
+# Copyright 2007, 2009-2010, 2012-2014
 #     The Board of Trustees of the Leland Stanford Junior University
 #
-# See LICENSE for licensing terms.
+# SPDX-License-Identifier: MIT
 
 ACLOCAL_AMFLAGS = -I m4
-EXTRA_DIST = .gitignore .travis.yml README.md LICENSE bootstrap		    \
-	cracklib/HISTORY cracklib/LICENCE cracklib/README		    \
-	cracklib/genrules.pl cracklib/mkdict docs/krb5-strength.5.in	    \
-	docs/krb5-strength.pod docs/metadata tests/README tests/TESTS	    \
+EXTRA_DIST = .clang-format .github .gitignore README.md LICENSE bootstrap   \
+	ci/README ci/install ci/test cracklib/HISTORY cracklib/LICENCE	    \
+	cracklib/README cracklib/genrules.pl cracklib/mkdict		    \
+	docs/krb5-strength.5.in docs/krb5-strength.pod docs/metadata	    \
+	tests/README tests/TESTS tests/data/cppcheck.supp		    \
 	tests/data/krb5.conf tests/data/make-krb5-conf tests/data/passwords \
 	tests/data/perl.conf tests/data/perlcriticrc tests/data/perltidyrc  \
 	tests/data/valgrind.supp tests/data/wordlist			    \
 	tests/data/wordlist.cdb tests/data/wordlist.sqlite		    \
-	tests/docs/pod-spelling-t tests/docs/pod-t tests/docs/urls-t	    \
-	tests/perl/critic-t tests/perl/minimum-version-t		    \
-	tests/perl/strict-t tests/tap/libtap.sh tests/tap/perl/Test/RRA.pm  \
-	tests/tap/perl/Test/RRA/Config.pm				    \
+	tests/docs/pod-spelling-t tests/docs/pod-t			    \
+	tests/docs/spdx-license-t tests/perl/critic-t			    \
+	tests/perl/minimum-version-t tests/perl/strict-t		    \
+	tests/style/obsolete-strings-t tests/tap/libtap.sh		    \
+	tests/tap/perl/Test/RRA.pm tests/tap/perl/Test/RRA/Config.pm	    \
 	tests/tap/perl/Test/RRA/Automake.pm tests/tools/heimdal-history-t   \
 	tests/tools/heimdal-strength-t tests/tools/wordlist-cdb-t	    \
 	tests/tools/wordlist-sqlite-t tests/tools/wordlist-t		    \
-	tests/util/xmalloc-t tools/heimdal-strength.pod
+	tests/util/xmalloc-t tests/valgrind/logs-t			    \
+	tools/heimdal-strength.pod
 
 # Do this globally.  Everything needs to find the Kerberos headers and
 # libraries, and if we're using the system CrackLib, TinyCDB, or SQLite, add
@@ -194,17 +197,32 @@ endif
 check-local: $(check_PROGRAMS) tests/data/dictionary.pwd
 	cd tests && ./runtests -l $(abs_top_srcdir)/tests/TESTS
 
-# Used by maintainers to run the main test suite under valgrind.  Suppress
-# the xmalloc and pod-spelling tests because the former won't work properly
-# under valgrind (due to increased memory usage) and the latter is pointless
-# to run under valgrind.  Don't try to trace several of the tests that are
-# written in Perl or shell and test Perl programs.
+# Used by maintainers to check the source code with cppcheck.
+check-cppcheck:
+	cd $(abs_top_srcdir) &&						\
+	    find . -name .git -prune -o -name '*.[ch]' -print		\
+	    | cppcheck -q --force --error-exitcode=2 --file-list=-	\
+		--suppressions-list=tests/data/cppcheck.supp		\
+		--enable=warning,performance,portability,style
+
+# The full path to valgrind and its options, used when doing valgrind
+# testing.
+VALGRIND_COMMAND = $(PATH_VALGRIND) --leak-check=full			\
+	--trace-children=yes --trace-children-skip=/bin/sh		\
+	--suppressions=$(abs_top_srcdir)/tests/data/valgrind.supp	\
+	--log-file=$(abs_top_builddir)/tests/tmp/valgrind/log.%p
+
+# Used by maintainers to run the main test suite under valgrind.
 check-valgrind: $(check_PROGRAMS) tests/data/dictionary.pwd
-	rm -rf $(abs_top_builddir)/tmp-valgrind
-	mkdir $(abs_top_builddir)/tmp-valgrind
-	env RRA_MAINTAINER_TESTS= valgrind --leak-check=full		\
-	    --show-reachable=yes --trace-children=yes			\
-	    --log-file=$(abs_top_builddir)/tmp-valgrind/log.%p		\
-	    --suppressions=$(abs_top_srcdir)/tests/data/valgrind.supp	\
-	    --trace-children-skip="/bin/sh,*/cat,*/diff,*/expr,*/grep,*/mkdir,*/rm,*/rmdir,*/sed,*/sleep,*/true,*/wc,*/docs/*-t,*/perl/*-t,*/data/make-krb5-conf,*/tools/heimdal-history-t,*/tools/wordlist*-t" \
-	    tests/runtests -l '$(abs_top_srcdir)/tests/TESTS'
+	rm -rf $(abs_top_builddir)/tests/tmp
+	mkdir $(abs_top_builddir)/tests/tmp
+	mkdir $(abs_top_builddir)/tests/tmp/valgrind
+	C_TAP_VALGRIND="$(VALGRIND_COMMAND)" tests/runtests \
+	    -l '$(abs_top_srcdir)/tests/TESTS'
+
+# Used by maintainers to reformat all source code using clang-format and
+# excluding some files.
+reformat:
+	find . -name '*.[ch]' \! -name snprintf.c \! -name krb5-profile.c \
+	    \! -path './cracklib/*' -print				  \
+	    | xargs clang-format-10 -style=file -i

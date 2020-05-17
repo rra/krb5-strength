@@ -12,10 +12,11 @@
  * instead.
  *
  * Written by Russ Allbery <eagle@eyrie.org>
+ * Copyright 2020 Russ Allbery <eagle@eyrie.org>
  * Copyright 2009, 2013
  *     The Board of Trustees of the Leland Stanford Junior University
  *
- * See LICENSE for licensing terms.
+ * SPDX-License-Identifier: MIT
  */
 
 #include <config.h>
@@ -24,7 +25,7 @@
 
 #include <errno.h>
 #ifdef HAVE_KADM5_KADM5_PWCHECK_H
-# include <kadm5/kadm5-pwcheck.h>
+#    include <kadm5/kadm5-pwcheck.h>
 #endif
 
 #include <plugin/internal.h>
@@ -60,11 +61,11 @@ convert_error(krb5_context ctx, krb5_error_code code, const char *prefix,
  */
 static int
 heimdal_pwcheck(krb5_context ctx, krb5_principal principal,
-                krb5_data *password, const char *tuning UNUSED,
-                char *message, size_t length)
+                krb5_data *password, const char *tuning UNUSED, char *message,
+                size_t length)
 {
     krb5_pwqual_moddata data = NULL;
-    char *pastring = NULL;
+    char *pastring;
     char *name = NULL;
     krb5_error_code code;
 
@@ -107,15 +108,18 @@ done:
 }
 
 /* The public symbol that Heimdal looks for. */
+/* clang-format off */
 static struct kadm5_pw_policy_check_func functions[] = {
-    { "krb5-strength", heimdal_pwcheck },
-    { NULL, NULL }
+    {"krb5-strength", heimdal_pwcheck},
+    {NULL, NULL}
 };
+extern struct kadm5_pw_policy_verifier kadm5_password_verifier;
 struct kadm5_pw_policy_verifier kadm5_password_verifier = {
     "krb5-strength",
     KADM5_PASSWD_VERSION_V1,
     "Russ Allbery",
     functions
 };
+/* clang-format on */
 
 #endif /* HAVE_KRB5_REALM */

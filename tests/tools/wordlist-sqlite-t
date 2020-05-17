@@ -3,10 +3,11 @@
 # Test suite for krb5-strength-wordlist SQLite database generation
 #
 # Written by Russ Allbery <eagle@eyrie.org>
+# Copyright 2020 Russ Allbery <eagle@eyrie.org>
 # Copyright 2014
 #     The Board of Trustees of the Leland Stanford Junior University
 #
-# See LICENSE for licensing terms.
+# SPDX-License-Identifier: MIT
 
 use 5.006;
 use strict;
@@ -14,9 +15,10 @@ use warnings;
 
 use lib "$ENV{SOURCE}/tap/perl";
 
-use Test::More;
 use Test::RRA qw(use_prereq);
 use Test::RRA::Automake qw(automake_setup test_file_path test_tmpdir);
+
+use Test::More;
 
 # Load prerequisite modules.
 use_prereq('DBI');

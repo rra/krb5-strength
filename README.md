@@ -1,6 +1,11 @@
-# krb5-strength 3.1
+# krb5-strength 3.2
 
-Copyright 2016 Russ Allbery <eagle@eyrie.org>.  Copyright 2006-2007,
+[![Build
+status](https://github.com/rra/krb5-strength/workflows/build/badge.svg)](https://github.com/rra/krb5-strength/actions)
+[![Debian
+package](https://img.shields.io/debian/v/krb5-strength)](https://tracker.debian.org/pkg/krb5-strength)
+
+Copyright 2016, 2020 Russ Allbery <eagle@eyrie.org>.  Copyright 2006-2007,
 2009-2010, 2012-2014 The Board of Trustees of the Leland Stanford Junior
 University.  Copyright 1993 Alec Muffett.  This software is distributed
 under a BSD-style license.  Please see the section [License](#license)
@@ -80,7 +85,7 @@ history implementation.
 For Heimdal, you may use either the external password quality check tool,
 installed as heimdal-strength, or the plugin as you choose.  It has been
 tested with Heimdal 1.2.1 and later, but has not recently been tested with
-versions prior to 1.5.
+versions prior to 7.0.
 
 For MIT Kerberos, version 1.9 or higher is required for the password
 quality plugin interface.  MIT Kerberos does not support an external
@@ -113,7 +118,7 @@ distribution); the database format is compatible.
 For building a CDB or SQLite dictionary, use the provided
 `krb5-strength-wordlist` program.  For CDB dictionries, the `cdb` utility
 must be on your `PATH`.  For SQLite, the DBI and DBD::SQLite Perl modules
-are required.  `krb5-strength-wordlist` requires Perl 5.006 or later.
+are required.  `krb5-strength-wordlist` requires Perl 5.010 or later.
 
 For a word list to use as source for the dictionary, you can use
 `/usr/share/dict/words` if it's available on your system, but it would be
@@ -132,27 +137,6 @@ later plus the following CPAN modules:
 * Readonly
 
 and their dependencies.
-
-To run the test suite, you will need Perl 5.010 or later and the
-dependencies of the `heimdal-history` program.  The following additional
-Perl modules will also be used by the test suite if present:
-
-* Perl6::Slurp
-* Test::MinimumVersion
-* Test::Perl::Critic
-* Test::Pod
-* Test::Spelling
-* Test::Strict
-
-All are available on CPAN.  Some tests will be skipped if the modules are
-not available.
-
-To enable tests that don't detect functionality problems but are used to
-sanity-check the release, set the environment variable `RELEASE_TESTING`
-to a true value.  To enable tests that may be sensitive to the local
-environment or that produce a lot of false positives without uncovering
-many problems, set the environment variable `AUTHOR_TESTING` to a true
-value.
 
 To bootstrap from a Git checkout, or if you change the Automake files and
 need to regenerate Makefile.in, you will need Automake 1.11 or later.  For
@@ -182,13 +166,15 @@ By default, the Heimdal external password check function is installed as
 `/usr/local/bin/heimdal-strength`, and the plugin is installed as
 `/usr/local/lib/krb5/plugins/pwqual/strength.so`.  You can change these
 paths with the `--prefix`, `--libdir`, and `--bindir` options to
-configure.
+`configure`.
 
 By default, the embedded version of CrackLib will be used.  To build with
-the system version of CrackLib, pass `--with-cracklib` to configure.  You
-can optionally add a directory, giving the root directory where CrackLib
-was installed, or separately set the include and library path with
-`--with-cracklib-include` and `--with-cracklib-lib`.
+the system version of CrackLib, pass `--with-cracklib` to `configure`.
+You can optionally add a directory, giving the root directory where
+CrackLib was installed, or separately set the include and library path
+with `--with-cracklib-include` and `--with-cracklib-lib`.  You can also
+build without any CrackLib support by passing `--without-cracklib` to
+`configure`.
 
 krb5-strength will automatically build with TinyCDB if it is found.  To
 specify the installation path of TinyCDB, use `--with-tinycdb`.  You can
@@ -239,7 +225,8 @@ path:
 
 Pass `--enable-silent-rules` to configure for a quieter build (similar to
 the Linux kernel).  Use `make warnings` instead of `make` to build with
-full GCC compiler warnings (requires a relatively current version of GCC).
+full GCC compiler warnings (requires either GCC or Clang and may require a
+relatively current version of the compiler).
 
 You can pass the `--enable-reduced-depends` flag to configure to try to
 minimize the shared library dependencies encoded in the binaries.  This
@@ -274,6 +261,27 @@ If a test fails, you can run a single test with verbose output via:
 Do this instead of running the test program directly since it will ensure
 that necessary environment variables are set up.
 
+To run the test suite, you will need Perl 5.010 or later and the
+dependencies of the `heimdal-history` program.  The following additional
+Perl modules will also be used by the test suite if present:
+
+* Perl6::Slurp
+* Test::MinimumVersion
+* Test::Perl::Critic
+* Test::Pod
+* Test::Spelling
+* Test::Strict
+
+All are available on CPAN.  Some tests will be skipped if the modules are
+not available.
+
+To enable tests that don't detect functionality problems but are used to
+sanity-check the release, set the environment variable `RELEASE_TESTING`
+to a true value.  To enable tests that may be sensitive to the local
+environment or that produce a lot of false positives without uncovering
+many problems, set the environment variable `AUTHOR_TESTING` to a true
+value.
+
 ## Support
 
 The [krb5-strength web
@@ -296,7 +304,7 @@ repository at:
 https://git.eyrie.org/git/kerberos/krb5-strength.git
 
 or [view the repository on the
-web](https://git.eyrie.org/?p=devel/krb5-strength.git).
+web](https://git.eyrie.org/?p=kerberos/krb5-strength.git).
 
 The eyrie.org repository is the canonical one, maintained by the author,
 but using GitHub is probably more convenient for most purposes.  Pull
@@ -307,7 +315,7 @@ requests are gratefully reviewed and normally accepted.
 The krb5-strength package as a whole is covered by the following copyright
 statement and license:
 
-> Copyright 2016
+> Copyright 2016, 2020
 >     Russ Allbery <eagle@eyrie.org>
 >
 > Copyright 2006-2007, 2009-2010, 2012-2014
@@ -349,6 +357,10 @@ licenses, all of which are compatible with the above general package
 license but which may require preservation of additional notices.  All
 required notices, and detailed information about the licensing of each
 file, are recorded in the LICENSE file.
+
+Files covered by a license with an assigned SPDX License Identifier
+include SPDX-License-Identifier tags to enable automated processing of
+license information.  See https://spdx.org/licenses/ for more information.
 
 For any copyright range specified by files in this package as YYYY-ZZZZ,
 the range specifies every single year in that closed interval.

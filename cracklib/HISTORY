@@ -7,17 +7,15 @@ following modifications have been made:
  * Modified the adjacent character check to depend on the password length.
  * Remove checks against the user's GECOS entry.
  * Don't exit on failure to open the database.
- * Improve the search algorithm in FindPW somewhat.
+ * Improved the search algorithm in FindPW somewhat.
  * Don't segfault on corrupt dictionaries.
  * Fixed the data format output by packer to properly pad the end.
- * Add ANSI C prototypes for all functions and mark const variables.
- * Remove unused functions.
- * Various compilation warning and portability fixes.
- * Use Autoconf and portable/system.h to find types of specific lengths.
- * Increase MINLENGTH.
- * Add a check for a duplicated dictionary word.
+ * Added ANSI C prototypes for all functions and mark const variables.
+ * Removed unused functions.
+ * Increased MINLENGTH.
+ * Added a check for a duplicated dictionary word.
  * Changed error for very short passwords to match current CrackLib.
- * Remove last block optimization in GetPW and start fresh each time.
+ * Removed last block optimization in GetPW and start fresh each time.
  * Close the dictionary after each password lookup.
  * Set hidden visibility on all CrackLib symbols.
  * Close the wfp file handle on PWClose if it's open.
@@ -25,6 +23,9 @@ following modifications have been made:
  * Changed the type of some variables to size_t to avoid truncation.
  * Forced locale in mkdict to avoid problems with non-C-locale sort.
  * Added a warning to packer if processing out-of-order words.
+ * Used Autoconf and portable/system.h to find types of specific lengths.
+ * Added missing break to RULE_MFIRST "(" and RULE_MLAST ")" handling.
+ * Various compilation warning and portability fixes.
 
 See the leading comments in each source file for a more detailed timeline
 and list of changes.

@@ -9,7 +9,7 @@
  * Copyright 2013
  *     The Board of Trustees of the Leland Stanford Junior University
  *
- * See LICENSE for licensing terms.
+ * SPDX-License-Identifier: MIT
  */
 
 #include <config.h>
@@ -50,20 +50,20 @@ set_error(krb5_context ctx, krb5_error_code code, const char *format,
  * and variable arguments and set the Kerberos error code and message,
  * returning the appropriate code.
  */
-#define ERROR_FUNC(name, code)                                          \
-    krb5_error_code                                                     \
-    strength_error_ ## name(krb5_context ctx, const char *format, ...)  \
-    {                                                                   \
-        va_list args;                                                   \
-        va_start(args, format);                                         \
-        set_error(ctx, code, format, args);                             \
-        va_end(args);                                                   \
-        return code;                                                    \
+#define ERROR_FUNC(name, code)                                     \
+    krb5_error_code strength_error_##name(krb5_context ctx,        \
+                                          const char *format, ...) \
+    {                                                              \
+        va_list args;                                              \
+        va_start(args, format);                                    \
+        set_error(ctx, code, format, args);                        \
+        va_end(args);                                              \
+        return code;                                               \
     }
-ERROR_FUNC(class,    KADM5_PASS_Q_CLASS)
-ERROR_FUNC(config,   KADM5_MISSING_KRB5_CONF_PARAMS)
-ERROR_FUNC(dict,     KADM5_PASS_Q_DICT)
-ERROR_FUNC(generic,  KADM5_PASS_Q_GENERIC)
+ERROR_FUNC(class, KADM5_PASS_Q_CLASS)
+ERROR_FUNC(config, KADM5_MISSING_KRB5_CONF_PARAMS)
+ERROR_FUNC(dict, KADM5_PASS_Q_DICT)
+ERROR_FUNC(generic, KADM5_PASS_Q_GENERIC)
 ERROR_FUNC(tooshort, KADM5_PASS_Q_TOOSHORT)
 
 

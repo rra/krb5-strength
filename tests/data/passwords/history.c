@@ -5,14 +5,17 @@
  * for the use in C test programs.  To make changes, modify the original
  * JSON source or (more rarely) the make-c-data script and run it again.
  *
+ * Written by Russ Allbery <eagle@eyrie.org>
+ * Copyright 2020 Russ Allbery <eagle@eyrie.org>
  * Copyright 2013
  *     The Board of Trustees of the Leland Stanford Junior University
  *
- * See LICENSE for licensing terms.
+ * SPDX-License-Identifier: MIT
  */
 
 #include <tests/data/passwords/tests.h>
 
+extern const struct password_test history_tests[];
 const struct password_test history_tests[] = {
     {
 
@@ -21,6 +24,7 @@ const struct password_test history_tests[] = {
         "password",
         0,
         NULL,
+        0,
     },
     {
 
@@ -29,6 +33,7 @@ const struct password_test history_tests[] = {
         "password",
         0,
         "Password was previously used",
+        0,
     },
     {
 
@@ -37,6 +42,7 @@ const struct password_test history_tests[] = {
         "password2",
         0,
         NULL,
+        0,
     },
     {
 
@@ -45,6 +51,7 @@ const struct password_test history_tests[] = {
         "password2",
         0,
         "Password was previously used",
+        0,
     },
     {
 
@@ -53,6 +60,7 @@ const struct password_test history_tests[] = {
         "password",
         0,
         "Password was previously used",
+        0,
     },
     {
 
@@ -61,6 +69,7 @@ const struct password_test history_tests[] = {
         "password",
         0,
         NULL,
+        0,
     },
     {
 
@@ -69,5 +78,6 @@ const struct password_test history_tests[] = {
         "someuser",
         0,
         "Password based on username or principal",
+        0,
     },
 };

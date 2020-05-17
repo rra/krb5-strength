@@ -7,10 +7,11 @@
  * dictionary.
  *
  * Written by Russ Allbery <eagle@eyrie.org>
+ * Copyright 2020 Russ Allbery <eagle@eyrie.org>
  * Copyright 2009, 2013
  *     The Board of Trustees of the Leland Stanford Junior University
  *
- * See LICENSE for licensing terms.
+ * SPDX-License-Identifier: MIT
  */
 
 #include <config.h>
@@ -21,8 +22,8 @@
 
 #include <plugin/internal.h>
 #include <util/macros.h>
-#include <util/messages.h>
 #include <util/messages-krb5.h>
+#include <util/messages.h>
 #include <util/xmalloc.h>
 
 
@@ -35,8 +36,9 @@ static void
 read_key(const char *key, char *buffer, size_t length)
 {
     char *p;
+    int size = (length < INT_MAX) ? (int) length : INT_MAX;
 
-    if (fgets(buffer, length, stdin) == NULL)
+    if (fgets(buffer, size, stdin) == NULL)
         sysdie("Cannot read %s", key);
     if (strlen(buffer) < 1 || buffer[strlen(buffer) - 1] != '\n')
         die("Malformed or too long %s line", key);
