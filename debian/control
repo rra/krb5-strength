@@ -26,7 +26,7 @@ Build-Depends:
  pkg-config,
  tinycdb,
 Rules-Requires-Root: no
-Standards-Version: 4.2.1
+Standards-Version: 4.5.0
 Homepage: https://www.eyrie.org/~eagle/software/krb5-strength/
 Vcs-Git: https://git.eyrie.org/git/kerberos/krb5-strength.git -b debian/master
 Vcs-Browser: https://git.eyrie.org/?p=kerberos/krb5-strength.git
