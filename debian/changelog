@@ -10,6 +10,7 @@ krb5-strength (3.2-1) UNRELEASED; urgency=medium
     (not used in the Debian build) in debian/copyright, since it's not
     identical to the Artistic license included in common-licenses.
   * Update to debhelper compatibility level V13.
+  * Refresh upstream signing key.
 
  -- Russ Allbery <rra@debian.org>  Sat, 16 May 2020 23:03:34 -0700
 
