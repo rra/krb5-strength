@@ -23,6 +23,7 @@ if [ "$KERBEROS" = 'heimdal' ]; then
 else
     ./configure CC="$COMPILER"
 fi
+make warnings
 
 # Run the tests with valgrind for one of the compilers.  Arbitrarily
 # pick the GCC build.  (The assumption here is that other compilers won't
