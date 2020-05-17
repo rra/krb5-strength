@@ -6,6 +6,11 @@ krb5-strength 3.2 (unreleased)
     password would be accepted without updating the history or password
     length databases.  Based on work by macrotex.
 
+    Increase hash iterations for heimdal-history by roughly a factor of
+    four to increase the time required for a password hash to about 0.1
+    seconds on modern hardware.  This will affect newly-stored history
+    entries but will not invalidate existing password history entries.
+
     Support building without CrackLib support by passing
     --without-cracklib to configure.  This makes the code a bit simpler
     and lighter if you don't intend to ever use the CrackLib support.

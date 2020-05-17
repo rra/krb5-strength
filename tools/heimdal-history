@@ -33,7 +33,7 @@ use Sys::Syslog qw(openlog syslog LOG_AUTH LOG_INFO LOG_WARNING);
 # The number of PBKDF2 iterations to use when hashing passwords.  This number
 # should be chosen so as to force the hash operation to take approximately 0.1
 # seconds on current hardware.
-Readonly my $HASH_ITERATIONS => 14592;
+Readonly my $HASH_ITERATIONS => 40128;
 
 # Path to the history database.  Currently, this must be a Berkeley DB file in
 # the old DB_HASH format.  Keys will be principal names, and values will be a
