@@ -207,9 +207,20 @@ main(void)
         is_password_test(ctx, vtable, data, &principal_tests[i]);
 
 #    ifdef HAVE_CRACKLIB
-    /* Run the CrackLib tests if CrackLib is available, otherwise skip them. */
-    for (i = 0; i < ARRAY_SIZE(cracklib_tests); i++)
+    /*
+     * Run the CrackLib tests if CrackLib is available, otherwise skip them.
+     * If built with the system CrackLib, skip tests that are marked as only
+     * working with the tougher rules of our embedded CrackLib.
+     */
+    for (i = 0; i < ARRAY_SIZE(cracklib_tests); i++) {
+#        ifdef HAVE_SYSTEM_CRACKLIB
+        if (cracklib_tests[i].skip_for_system_cracklib) {
+            skip_block(2, "not built with embedded CrackLib");
+            continue;
+        }
+#        endif
         is_password_test(ctx, vtable, data, &cracklib_tests[i]);
+    }
 #    else
     count = ARRAY_SIZE(cracklib_tests);
     skip_block(count * 2, "not built with CrackLib support");
@@ -253,8 +264,15 @@ main(void)
     is_int(0, code, "Plugin initialization (krb5.conf dictionary)");
     if (code != 0)
         bail("cannot continue after plugin initialization failure");
-    for (i = 0; i < ARRAY_SIZE(cracklib_tests); i++)
+    for (i = 0; i < ARRAY_SIZE(cracklib_tests); i++) {
+#        ifdef HAVE_SYSTEM_CRACKLIB
+        if (cracklib_tests[i].skip_for_system_cracklib) {
+            skip_block(2, "not built with embedded CrackLib");
+            continue;
+        }
+#        endif
         is_password_test(ctx, vtable, data, &cracklib_tests[i]);
+    }
     vtable->close(ctx, data);
 
     /*

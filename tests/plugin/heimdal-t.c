@@ -196,8 +196,15 @@ main(void)
     run_setup((const char **) setup_argv);
 
     /* Now, run all of the tests. */
-    for (i = 0; i < ARRAY_SIZE(cracklib_tests); i++)
+    for (i = 0; i < ARRAY_SIZE(cracklib_tests); i++) {
+#        ifdef HAVE_SYSTEM_CRACKLIB
+        if (cracklib_tests[i].skip_for_system_cracklib) {
+            skip_block(2, "not built with embedded CrackLib");
+            continue;
+        }
+#        endif
         is_password_test(verifier, &cracklib_tests[i]);
+    }
 
     /*
      * Add length restrictions and a maximum length for CrackLib.  This should

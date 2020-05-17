@@ -5,6 +5,7 @@
  * out by make-c-data.  It's included by the test data files.
  *
  * Written by Russ Allbery <eagle@eyrie.org>
+ * Copyright 2020 Russ Allbery <eagle@eyrie.org>
  * Copyright 2013
  *     The Board of Trustees of the Leland Stanford Junior University
  *
@@ -17,6 +18,7 @@
 #include <config.h>
 #include <portable/kadmin.h>
 #include <portable/krb5.h>
+#include <portable/stdbool.h>
 
 struct password_test {
     const char *name;
@@ -24,6 +26,7 @@ struct password_test {
     const char *password;
     krb5_error_code code;
     const char *error;
+    bool skip_for_system_cracklib;
 };
 
 #endif /* !TESTS_DATA_PASSWORD_TESTS_H */

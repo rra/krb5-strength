@@ -41,7 +41,9 @@ RRA_LIB_CRACKLIB
 AS_IF([test x"$rra_system_cracklib" = xyes],
     [RRA_LIB_CRACKLIB_SWITCH
      AC_CHECK_HEADERS([crack.h])
-     RRA_LIB_CRACKLIB_RESTORE])
+     RRA_LIB_CRACKLIB_RESTORE
+     AC_DEFINE([HAVE_SYSTEM_CRACKLIB], 1,
+        [Define if using the system CrackLib.])])
 RRA_LIB_KRB5
 RRA_LIB_KRB5_SWITCH
 AC_CHECK_HEADERS([krb5/pwqual_plugin.h], [], [], [RRA_INCLUDES_KRB5])

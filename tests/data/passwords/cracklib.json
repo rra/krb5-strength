@@ -24,21 +24,24 @@
         "principal": "test@EXAMPLE.ORG",
         "password": "stanfordstanford",
         "code": "KADM5_PASS_Q_GENERIC",
-        "error": "it is based on a (duplicated) dictionary word"
+        "error": "it is based on a (duplicated) dictionary word",
+        "skip_for_system_cracklib": true
     },
     {
         "name": "in dictionary (reversed)",
         "principal": "test@EXAMPLE.ORG",
         "password": "enabrettib",
         "code": "KADM5_PASS_Q_GENERIC",
-        "error": "it is based on a (reversed) dictionary word"
+        "error": "it is based on a (reversed) dictionary word",
+        "skip_for_system_cracklib": true
     },
     {
         "name": "seven characters",
         "principal": "test@EXAMPLE.ORG",
         "password": "dfareas",
         "code": "KADM5_PASS_Q_GENERIC",
-        "error": "it is too short"
+        "error": "it is too short",
+        "skip_for_system_cracklib": true
     },
     {
         "name": "four characters",

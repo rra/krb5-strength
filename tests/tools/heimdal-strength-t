@@ -296,10 +296,18 @@ sub test_require_classes_syntax {
     return;
 }
 
-# Load the password tests from JSON.
+# Load the password tests from JSON, removing the CrackLib tests that may fail
+# if we were built with the system CrackLib.  We don't have an easy way of
+# knowing which CrackLib heimdal-strength was linked against, so we have to
+# ignore them unconditionally.  The separate plugin tests will exercise that
+# code.
 my %tests;
 for my $type (qw(cdb classes cracklib length letter principal sqlite)) {
     my $tests = load_password_tests("$type.json");
+    if ($type eq 'cracklib') {
+        my @tests = grep { !$_->{skip_for_system_cracklib} } @{$tests};
+        $tests = [@tests];
+    }
     $tests{$type} = $tests;
 }
 
