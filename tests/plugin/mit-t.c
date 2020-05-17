@@ -238,7 +238,6 @@ main(void)
         bail("cannot find data/make-krb5-conf in the test suite");
     setup_argv[1] = path;
     setup_argv[2] = tmpdir;
-    setup_argv[3] = NULL;
 
     /* Point KRB5_CONFIG at the newly-generated krb5.conf file. */
     basprintf(&krb5_config, "KRB5_CONFIG=%s/krb5.conf", tmpdir);

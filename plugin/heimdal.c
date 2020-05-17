@@ -65,7 +65,7 @@ heimdal_pwcheck(krb5_context ctx, krb5_principal principal,
                 size_t length)
 {
     krb5_pwqual_moddata data = NULL;
-    char *pastring = NULL;
+    char *pastring;
     char *name = NULL;
     krb5_error_code code;
 
