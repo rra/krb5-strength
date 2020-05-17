@@ -305,7 +305,7 @@ main(void)
 
     /* Otherwise mark the CrackLib tests as skipped. */
     count = ARRAY_SIZE(cracklib_tests) + ARRAY_SIZE(length_tests);
-    skip_block(count * 2 + 1, "not built with CrackLib support");
+    skip_block(count * 2 + 2, "not built with CrackLib support");
 
 #    endif /* !HAVE_CRACKLIB */
 
