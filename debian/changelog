@@ -4,6 +4,8 @@ krb5-strength (3.2-1) UNRELEASED; urgency=medium
     - New --check-only option to heimdal-history.
     - Increase hash iterations for heimdal-history for new hashes.
     - Use explicit_bzero to overwrite copies of passwords.
+  * Drop upstream patch to modify the test suite, since the upstream test
+    suite now correctly handles a system CrackLib library.
   * Include the full text of the license of the embedded copy of cracklib
     (not used in the Debian build) in debian/copyright, since it's not
     identical to the Artistic license included in common-licenses.
