@@ -39,11 +39,12 @@ use_prereq('Readonly');
 #
 # $principal - Principal to pass to the command
 # $password  - Password to pass to the command
+# @extra     - Additional options to pass to heimdal-history
 #
 # Returns: The exit status, standard output, and standard error as a list
 #  Throws: Text exception on failure to run the test program
 sub run_heimdal_history {
-    my ($principal, $password) = @_;
+    my ($principal, $password, @extra) = @_;
 
     # Build the input to the strength checking program.
     my $in = "principal: $principal\n";
@@ -64,6 +65,7 @@ sub run_heimdal_history {
         '-S' => "$tmpdir/lengths.db",
         '-s' => $strength,
     );
+    push(@options, @extra);
 
     # Run the password strength checker.
     my ($out, $err);
@@ -135,7 +137,7 @@ my $tests = load_password_tests('history.json');
 
 # Calculate and declare the plan.  We run three tests for each password test,
 # and then do some additional testing of the length statistics.
-plan(tests => scalar(@{$tests}) * 3 + 2);
+plan(tests => scalar(@{$tests}) * 3 + 8);
 
 # Point to a generic krb5.conf file.  This ensures that the heimdal-strength
 # program will only do principal-based strength checks.
@@ -157,6 +159,19 @@ my $path = test_tmpdir() . '/lengths.db';
 ok(tie(%lengthdb, 'DB_File::Lock', [$path, $mode, oct(600)], 'write'),
     'Length database exists');
 is_deeply(\%lengthdb, \%lengths, '...and contents are correct');
+
+# Check the same password twice in a row with the -c option.  It should be
+# accepted both times, instead of rejected the second time as a duplicate.
+my ($status, $out, $err)
+  = run_heimdal_history('test@EXAMPLE.ORG', 'somepass', '-c');
+is($status, 0,            'First password check succeeds');
+is($out,    "APPROVED\n", '...with correct output');
+is($err,    q{},          '...and no error');
+($status, $out, $err)
+  = run_heimdal_history('test@EXAMPLE.ORG', 'somepass', '-c');
+is($status, 0,            'Second password check still succeeds');
+is($out,    "APPROVED\n", '...with correct output');
+is($err,    q{},          '...and no error');
 
 # Clean up the databases and lock files on any exit.
 END {

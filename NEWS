@@ -2,6 +2,10 @@
 
 krb5-strength 3.2 (unreleased)
 
+    Add new -c (--check-only) option to heimdal-history to check whether a
+    password would be accepted without updating the history or password
+    length databases.  Based on work by macrotex.
+
     Support building without CrackLib support by passing
     --without-cracklib to configure.  This makes the code a bit simpler
     and lighter if you don't intend to ever use the CrackLib support.
