@@ -17,6 +17,8 @@
  *   - Fix int8, int16, and int32 definitions.
  * 2013-10-01  Russ Allbery <eagle@eyrie.org>
  *   - Set hidden visibility on all symbols by default.
+ * 2020-05-16  Russ Allbery <eagle@eyrie.org>
+ *   - Cast CRACK_TOLOWER and CRACK_TOUPPER to char.
  */
 
 #include <config.h>
@@ -84,6 +86,6 @@ extern char *Lowercase(const char *);
 /* Undo default visibility change. */
 #pragma GCC visibility pop
 
-#define CRACK_TOLOWER(a) 	(isupper(a)?tolower(a):(a)) 
-#define CRACK_TOUPPER(a) 	(islower(a)?toupper(a):(a)) 
+#define CRACK_TOLOWER(a) 	((char)(isupper(a)?tolower(a):(a)))
+#define CRACK_TOUPPER(a) 	((char)(islower(a)?toupper(a):(a)))
 #define STRCMP(a,b)		strcmp((a),(b))

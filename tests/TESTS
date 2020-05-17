@@ -1,20 +1,36 @@
+# Test list for krb5-strength.  -*- conf -*-
+#
+# Written by Russ Allbery <eagle@eyrie.org>
+# Copyright 2016, 2020 Russ Allbery <eagle@eyrie.org>
+# Copyright 2009-2010, 2013-2014
+#     The Board of Trustees of the Leland Stanford Junior University
+#
+# Copying and distribution of this file, with or without modification, are
+# permitted in any medium without royalty provided the copyright notice and
+# this notice are preserved.  This file is offered as-is, without any
+# warranty.
+#
+# SPDX-License-Identifier: FSFAP
+
 docs/pod
 docs/pod-spelling
-docs/urls
-plugin/heimdal
-plugin/mit
+docs/spdx-license
+plugin/heimdal          valgrind
+plugin/mit              valgrind
 perl/critic
 perl/minimum-version
 perl/strict
-portable/asprintf
-portable/mkstemp
-portable/snprintf
-portable/strndup
+portable/asprintf       valgrind
+portable/mkstemp        valgrind
+portable/snprintf       valgrind
+portable/strndup        valgrind
+style/obsolete-strings
 tools/heimdal-history
 tools/heimdal-strength
 tools/wordlist
 tools/wordlist-cdb
 tools/wordlist-sqlite
-util/messages
-util/messages-krb5
+util/messages           valgrind
+util/messages-krb5      valgrind
 util/xmalloc
+valgrind/logs

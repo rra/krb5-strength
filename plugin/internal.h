@@ -4,10 +4,10 @@
  * Developed by Derrick Brashear and Ken Hornstein of Sine Nomine Associates,
  *     on behalf of Stanford University
  * Extensive modifications by Russ Allbery <eagle@eyrie.org>
- * Copyright 2006, 2007, 2009, 2012, 2013, 2014
+ * Copyright 2006-2007, 2009, 2012-2014
  *     The Board of Trustees of the Leland Stanford Junior University
  *
- * See LICENSE for licensing terms.
+ * SPDX-License-Identifier: MIT
  */
 
 #ifndef PLUGIN_INTERNAL_H
@@ -18,34 +18,34 @@
 #include <portable/macros.h>
 
 #ifdef HAVE_CDB_H
-# include <cdb.h>
+#    include <cdb.h>
 #endif
 #ifdef HAVE_SQLITE3_H
-# include <sqlite3.h>
+#    include <sqlite3.h>
 #endif
 #include <stddef.h>
 
 #ifdef HAVE_KRB5_PWQUAL_PLUGIN_H
-# include <krb5/pwqual_plugin.h>
+#    include <krb5/pwqual_plugin.h>
 #else
 typedef struct krb5_pwqual_moddata_st *krb5_pwqual_moddata;
 #endif
 
 /* Error strings returned (and displayed to the user) for various failures. */
-#define ERROR_ASCII        "Password contains non-ASCII or control characters"
-#define ERROR_CLASS_LOWER  "Password must contain a lowercase letter"
-#define ERROR_CLASS_UPPER  "Password must contain an uppercase letter"
-#define ERROR_CLASS_DIGIT  "Password must contain a number"
+#define ERROR_ASCII       "Password contains non-ASCII or control characters"
+#define ERROR_CLASS_LOWER "Password must contain a lowercase letter"
+#define ERROR_CLASS_UPPER "Password must contain an uppercase letter"
+#define ERROR_CLASS_DIGIT "Password must contain a number"
 #define ERROR_CLASS_SYMBOL \
     "Password must contain a space or punctuation character"
-#define ERROR_CLASS_MIN \
+#define ERROR_CLASS_MIN                                                    \
     "Password must contain %lu types of characters (lowercase, uppercase," \
     " numbers, symbols)"
-#define ERROR_DICT         "Password found in list of common passwords"
-#define ERROR_LETTER       "Password is only letters and spaces"
-#define ERROR_MINDIFF      "Password does not contain enough unique characters"
-#define ERROR_SHORT        "Password is too short"
-#define ERROR_USERNAME     "Password based on username or principal"
+#define ERROR_DICT     "Password found in list of common passwords"
+#define ERROR_LETTER   "Password is only letters and spaces"
+#define ERROR_MINDIFF  "Password does not contain enough unique characters"
+#define ERROR_SHORT    "Password is too short"
+#define ERROR_USERNAME "Password based on username or principal"
 
 /*
  * A character class rule, which consists of a minimum length to which the
@@ -78,17 +78,17 @@ struct vector {
  * checking for at least the MIT plugin.
  */
 struct krb5_pwqual_moddata_st {
-    long minimum_different;     /* Minimum number of different characters */
-    long minimum_length;        /* Minimum password length */
-    bool ascii;                 /* Whether to require printable ASCII */
-    bool nonletter;             /* Whether to require a non-letter */
-    struct class_rule *rules;   /* Linked list of character class rules */
-    char *dictionary;           /* Base path to CrackLib dictionary */
-    long cracklib_maxlen;       /* Longer passwords skip CrackLib checks */
-    bool have_cdb;              /* Whether we have a CDB dictionary */
-    int cdb_fd;                 /* File descriptor of CDB dictionary */
+    long minimum_different;   /* Minimum number of different characters */
+    long minimum_length;      /* Minimum password length */
+    bool ascii;               /* Whether to require printable ASCII */
+    bool nonletter;           /* Whether to require a non-letter */
+    struct class_rule *rules; /* Linked list of character class rules */
+    char *dictionary;         /* Base path to CrackLib dictionary */
+    long cracklib_maxlen;     /* Longer passwords skip CrackLib checks */
+    bool have_cdb;            /* Whether we have a CDB dictionary */
+    int cdb_fd;               /* File descriptor of CDB dictionary */
 #ifdef HAVE_CDB_H
-    struct cdb cdb;             /* Open CDB dictionary data */
+    struct cdb cdb; /* Open CDB dictionary data */
 #endif
 #ifdef HAVE_SQLITE3_H
     sqlite3 *sqlite;            /* Open SQLite database handle */
@@ -131,19 +131,27 @@ krb5_error_code strength_check_cdb(krb5_context, krb5_pwqual_moddata,
                                    const char *password);
 void strength_close_cdb(krb5_context, krb5_pwqual_moddata);
 #else
-# define strength_check_cdb(c, d, p) 0
-# define strength_close_cdb(c, d)    /* empty */
+#    define strength_check_cdb(c, d, p) 0
+#    define strength_close_cdb(c, d)    /* empty */
 #endif
 
 /*
  * CrackLib handling.  strength_init_cracklib gets the dictionary
  * configuration does some sanity checks on it, and strength_check_cracklib
  * checks the password against CrackLib.
+ *
+ * If not built with CrackLib support, provide a stub for check.  init is
+ * always a real function, which reports an error if CrackLib is requested and
+ * not availble.
  */
 krb5_error_code strength_init_cracklib(krb5_context, krb5_pwqual_moddata,
                                        const char *dictionary);
+#ifdef HAVE_CRACKLIB
 krb5_error_code strength_check_cracklib(krb5_context, krb5_pwqual_moddata,
                                         const char *password);
+#else
+#    define strength_check_cracklib(c, d, p) 0
+#endif
 
 /*
  * SQLite handling.  strength_init_sqlite gets the database configuration and
@@ -160,8 +168,8 @@ krb5_error_code strength_check_sqlite(krb5_context, krb5_pwqual_moddata,
                                       const char *password);
 void strength_close_sqlite(krb5_context, krb5_pwqual_moddata);
 #else
-# define strength_check_sqlite(c, d, p) 0
-# define strength_close_sqlite(c, d)    /* empty */
+#    define strength_check_sqlite(c, d, p) 0
+#    define strength_close_sqlite(c, d)    /* empty */
 #endif
 
 /* Check whether the password statisfies character class requirements. */
@@ -177,8 +185,7 @@ krb5_error_code strength_check_principal(krb5_context, krb5_pwqual_moddata,
  * Manage vectors, which are counted lists of strings.  The functions that
  * return a boolean return false if memory allocation fails.
  */
-struct vector *strength_vector_new(void)
-    __attribute__((__malloc__));
+struct vector *strength_vector_new(void) __attribute__((__malloc__));
 bool strength_vector_add(struct vector *, const char *string)
     __attribute__((__nonnull__));
 void strength_vector_free(struct vector *);

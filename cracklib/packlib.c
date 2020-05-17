@@ -28,6 +28,8 @@
  *   - Close the wfp file handle on PWClose if it's open.
  * 2016-11-06  Russ Allbery <eagle@eyrie.org>
  *   - Remove unused vers_id to silence GCC warnings.
+ * 2020-05-16  Russ Allbery <eagle@eyrie.org>
+ *   - Fix types of printf formatting directives in DEBUG conditionals.
  */
 
 #include <stdio.h>
@@ -182,7 +184,7 @@ PWClose(PWDICT *pwp)
 	    	    pwp->hwms[i] = pwp->hwms[i-1];
 	    	}
 #ifdef DEBUG
-	    	printf("hwm[%02x] = %d\n", i, pwp->hwms[i]);
+	    	printf("hwm[%02x] = %u\n", i, pwp->hwms[i]);
 #endif
 	    }
 	    fwrite(pwp->hwms, 1, sizeof(pwp->hwms), pwp->wfp);
@@ -344,7 +346,7 @@ FindPW(PWDICT *pwp, const char *string)
     }
 
 #ifdef DEBUG
-    printf("---- %lu, %lu ----\n", lwm, hwm);
+    printf("---- %u, %u ----\n", lwm, hwm);
 #endif
 
     for (;;)
@@ -352,7 +354,7 @@ FindPW(PWDICT *pwp, const char *string)
 	int cmp;
 
 #ifdef DEBUG
-	printf("%lu, %lu\n", lwm, hwm);
+	printf("%u, %u\n", lwm, hwm);
 #endif
 
 	middle = lwm + ((hwm - lwm + 1) / 2);

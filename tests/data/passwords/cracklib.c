@@ -5,14 +5,17 @@
  * for the use in C test programs.  To make changes, modify the original
  * JSON source or (more rarely) the make-c-data script and run it again.
  *
+ * Written by Russ Allbery <eagle@eyrie.org>
+ * Copyright 2020 Russ Allbery <eagle@eyrie.org>
  * Copyright 2013
  *     The Board of Trustees of the Leland Stanford Junior University
  *
- * See LICENSE for licensing terms.
+ * SPDX-License-Identifier: MIT
  */
 
 #include <tests/data/passwords/tests.h>
 
+extern const struct password_test cracklib_tests[];
 const struct password_test cracklib_tests[] = {
     {
 
@@ -21,6 +24,7 @@ const struct password_test cracklib_tests[] = {
         "known good password",
         0,
         NULL,
+        0,
     },
     {
 
@@ -29,6 +33,7 @@ const struct password_test cracklib_tests[] = {
         "password",
         KADM5_PASS_Q_GENERIC,
         "it is based on a dictionary word",
+        0,
     },
     {
 
@@ -37,6 +42,7 @@ const struct password_test cracklib_tests[] = {
         "bitterbane",
         KADM5_PASS_Q_GENERIC,
         "it is based on a dictionary word",
+        0,
     },
     {
 
@@ -45,6 +51,7 @@ const struct password_test cracklib_tests[] = {
         "stanfordstanford",
         KADM5_PASS_Q_GENERIC,
         "it is based on a (duplicated) dictionary word",
+        1,
     },
     {
 
@@ -53,6 +60,7 @@ const struct password_test cracklib_tests[] = {
         "enabrettib",
         KADM5_PASS_Q_GENERIC,
         "it is based on a (reversed) dictionary word",
+        1,
     },
     {
 
@@ -61,6 +69,7 @@ const struct password_test cracklib_tests[] = {
         "dfareas",
         KADM5_PASS_Q_GENERIC,
         "it is too short",
+        1,
     },
     {
 
@@ -69,6 +78,7 @@ const struct password_test cracklib_tests[] = {
         "food",
         KADM5_PASS_Q_GENERIC,
         "it is too short",
+        0,
     },
     {
 
@@ -77,6 +87,7 @@ const struct password_test cracklib_tests[] = {
         "foo",
         KADM5_PASS_Q_GENERIC,
         "it is WAY too short",
+        0,
     },
     {
 
@@ -85,6 +96,7 @@ const struct password_test cracklib_tests[] = {
         "",
         KADM5_PASS_Q_GENERIC,
         "it is WAY too short",
+        0,
     },
     {
 
@@ -93,6 +105,7 @@ const struct password_test cracklib_tests[] = {
         "  	  		  ",
         KADM5_PASS_Q_GENERIC,
         "it does not contain enough DIFFERENT characters",
+        0,
     },
     {
 
@@ -101,6 +114,7 @@ const struct password_test cracklib_tests[] = {
         "abcdefghi",
         KADM5_PASS_Q_GENERIC,
         "it is too simplistic/systematic",
+        0,
     },
     {
 
@@ -109,6 +123,7 @@ const struct password_test cracklib_tests[] = {
         "22413411",
         KADM5_PASS_Q_GENERIC,
         "it does not contain enough DIFFERENT characters",
+        0,
     },
     {
 
@@ -117,5 +132,6 @@ const struct password_test cracklib_tests[] = {
         "OwenDericksegregationistshumiliatemeningitis'smainmast",
         0,
         NULL,
+        0,
     },
 };

@@ -20,14 +20,16 @@
  * which can be found at <https://www.eyrie.org/~eagle/software/rra-c-util/>.
  *
  * Written by Russ Allbery <eagle@eyrie.org>
+ * Copyright 2015, 2017, 2020 Russ Allbery <eagle@eyrie.org>
+ * Copyright 2010-2014
+ *     The Board of Trustees of the Leland Stanford Junior University
  *
- * The authors hereby relinquish any claim to any copyright that they may have
- * in this work, whether granted under contract or by operation of law or
- * international treaty, and hereby commit to the public, at large, that they
- * shall not, at any time in the future, seek to enforce any copyright in this
- * work against any person or entity, or prevent any person or entity from
- * copying, publishing, distributing or creating derivative works of this
- * work.
+ * Copying and distribution of this file, with or without modification, are
+ * permitted in any medium without royalty provided the copyright notice and
+ * this notice are preserved.  This file is offered as-is, without any
+ * warranty.
+ *
+ * SPDX-License-Identifier: FSFAP
  */
 
 #ifndef PORTABLE_KRB5_H
@@ -38,16 +40,16 @@
  * stripped-down version of config.h with a different name.
  */
 #ifndef CONFIG_H_INCLUDED
-# include <config.h>
+#    include <config.h>
 #endif
 #include <portable/macros.h>
 
 #if defined(HAVE_KRB5_H)
-# include <krb5.h>
+#    include <krb5.h>
 #elif defined(HAVE_KERBEROSV5_KRB5_H)
-# include <kerberosv5/krb5.h>
+#    include <kerberosv5/krb5.h>
 #else
-# include <krb5/krb5.h>
+#    include <krb5/krb5.h>
 #endif
 #include <stdlib.h>
 
@@ -57,12 +59,24 @@ BEGIN_DECLS
 #pragma GCC visibility push(hidden)
 
 /*
+ * AIX included Kerberos includes the profile library but not the
+ * krb5_appdefault functions, so we provide replacements that we have to
+ * prototype.
+ */
+#ifndef HAVE_KRB5_APPDEFAULT_STRING
+void krb5_appdefault_boolean(krb5_context, const char *, const krb5_data *,
+                             const char *, int, int *);
+void krb5_appdefault_string(krb5_context, const char *, const krb5_data *,
+                            const char *, const char *, char **);
+#endif
+
+/*
  * MIT-specific.  The Heimdal documentation says to use free(), but that
  * doesn't actually make sense since the memory is allocated inside the
  * Kerberos library.  Use krb5_xfree instead.
  */
 #ifndef HAVE_KRB5_FREE_DEFAULT_REALM
-# define krb5_free_default_realm(c, r) krb5_xfree(r)
+#    define krb5_free_default_realm(c, r) krb5_xfree(r)
 #endif
 
 /*
@@ -73,16 +87,16 @@ BEGIN_DECLS
  * really do about it.
  */
 #ifndef HAVE_KRB5_FREE_STRING
-# ifdef HAVE_KRB5_XFREE
-#  define krb5_free_string(c, s) krb5_xfree(s)
-# else
-#  define krb5_free_string(c, s) free(s)
-# endif
+#    ifdef HAVE_KRB5_XFREE
+#        define krb5_free_string(c, s) krb5_xfree(s)
+#    else
+#        define krb5_free_string(c, s) free(s)
+#    endif
 #endif
 
 /* Heimdal: krb5_xfree, MIT: krb5_free_unparsed_name. */
 #ifdef HAVE_KRB5_XFREE
-# define krb5_free_unparsed_name(c, p) krb5_xfree(p)
+#    define krb5_free_unparsed_name(c, p) krb5_xfree(p)
 #endif
 
 /*
@@ -111,16 +125,17 @@ krb5_error_code krb5_get_init_creds_opt_alloc(krb5_context,
                                               krb5_get_init_creds_opt **);
 #endif
 #ifdef HAVE_KRB5_GET_INIT_CREDS_OPT_FREE
-# ifndef HAVE_KRB5_GET_INIT_CREDS_OPT_FREE_2_ARGS
-#  define krb5_get_init_creds_opt_free(c, o) krb5_get_init_creds_opt_free(o)
-# endif
+#    ifndef HAVE_KRB5_GET_INIT_CREDS_OPT_FREE_2_ARGS
+#        define krb5_get_init_creds_opt_free(c, o) \
+            krb5_get_init_creds_opt_free(o)
+#    endif
 #else
-# define krb5_get_init_creds_opt_free(c, o) free(o)
+#    define krb5_get_init_creds_opt_free(c, o) free(o)
 #endif
 
 /* Heimdal-specific. */
 #ifndef HAVE_KRB5_GET_INIT_CREDS_OPT_SET_DEFAULT_FLAGS
-# define krb5_get_init_creds_opt_set_default_flags(c, p, r, o) /* empty */
+#    define krb5_get_init_creds_opt_set_default_flags(c, p, r, o) /* empty */
 #endif
 
 /*
@@ -129,7 +144,7 @@ krb5_error_code krb5_get_init_creds_opt_alloc(krb5_context,
  * present in older MIT Kerberos libraries but not prototyped.
  */
 #if !HAVE_DECL_KRB5_KT_FREE_ENTRY
-# define krb5_kt_free_entry(c, e) krb5_free_keytab_entry_contents((c), (e))
+#    define krb5_kt_free_entry(c, e) krb5_free_keytab_entry_contents((c), (e))
 #endif
 
 /*

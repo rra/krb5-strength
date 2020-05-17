@@ -8,10 +8,11 @@
  * Developed by Derrick Brashear and Ken Hornstein of Sine Nomine Associates,
  *     on behalf of Stanford University
  * Extensive modifications by Russ Allbery <eagle@eyrie.org>
- * Copyright 2006, 2007, 2009, 2012, 2013, 2014
+ * Copyright 2020 Russ Allbery <eagle@eyrie.org>
+ * Copyright 2006-2007, 2009, 2012-2014
  *     The Board of Trustees of the Leland Stanford Junior University
  *
- * See LICENSE for licensing terms.
+ * SPDX-License-Identifier: MIT
  */
 
 #include <config.h>
@@ -56,7 +57,7 @@ check_component(krb5_context ctx, const char *component, const char *password)
             copy[j] = c;
         }
         if (strcasecmp(copy, password) == 0) {
-            memset(copy, 0, strlen(copy));
+            explicit_bzero(copy, strlen(copy));
             free(copy);
             return strength_error_generic(ctx, ERROR_USERNAME);
         }
@@ -159,7 +160,7 @@ strength_check_principal(krb5_context ctx, krb5_pwqual_moddata data UNUSED,
         if (i != 0) {
             code = check_component(ctx, copy + i, password);
             if (code != 0) {
-                memset(copy, 0, strlen(copy));
+                explicit_bzero(copy, strlen(copy));
                 free(copy);
                 return code;
             }
@@ -176,7 +177,7 @@ strength_check_principal(krb5_context ctx, krb5_pwqual_moddata data UNUSED,
         /* Check the current component. */
         code = check_component(ctx, start, password);
         if (code != 0) {
-            memset(copy, 0, strlen(copy));
+            explicit_bzero(copy, strlen(copy));
             free(copy);
             return code;
         }
@@ -187,7 +188,7 @@ strength_check_principal(krb5_context ctx, krb5_pwqual_moddata data UNUSED,
     } while (i < length);
 
     /* Password does not appear to be based on the principal. */
-    memset(copy, 0, strlen(copy));
+    explicit_bzero(copy, strlen(copy));
     free(copy);
     return 0;
 }

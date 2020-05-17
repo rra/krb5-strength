@@ -1,6 +1,7 @@
 =for stopwords
 heimdal-strength Heimdal CrackLib krb5-strength Allbery CDB
 canonicalization krb5-strength-wordlist reproducibly
+SPDX-License-Identifier FSFAP
 
 =head1 NAME
 
@@ -203,12 +204,14 @@ Russ Allbery <eagle@eyrie.org>
 
 Copyright 2016 Russ Allbery <eagle@eyrie.org>
 
-Copyright 2010, 2013, 2014 The Board of Trustees of the Leland Stanford
+Copyright 2010, 2013-2014 The Board of Trustees of the Leland Stanford
 Junior University
 
 Copying and distribution of this file, with or without modification, are
 permitted in any medium without royalty provided the copyright notice and
 this notice are preserved.  This file is offered as-is, without any
 warranty.
+
+SPDX-License-Identifier: FSFAP
 
 =cut

@@ -29,11 +29,11 @@
  *
  * Written by Russ Allbery <eagle@eyrie.org>
  * Based on work by David Mazières
- * Copyright 2016 Russ Allbery <eagle@eyrie.org>
+ * Copyright 2016, 2020 Russ Allbery <eagle@eyrie.org>
  * Copyright 2014
  *     The Board of Trustees of the Leland Stanford Junior University
  *
- * See LICENSE for licensing terms.
+ * SPDX-License-Identifier: MIT
  */
 
 #include <config.h>
@@ -42,7 +42,7 @@
 #include <portable/system.h>
 
 #ifdef HAVE_SQLITE3_H
-# include <sqlite3.h>
+#    include <sqlite3.h>
 #endif
 
 #include <plugin/internal.h>
@@ -54,10 +54,12 @@
  * prefix and the prefix with the last character incremented; the suffix query
  * gets the same, but the suffix should be reversed.
  */
+/* clang-format off */
 #define PREFIX_QUERY \
     "SELECT password, drowssap FROM passwords WHERE password BETWEEN ? AND ?;"
 #define SUFFIX_QUERY \
     "SELECT password, drowssap FROM passwords WHERE drowssap BETWEEN ? AND ?;"
+/* clang-format on */
 
 
 /*
@@ -72,12 +74,13 @@ strength_init_sqlite(krb5_context ctx, krb5_pwqual_moddata data UNUSED)
     /* Get CDB dictionary path from krb5.conf. */
     strength_config_string(ctx, "password_dictionary_sqlite", &path);
 
-    /* If it was set, report an error, since we don't have CDB support. */
+    /* If it was set, report an error, since we don't have SQLite support. */
     if (path == NULL)
         return 0;
     free(path);
-    krb5_set_error_message(ctx, KADM5_BAD_SERVER_PARAMS, "SQLite dictionary"
-                           " requested but not built with SQLite support");
+    krb5_set_error_message(ctx, KADM5_BAD_SERVER_PARAMS,
+                           "SQLite dictionary requested but not built with"
+                           " SQLite support");
     return KADM5_BAD_SERVER_PARAMS;
 }
 #endif
@@ -100,7 +103,7 @@ error_sqlite(krb5_context ctx, krb5_pwqual_moddata data, const char *format,
     ssize_t length;
     char *message;
     const char *errmsg;
-    
+
     errmsg = sqlite3_errmsg(data->sqlite);
     va_start(args, format);
     length = vasprintf(&message, format, args);
@@ -163,10 +166,10 @@ common_prefix_length(const char *a, const char *b)
  *
  * To see why the sum of the prefix and suffix length can be longer than the
  * length of the password when the password doesn't match the word, consider
- * the password "aaaa" and the word "aaaaaaaaa"
- * (The prefix length plus the
+ * the password "aaaa" and the word "aaaaaaaaa".  The prefix length plus the
  * suffix length may be greater than the length of the password if the
- * password is an exact match for the word or 
+ * password is an exact match for the word or an initial or final substring of
+ * the word.
  */
 static bool
 match(size_t length, const char *password, const char *drowssap,
@@ -255,7 +258,8 @@ strength_check_sqlite(krb5_context ctx, krb5_pwqual_moddata data,
                       const char *password)
 {
     krb5_error_code code;
-    size_t length, prefix_length, suffix_length;
+    size_t length;
+    int prefix_length, suffix_length;
     char *prefix = NULL;
     char *drowssap = NULL;
     bool found = false;
@@ -269,13 +273,14 @@ strength_check_sqlite(krb5_context ctx, krb5_pwqual_moddata data,
      * Determine the length of the prefix and suffix into which we'll divide
      * the string.  Passwords shorter than two characters cannot be
      * meaningfully checked using this method and cause boundary condition
-     * problems.
+     * problems.  Passwords longer than INT_MAX cannot be passed to the SQLite
+     * library.
      */
     length = strlen(password);
-    if (length < 2)
+    if (length < 2 || length > INT_MAX)
         return 0;
-    prefix_length = length / 2;
-    suffix_length = length - prefix_length;
+    prefix_length = (int) length / 2;
+    suffix_length = (int) length - prefix_length;
 
     /* Obtain the reversed password, used for suffix checks. */
     drowssap = reverse_string(password);
@@ -295,8 +300,8 @@ strength_check_sqlite(krb5_context ctx, krb5_pwqual_moddata data,
         goto fail;
     }
     prefix[prefix_length - 1]++;
-    status = sqlite3_bind_text(data->prefix_query, 2, prefix, prefix_length,
-                               NULL);
+    status =
+        sqlite3_bind_text(data->prefix_query, 2, prefix, prefix_length, NULL);
     if (status != SQLITE_OK) {
         code = error_sqlite(ctx, data, "cannot bind prefix end");
         goto fail;
@@ -363,8 +368,8 @@ strength_check_sqlite(krb5_context ctx, krb5_pwqual_moddata data,
         goto found;
 
     /* No match.  Clean up and return success. */
-    memset(prefix, 0, length);
-    memset(drowssap, 0, length);
+    explicit_bzero(prefix, length);
+    explicit_bzero(drowssap, length);
     free(prefix);
     free(drowssap);
     return 0;
@@ -374,8 +379,9 @@ found:
     code = strength_error_dict(ctx, ERROR_DICT);
 
 fail:
-    memset(prefix, 0, length);
-    memset(drowssap, 0, length);
+    if (prefix != NULL)
+        explicit_bzero(prefix, length);
+    explicit_bzero(drowssap, length);
     free(prefix);
     free(drowssap);
     return code;

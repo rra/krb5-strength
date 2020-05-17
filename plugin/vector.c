@@ -22,7 +22,7 @@
  * Copyright 2013
  *     The Board of Trustees of the Leland Stanford Junior University
  *
- * See LICENSE for licensing terms.
+ * SPDX-License-Identifier: MIT
  */
 
 #include <config.h>
@@ -181,7 +181,7 @@ split_multi_count(const char *string, const char *seps)
  */
 struct vector *
 strength_vector_split_multi(const char *string, const char *seps,
-                        struct vector *vector)
+                            struct vector *vector)
 {
     const char *p, *start;
     size_t i, count;
@@ -206,7 +206,7 @@ strength_vector_split_multi(const char *string, const char *seps,
     for (start = string, p = string, i = 0; *p != '\0'; p++)
         if (strchr(seps, *p) != NULL) {
             if (start != p) {
-                vector->strings[i] = strndup(start, (size_t) (p - start));
+                vector->strings[i] = strndup(start, (size_t)(p - start));
                 if (vector->strings[i] == NULL)
                     goto fail;
                 i++;
@@ -217,7 +217,7 @@ strength_vector_split_multi(const char *string, const char *seps,
 
     /* If there is anything left in the string, we have one more component. */
     if (start != p) {
-        vector->strings[i] = strndup(start, (size_t) (p - start));
+        vector->strings[i] = strndup(start, (size_t)(p - start));
         if (vector->strings[i] == NULL)
             goto fail;
         vector->count++;
