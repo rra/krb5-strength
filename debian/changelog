@@ -1,4 +1,4 @@
-krb5-strength (3.2-1) UNRELEASED; urgency=medium
+krb5-strength (3.2-1) unstable; urgency=medium
 
   * New upstream release.
     - New --check-only option to heimdal-history.
@@ -13,7 +13,7 @@ krb5-strength (3.2-1) UNRELEASED; urgency=medium
   * Update to standards version 4.5.0 (no changes required).
   * Refresh upstream signing key.
 
- -- Russ Allbery <rra@debian.org>  Sat, 16 May 2020 23:03:34 -0700
+ -- Russ Allbery <rra@debian.org>  Sun, 17 May 2020 10:27:44 -0700
 
 krb5-strength (3.1-2) unstable; urgency=medium
 
