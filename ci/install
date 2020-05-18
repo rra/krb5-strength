@@ -27,7 +27,7 @@ apt-get install aspell cpanminus cppcheck heimdal-multidev libcdb-dev   \
         libdbi-perl libgetopt-long-descriptive-perl libipc-run-perl     \
         libjson-perl libkrb5-dev libperl6-slurp-perl libreadonly-perl   \
         libsqlite3-dev libtest-pod-perl libtest-spelling-perl           \
-        libtest-strict-perl pkg-config perl sqlite tinycdb valgrind
+        libtest-strict-perl pkg-config perl tinycdb valgrind
 
 # Dependencies for Perl tests.
 cpanm Perl::Tidy
