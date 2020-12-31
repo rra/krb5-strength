@@ -1,5 +1,8 @@
 krb5-strength (3.2-2) UNRELEASED; urgency=medium
 
+  * Mark build dependencies used only for the test suite with <!nocheck>.
+    Thanks, Helmut Grohne.  (Closes: #978723)
+  * Remove Build-Dependency on libfile-slurp-perl, which was not used.
   * Change the Debian packaging branch to debian/unstable.
   * Change canonical packaging repository to Salsa.
 
