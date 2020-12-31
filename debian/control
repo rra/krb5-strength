@@ -28,8 +28,8 @@ Build-Depends:
 Rules-Requires-Root: no
 Standards-Version: 4.5.0
 Homepage: https://www.eyrie.org/~eagle/software/krb5-strength/
-Vcs-Git: https://git.eyrie.org/git/kerberos/krb5-strength.git -b debian/master
-Vcs-Browser: https://git.eyrie.org/?p=kerberos/krb5-strength.git
+Vcs-Git: https://salsa.debian.org/rra/krb5-strength.git
+Vcs-Browser: https://salsa.debian.org/rra/krb5-strength
 
 Package: krb5-strength
 Architecture: any
