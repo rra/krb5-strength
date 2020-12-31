@@ -1,0 +1,8 @@
+Name: krb5-strength
+Contact: Russ Allbery <eagle@eyrie.org>
+Documentation: https://www.eyrie.org/~eagle/software/krb5-strength/
+Bug-Database: https://github.com/rra/krb5-strength/issues
+Bug-Submit: https://github.com/rra/krb5-strength/issues/new
+Changelog: https://www.eyrie.org/~eagle/software/krb5-strength/news.html
+Repository: https://git.eyrie.org/git/kerberos/krb5-strength.git
+Repository-Browse: https://git.eyrie.org/?p=kerberos/krb5-strength.git
