@@ -1,9 +1,9 @@
-krb5-strength (3.2-3) UNRELEASED; urgency=medium
+krb5-strength (3.2-3) unstable; urgency=medium
 
   [ Helmut Grohne ]
   * Fix FTBFS with nocheck profile. (Closes: #983701)
 
- -- Russ Allbery <rra@debian.org>  Sun, 28 Feb 2021 11:21:48 -0800
+ -- Russ Allbery <rra@debian.org>  Sun, 28 Feb 2021 11:27:30 -0800
 
 krb5-strength (3.2-2) unstable; urgency=medium
 
