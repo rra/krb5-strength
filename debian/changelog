@@ -1,3 +1,11 @@
+krb5-strength (3.2-4) UNRELEASED; urgency=medium
+
+  * Run make maintainer-clean during debian/rules clean, since
+    debian/rules build runs ./bootstrap and thus regenerates test files.
+    (Closes: #1048564)
+
+ -- Russ Allbery <rra@debian.org>  Sun, 22 Oct 2023 12:29:39 -0700
+
 krb5-strength (3.2-3) unstable; urgency=medium
 
   [ Helmut Grohne ]

@@ -11,6 +11,9 @@ PACKAGE := $(shell dh_listpackages)
 %:
 	dh $@
 
+override_dh_auto_clean:
+	dh_auto_clean -- maintainer-clean
+
 override_dh_auto_configure:
 	./bootstrap
 	dh_auto_configure -- --enable-reduced-depends --with-cracklib
