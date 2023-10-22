@@ -4,6 +4,7 @@ krb5-strength (3.2-4) unstable; urgency=medium
     debian/rules build runs ./bootstrap and thus regenerates test files.
     (Closes: #1048564)
   * Update to standards version 4.6.2 (no changes required).
+  * Refresh upstream signing key.
 
  -- Russ Allbery <rra@debian.org>  Sun, 22 Oct 2023 12:37:47 -0700
 
