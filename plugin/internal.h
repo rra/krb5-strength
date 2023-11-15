@@ -1,7 +1,7 @@
 /*
  * Prototypes for the kadmin password strength checking plugin.
  *
- * Developed by Derrick Brashear and Ken Hornstein of Sine Nomine Associates,
+ * Developed by Daria Phoebe Brashear and Ken Hornstein of Sine Nomine Associates,
  *     on behalf of Stanford University
  * Extensive modifications by Russ Allbery <eagle@eyrie.org>
  * Copyright 2006-2007, 2009, 2012-2014

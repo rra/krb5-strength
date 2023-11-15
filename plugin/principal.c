@@ -5,7 +5,7 @@
  * password is being changed, trying to detect and reject passwords based on
  * components of the principal.
  *
- * Developed by Derrick Brashear and Ken Hornstein of Sine Nomine Associates,
+ * Developed by Daria Phoebe Brashear and Ken Hornstein of Sine Nomine Associates,
  *     on behalf of Stanford University
  * Extensive modifications by Russ Allbery <eagle@eyrie.org>
  * Copyright 2020 Russ Allbery <eagle@eyrie.org>

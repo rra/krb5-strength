@@ -342,7 +342,7 @@ statement and license:
 > FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 > DEALINGS IN THE SOFTWARE.
 >
-> Developed by Derrick Brashear and Ken Hornstein of Sine Nomine Associates,
+> Developed by Daria Phoebe Brashear and Ken Hornstein of Sine Nomine Associates,
 > on behalf of Stanford University.
 >
 > The embedded version of CrackLib (all files in the `cracklib`
