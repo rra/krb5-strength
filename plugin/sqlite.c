@@ -147,7 +147,7 @@ common_prefix_length(const char *a, const char *b)
 {
     size_t i;
 
-    for (i = 0; a[i] == b[i] && a[i] != '\0' && b[i] != '\0'; i++)
+    for (i = 0; a[i] == b[i] && a[i] != '\0'; i++)
         ;
     return i;
 }

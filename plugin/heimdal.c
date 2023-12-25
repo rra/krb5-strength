@@ -61,8 +61,8 @@ convert_error(krb5_context ctx, krb5_error_code code, const char *prefix,
  */
 static int
 heimdal_pwcheck(krb5_context ctx, krb5_principal principal,
-                krb5_data *password, const char *tuning UNUSED,
-                char *message, size_t length)
+                krb5_data *password, const char *tuning UNUSED, char *message,
+                size_t length)
 {
     krb5_pwqual_moddata data = NULL;
     char *pastring;
