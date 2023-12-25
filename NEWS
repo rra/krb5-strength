@@ -5,6 +5,8 @@ krb5-strength 3.3 (unreleased)
     heimdal-history now requires the Perl modules Const::Fast and
     JSON::MaybeXS instead of Readonly and JSON.
 
+    Explicitly erase the copy of the password made in the Heimdal plugin.
+
     Update to rra-c-util 10.5:
 
     * Assume a working snprintf rather than supplying a replacement.
