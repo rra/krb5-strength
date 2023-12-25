@@ -32,7 +32,7 @@ jobs:
           - "heimdal"
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: install
         run: sudo ci/install
       - name: test
