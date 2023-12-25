@@ -4,11 +4,11 @@
 %bcond_with     history # build heimdal-history tool
 
 Name:		krb5-strength
-Version:	3.2
+Version:	3.3
 Release:	1%{?dist}
 Summary:	Kerberos password strength checking plugin
 Group:		System Environment/Daemons
-License:	GPLv2+
+License:	MIT
 Vendor:		Russ Allbery
 URL:            https://www.eyrie.org/~eagle/software/%{name}/
 Source0:	https://archives.eyrie.org/software/kerberos/%{name}-%{version}.tar.gz
@@ -38,12 +38,12 @@ Summary:	Kerberos password strength checking plugin history tool
 Group:		System Environment/Daemons
 Requires: %{name}
 Requires: perl(autodie)
+Requires: perl(Const::Fast)
 Requires: perl(Crypt::PBKDF2)
 Requires: perl(DB_File::Lock)
 Requires: perl(Getopt::Long::Descriptive)
 Requires: perl(IPC::Run)
-Requires: perl(JSON)
-Requires: perl(Readonly)
+Requires: perl(JSON::MaybeXS)
 %description -n %{name}-history
 Heimdal password history tool for Kerberos password strength checking plugin
 %endif
@@ -91,5 +91,9 @@ rm -f $RPM_BUILD_ROOT%{_mandir}/man1/heimdal-history.*
 %endif
 
 %changelog
+* Mon Dec 25 2023 Russ Allbery <eagle@eyrie.org> 3.3-1
+- Update license
+- Update Perl dependencies for history package
+
 * Wed Nov 15 2023 Daria Phoebe Brashear <dariaphoebe@auristor.com> 3.2-1
 - Heimdal spec file
