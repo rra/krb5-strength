@@ -159,14 +159,18 @@ x_realloc(void *p, size_t size, const char *file, int line)
          * that if realloc fails (which is true in every case when it returns
          * NULL when size > 0), p is unchanged and still valid.
          */
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wuse-after-free"
+#if !defined(__clang__)
+#    pragma GCC diagnostic push
+#    pragma GCC diagnostic ignored "-Wuse-after-free"
+#endif
     while (newp == NULL) {
         (*xmalloc_error_handler)("realloc", size, file, line);
         newp = realloc(p, size);
     }
     return newp;
-#pragma GCC diagnostic pop
+#if !defined(__clang__)
+#    pragma GCC diagnostic pop
+#endif
 }
 
 
@@ -186,13 +190,17 @@ x_reallocarray(void *p, size_t n, size_t size, const char *file, int line)
          * every case when it returns NULL when size > 0 and n > 0), p is
          * unchanged and still valid.
          */
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wuse-after-free"
+#if !defined(__clang__)
+#    pragma GCC diagnostic push
+#    pragma GCC diagnostic ignored "-Wuse-after-free"
+#endif
     while (newp == NULL) {
         (*xmalloc_error_handler)("reallocarray", n *size, file, line);
         newp = reallocarray(p, n, size);
     }
-#pragma GCC diagnostic pop
+#if !defined(__clang__)
+#    pragma GCC diagnostic pop
+#endif
     return newp;
 }
 
