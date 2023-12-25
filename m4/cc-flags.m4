@@ -1,4 +1,4 @@
-# serial 1
+# serial 2
 
 dnl Check whether the compiler supports particular flags.
 dnl
@@ -17,7 +17,7 @@ dnl
 dnl The canonical version of this file is maintained in the rra-c-util
 dnl package, available at <https://www.eyrie.org/~eagle/software/rra-c-util/>.
 dnl
-dnl Copyright 2016-2022 Russ Allbery <eagle@eyrie.org>
+dnl Copyright 2016-2023 Russ Allbery <eagle@eyrie.org>
 dnl Copyright 2006, 2009, 2016
 dnl     by Internet Systems Consortium, Inc. ("ISC")
 dnl
@@ -104,6 +104,7 @@ dnl   -Wtautological-pointer-compare  False positives with for loops
 dnl   -Wundef                         Conflicts with Autoconf probe results
 dnl   -Wunreachable-code              Happens with optional compilation
 dnl   -Wunreachable-code-return       Other compilers get confused
+dnl   -Wunsafe-buffer-usage           Intended for C++, not applicable to C
 dnl   -Wunused-macros                 Often used on suppressed branches
 dnl   -Wused-but-marked-unused        Happens a lot with conditional code
 dnl
@@ -116,8 +117,8 @@ AC_DEFUN([RRA_PROG_CC_WARNINGS_FLAGS],
         [-Weverything -Wno-cast-qual -Wno-disabled-macro-expansion -Wno-padded
          -Wno-sign-conversion -Wno-reserved-id-macro -Wno-reserved-identifier
          -Wno-tautological-pointer-compare -Wno-undef -Wno-unreachable-code
-         -Wno-unreachable-code-return -Wno-unused-macros
-         -Wno-used-but-marked-unused],
+         -Wno-unreachable-code-return -Wno-unsafe-buffer-usage
+         -Wno-unused-macros -Wno-used-but-marked-unused],
         [RRA_PROG_CC_FLAG(flag,
             [WARNINGS_CFLAGS="${WARNINGS_CFLAGS} flag"])])],
     [WARNINGS_CFLAGS="-g -O2 -D_FORTIFY_SOURCE=2 -Werror"
