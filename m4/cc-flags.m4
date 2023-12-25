@@ -86,7 +86,7 @@ dnl
 dnl   -Wsign-conversion  Too many fiddly changes for the benefit
 dnl   -Wstack-protector  Too many false positives from small buffers
 dnl
-dnl Last checked against gcc 9.2.1 (2019-09-01).  -D_FORTIFY_SOURCE=2 enables
+dnl Last checked against gcc 13.2 (2023-12-25).  -D_FORTIFY_SOURCE=2 enables
 dnl warn_unused_result attribute markings on glibc functions on Linux, which
 dnl catches a few more issues.  Add -O2 because gcc won't find some warnings
 dnl without optimization turned on.
@@ -123,17 +123,19 @@ AC_DEFUN([RRA_PROG_CC_WARNINGS_FLAGS],
             [WARNINGS_CFLAGS="${WARNINGS_CFLAGS} flag"])])],
     [WARNINGS_CFLAGS="-g -O2 -D_FORTIFY_SOURCE=2 -Werror"
      m4_foreach_w([flag],
-        [-fstrict-overflow -fstrict-aliasing -Wall -Wextra -Wformat=2
-         -Wformat-overflow=2 -Wformat-signedness -Wformat-truncation=2
-         -Wnull-dereference -Winit-self -Wswitch-enum -Wstrict-overflow=5
-         -Wmissing-format-attribute -Walloc-zero -Wduplicated-branches
+        [-fstrict-overflow -fstrict-aliasing -fstrict-flex-arrays=3 -Wall
+         -Wextra -Wformat=2 -Wformat-overflow=2 -Wformat-signedness
+         -Wformat-truncation=2 -Wnull-dereference -Winit-self -Wswitch-enum
+         -Wstrict-overflow=5 -Wmissing-format-attribute -Walloc-zero
+         -Warith-conversion -Warray-bounds=3 -Wduplicated-branches
          -Wduplicated-cond -Wtrampolines -Wfloat-equal
          -Wdeclaration-after-statement -Wshadow -Wpointer-arith
          -Wbad-function-cast -Wcast-align -Wwrite-strings -Wconversion
-         -Wno-sign-conversion -Wdate-time -Wjump-misses-init -Wlogical-op
-         -Wstrict-prototypes -Wold-style-definition -Wmissing-prototypes
-         -Wmissing-declarations -Wnormalized=nfc -Wpacked -Wredundant-decls
-         -Wrestrict -Wnested-externs -Winline -Wvla],
+         -Wno-sign-conversion -Wdate-time -Wjump-misses-init
+         -Wlogical-op -Wstrict-prototypes -Wold-style-definition
+         -Wmissing-prototypes -Wmissing-declarations -Wnormalized=nfc
+         -Wpacked -Wredundant-decls -Wrestrict -Wnested-externs -Winline
+         -Wvla -Wuse-after-free=3],
         [RRA_PROG_CC_FLAG(flag,
             [WARNINGS_CFLAGS="${WARNINGS_CFLAGS} flag"])])])
  AC_SUBST([WARNINGS_CFLAGS])])
