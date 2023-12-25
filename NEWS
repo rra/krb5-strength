@@ -5,7 +5,13 @@ krb5-strength 3.3 (unreleased)
     heimdal-history now requires the Perl modules Const::Fast and
     JSON::MaybeXS instead of Readonly and JSON.
 
-    Explicitly erase the copy of the password made in the Heimdal plugin.
+    Increase hash iterations for heimdal-history by about 10% to maintain
+    the time required for a password hash at about 0.1 seconds on not
+    horribly modern hardware.  This will affect newly-stored history
+    entries but will not invalidate existing password history entries.
+
+    Explicitly erase the copy of the password made in the Heimdal plugin
+    before freeing memory.
 
     Add a spec file for building RPMs, contributed by Daria Phoebe
     Brashear.
