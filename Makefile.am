@@ -129,9 +129,9 @@ maintainer-clean-local:
 
 warnings:
 	$(MAKE) V=0 CFLAGS='$(WARNINGS_CFLAGS) $(AM_CFLAGS)' \
-	    KRB5_CPPFLAGS='$(KRB5_CPPFLAGS_GCC)'
+	    KRB5_CPPFLAGS='$(KRB5_CPPFLAGS_WARNINGS)'
 	$(MAKE) V=0 CFLAGS='$(WARNINGS_CFLAGS) $(AM_CFLAGS)' \
-	    KRB5_CPPFLAGS='$(KRB5_CPPFLAGS_GCC)' $(check_PROGRAMS)
+	    KRB5_CPPFLAGS='$(KRB5_CPPFLAGS_WARNINGS)' $(check_PROGRAMS)
 
 # The bits below are for the test suite, not for the main package.
 check_PROGRAMS = tests/runtests tests/plugin/heimdal-t tests/plugin/mit-t   \
