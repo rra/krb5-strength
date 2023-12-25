@@ -63,7 +63,7 @@
  * which can be found at <https://www.eyrie.org/~eagle/software/rra-c-util/>.
  *
  * Written by Russ Allbery <eagle@eyrie.org>
- * Copyright 2015 Russ Allbery <eagle@eyrie.org>
+ * Copyright 2015, 2023 Russ Allbery <eagle@eyrie.org>
  * Copyright 2012-2014
  *     The Board of Trustees of the Leland Stanford Junior University
  * Copyright 2004-2006 Internet Systems Consortium, Inc. ("ISC")
@@ -137,7 +137,7 @@ x_calloc(size_t n, size_t size, const char *file, int line)
     size = (size > 0) ? size : 1;
     p = calloc(n, size);
     while (p == NULL) {
-        (*xmalloc_error_handler)("calloc", n * size, file, line);
+        (*xmalloc_error_handler)("calloc", n *size, file, line);
         p = calloc(n, size);
     }
     return p;
@@ -150,11 +150,23 @@ x_realloc(void *p, size_t size, const char *file, int line)
     void *newp;
 
     newp = realloc(p, size);
-    while (newp == NULL && size > 0) {
+    if (size == 0)
+        return newp;
+
+        /*
+         * GCC 13.2.0 (and some earlier versions) misdiagnose this error
+         * handling as a use-after-free of p, but the C standard guarantees
+         * that if realloc fails (which is true in every case when it returns
+         * NULL when size > 0), p is unchanged and still valid.
+         */
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wuse-after-free"
+    while (newp == NULL) {
         (*xmalloc_error_handler)("realloc", size, file, line);
         newp = realloc(p, size);
     }
     return newp;
+#pragma GCC diagnostic pop
 }
 
 
@@ -164,10 +176,23 @@ x_reallocarray(void *p, size_t n, size_t size, const char *file, int line)
     void *newp;
 
     newp = reallocarray(p, n, size);
-    while (newp == NULL && size > 0 && n > 0) {
-        (*xmalloc_error_handler)("reallocarray", n * size, file, line);
+    if (size == 0 || n == 0)
+        return newp;
+
+        /*
+         * GCC 13.2.0 (and some earlier versions) misdiagnose this error
+         * handling as a use-after-free of p, but the documentation of
+         * reallocarray guarantees that if reallocarray fails (which is true in
+         * every case when it returns NULL when size > 0 and n > 0), p is
+         * unchanged and still valid.
+         */
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wuse-after-free"
+    while (newp == NULL) {
+        (*xmalloc_error_handler)("reallocarray", n *size, file, line);
         newp = reallocarray(p, n, size);
     }
+#pragma GCC diagnostic pop
     return newp;
 }
 
@@ -202,7 +227,7 @@ x_strndup(const char *s, size_t size, const char *file, int line)
     char *copy;
 
     /* Don't assume that the source string is nul-terminated. */
-    for (p = s; (size_t)(p - s) < size && *p != '\0'; p++)
+    for (p = s; (size_t) (p - s) < size && *p != '\0'; p++)
         ;
     length = p - s;
     copy = malloc(length + 1);

@@ -17,14 +17,14 @@ use strict;
 use warnings;
 
 use DB_File::Lock;
+use Const::Fast qw(const);
 use Crypt::PBKDF2;
 use Fcntl qw(O_CREAT O_RDWR);
 use File::Basename qw(basename);
 use Getopt::Long::Descriptive qw(describe_options);
 use IPC::Run qw(run);
-use JSON qw(encode_json decode_json);
+use JSON::MaybeXS qw(encode_json decode_json);
 use POSIX qw(setgid setuid);
-use Readonly;
 use Sys::Syslog qw(openlog syslog LOG_AUTH LOG_INFO LOG_WARNING);
 
 # The most convenient interface to Berkeley DB files is ties.
@@ -33,40 +33,40 @@ use Sys::Syslog qw(openlog syslog LOG_AUTH LOG_INFO LOG_WARNING);
 # The number of PBKDF2 iterations to use when hashing passwords.  This number
 # should be chosen so as to force the hash operation to take approximately 0.1
 # seconds on current hardware.
-Readonly my $HASH_ITERATIONS => 40128;
+const my $HASH_ITERATIONS => 40128;
 
 # Path to the history database.  Currently, this must be a Berkeley DB file in
 # the old DB_HASH format.  Keys will be principal names, and values will be a
 # JSON array of hashes.  Each hash will have two keys: timestamp, which holds
 # the seconds since UNIX epoch at which the history entry was stored, and
 # hash, which holds the Crypt::PBKDF2 LDAP-style password hash.
-Readonly my $HISTORY_PATH => '/var/lib/heimdal-history/history.db';
+const my $HISTORY_PATH => '/var/lib/heimdal-history/history.db';
 
 # User and group used to do all password history lookups and writes, assuming
 # that this program is invoked as root and can therefore change UID and GID.
-Readonly my $HISTORY_USER  => '_history';
-Readonly my $HISTORY_GROUP => '_history';
+const my $HISTORY_USER => '_history';
+const my $HISTORY_GROUP => '_history';
 
 # Path to the Berkeley DB file (DB_HASH format) that stores statistics on
 # password length of accepted passwords.  Each successful password validation
 # will increase the counter for that length.  This is read and written with
 # $HISTORY_USER and $HISTORY_GROUP.
-Readonly my $LENGTH_STATS_PATH => '/var/lib/heimdal-history/lengths.db';
+const my $LENGTH_STATS_PATH => '/var/lib/heimdal-history/lengths.db';
 
 # The message to return to the user if we reject the password because it was
 # found in the user's history.
-Readonly my $REJECT_MESSAGE => 'Password was previously used';
+const my $REJECT_MESSAGE => 'Password was previously used';
 
 # The path to the external strength checking program to run.  This is done
 # first before checking history, and if it fails, that failure is returned as
 # the failure for this program.
-Readonly my $STRENGTH_PROGRAM => '/usr/bin/heimdal-strength';
+const my $STRENGTH_PROGRAM => '/usr/bin/heimdal-strength';
 
 # User and group used to do password strength checking.  Generally, this
 # doesn't require any privileges since the strength dictionary is
 # world-readable.
-Readonly my $STRENGTH_USER  => 'nobody';
-Readonly my $STRENGTH_GROUP => 'nogroup';
+const my $STRENGTH_USER => 'nobody';
+const my $STRENGTH_GROUP => 'nogroup';
 
 # Global boolean variable saying whether to log with syslog.  This is set
 # based on the presence of the -q (--quiet) command-line option.
@@ -165,9 +165,9 @@ sub log_error {
         return;
     }
     my $message = encode_log_message(
-        action    => 'check',
+        action => 'check',
         principal => $principal,
-        error     => $error,
+        error => $error,
     );
     syslog(LOG_WARNING, '%s', $message);
     return;
@@ -199,9 +199,9 @@ sub log_result {
 
     # Create the message.
     my %message = (
-        action    => 'check',
+        action => 'check',
         principal => $principal,
-        result    => $result,
+        result => $result,
     );
     if ($result eq 'rejected' && defined($reason)) {
         $message{reason} = $reason;
@@ -299,7 +299,7 @@ sub is_in_history {
 sub find_iteration_count {
     my ($target, $delta) = @_;
     my $high = 0;
-    my $low  = 0;
+    my $low = 0;
 
     # A static password to use for benchmarking.
     my $password = 'this is a benchmark';
@@ -313,7 +313,7 @@ sub find_iteration_count {
     require Benchmark;
     my $iterations = $HASH_ITERATIONS;
     while (1) {
-        my $hash  = sub { password_hash($password, $iterations) };
+        my $hash = sub { password_hash($password, $iterations) };
         my $times = Benchmark::timethis(20, $hash, q{}, 'none');
 
         # Extract the CPU time from the formatted time string.  This will be
@@ -377,9 +377,10 @@ sub check_history {
     {
         my %history;
         my $mode = O_CREAT | O_RDWR;
-        tie(%history, 'DB_File::Lock', $path, $mode, oct(600), $DB_HASH,
-            'write')
-          or die "$0: cannot open $path: $!\n";
+        tie(
+            %history, 'DB_File::Lock', $path, $mode, oct(600), $DB_HASH,
+            'write',
+        ) or die "$0: cannot open $path: $!\n";
         $history_json = $history{$principal};
     }
 
@@ -487,18 +488,18 @@ sub update_length_counts {
 # $principal - Principal attempting to change their password
 # $password  - The new password
 #
-# Returns: Scalar context: true if the password was accepted, false otherwise
-#          List context: whether the password is okay, the exit status of the
-#            quality checking program, and the error message if the first
-#            element is false
-#  Throws: Text exception on failure to execute the program, or read or write
-#          from it or to it, or if it fails without an error
+# Returns: A list of three elements:
+#            - whether the password is okay
+#            - the exit status of the quality checking program
+#            - the error message if the first element is false
+# Throws: Text exception on failure to execute the program, or read or
+#         write from it or to it, or if it fails without an error
 sub strength_check {
     my ($path, $principal, $password) = @_;
 
     # Run the external quality checking program.  If we're root, we'll run it
     # as the strength checking user and group.
-    my $in   = "principal: $principal\nnew-password: $password\nend\n";
+    my $in = "principal: $principal\nnew-password: $password\nend\n";
     my $init = sub { drop_privileges($STRENGTH_USER, $STRENGTH_GROUP) };
     my ($out, $err);
     run([$path, $principal], \$in, \$out, \$err, init => $init);
@@ -517,7 +518,7 @@ sub strength_check {
     }
 
     # Return the results.
-    return wantarray ? ($okay, $err, $status) : $okay;
+    return ($okay, $err, $status);
 }
 
 # Read a Heimdal external password quality checking request from the provided
@@ -536,8 +537,7 @@ sub strength_check {
 #
 # $fh - File handle from which to read
 #
-# Returns: Scalar context: the password
-#          List context: a list of the password and the principal
+# Returns: List of the password and the principal
 #  Throws: Text exception on any protocol violations or IO errors
 sub read_change_data {
     my ($fh) = @_;
@@ -569,9 +569,7 @@ sub read_change_data {
     }
 
     # Return the results.
-    my $password  = $data{'new-password'};
-    my $principal = $data{principal};
-    return wantarray ? ($password, $principal) : $password;
+    return ($data{'new-password'}, $data{principal});
 }
 
 ##############################################################################
@@ -586,6 +584,7 @@ my $fullpath = $0;
 local $0 = basename($0);
 
 # Parse the argument list.
+#<<<
 my ($opt, $usage) = describe_options(
     '%c %o',
     ['benchmark|b=f', 'Benchmark hash iterations for this target time'],
@@ -597,6 +596,7 @@ my ($opt, $usage) = describe_options(
     ['stats|S=s',     'Path to database of length statistics'],
     ['strength|s=s',  'Path to strength checking program to run'],
 );
+#>>>
 if ($opt->help) {
     print {*STDOUT} $usage->text
       or die "$0: cannot write to standard output: $!\n";
@@ -607,7 +607,7 @@ if ($opt->help) {
     exec('perldoc', '-t', $fullpath);
 }
 my $database = $opt->database || $HISTORY_PATH;
-my $stats_db = $opt->stats    || $LENGTH_STATS_PATH;
+my $stats_db = $opt->stats || $LENGTH_STATS_PATH;
 my $strength = $opt->strength || $STRENGTH_PROGRAM;
 
 # If asked to do benchmarking, ignore other arguments and just do that.
@@ -905,7 +905,7 @@ Russ Allbery <eagle@eyrie.org>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright 2016-2017, 2020 Russ Allbery <eagle@eyrie.org>
+Copyright 2016-2017, 2020, 2023 Russ Allbery <eagle@eyrie.org>
 
 Copyright 2013-2014 The Board of Trustees of the Leland Stanford Junior
 University

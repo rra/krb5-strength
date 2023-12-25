@@ -2,6 +2,7 @@
  * Test for the Heimdal shared module API.
  *
  * Written by Russ Allbery <eagle@eyrie.org>
+ * Copyright 2023 Russ Allbery <eagle@eyrie.org>
  * Copyright 2009, 2013-2014
  *     The Board of Trustees of the Leland Stanford Junior University
  *
@@ -292,7 +293,7 @@ main(void)
 
 #    endif /* !HAVE_CDB */
 
-#    ifdef HAVE_SQLITE
+#    ifdef HAVE_SQLITE3
 
     /*
      * If built with SQLite, set up krb5.conf to use a SQLite dictionary
@@ -314,13 +315,13 @@ main(void)
     for (i = 0; i < ARRAY_SIZE(principal_tests); i++)
         is_password_test(verifier, &principal_tests[i]);
 
-#    else /* !HAVE_SQLITE */
+#    else /* !HAVE_SQLITE3 */
 
     /* Otherwise, mark the SQLite tests as skipped. */
     count = ARRAY_SIZE(sqlite_tests) + ARRAY_SIZE(principal_tests);
     skip_block(count * 2, "not built with SQLite support");
 
-#    endif /* !HAVE_SQLITE */
+#    endif /* !HAVE_SQLITE3 */
 
     /* Manually clean up after the results of make-krb5-conf. */
     basprintf(&path, "%s/krb5.conf", tmpdir);

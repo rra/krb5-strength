@@ -3,7 +3,7 @@
 # Test suite for krb5-strength-wordlist filtering functions.
 #
 # Written by Russ Allbery <eagle@eyrie.org>
-# Copyright 2016, 2020 Russ Allbery <eagle@eyrie.org>
+# Copyright 2016, 2020, 2023 Russ Allbery <eagle@eyrie.org>
 # Copyright 2014
 #     The Board of Trustees of the Leland Stanford Junior University
 #
@@ -22,7 +22,7 @@ use Encode qw(encode);
 use Test::More;
 
 # Load prerequisite modules.
-use_prereq('IPC::Run',     'run');
+use_prereq('IPC::Run', 'run');
 use_prereq('Perl6::Slurp', 'slurp');
 
 # Set up for testing of an Automake project.
@@ -50,9 +50,9 @@ sub run_wordlist {
     my $status = ($? >> 8);
 
     # Check the results.
-    is($status, 0,   "krb5-strength-wordlist @args");
-    is($out,    q{}, '...with no output');
-    is($err,    q{}, '...and no errors');
+    is($status, 0, "krb5-strength-wordlist @args");
+    is($out, q{}, '...with no output');
+    is($err, q{}, '...and no errors');
     return;
 }
 
@@ -65,7 +65,9 @@ my @wordlist = slurp(test_file_path('data/wordlist'));
 my @filtered = grep { !m{d}xms && length >= 8 } @wordlist;
 
 # Add a non-ASCII word to test non-ASCII filtering.
-push(@wordlist, encode('UTF-8', "\N{U+0639}\N{U+0631}\N{U+0628}\N{U+649}"));
+## no critic (ValuesAndExpressions::ProhibitEscapedCharacters)
+push(@wordlist, encode('UTF-8', "\x{0639}\x{0631}\x{0628}\x{0649}"));
+## use critic
 
 # Write the new wordlist, including the non-ASCII word, to a new file.
 my $tmpdir = test_tmpdir();

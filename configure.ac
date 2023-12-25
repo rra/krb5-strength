@@ -1,7 +1,7 @@
 dnl Process this file with autoconf to produce a configure script.
 dnl
 dnl Written by Russ Allbery <eagle@eyrie.org>
-dnl Copyright 2016, 2020 Russ Allbery <eagle@eyrie.org>
+dnl Copyright 2016, 2020, 2023 Russ Allbery <eagle@eyrie.org>
 dnl Copyright 2006-2007, 2009-2010, 2012-2014
 dnl     The Board of Trustees of the Leland Stanford Junior University
 dnl
@@ -29,7 +29,7 @@ AC_SYS_LARGEFILE
 AM_PROG_CC_C_O
 m4_ifdef([AM_PROG_AR], [AM_PROG_AR])
 AC_PROG_INSTALL
-AM_DISABLE_STATIC
+AC_DISABLE_STATIC
 LT_INIT
 
 dnl Only used for the test suite.
@@ -59,7 +59,7 @@ AC_LIBOBJ([krb5-extra])
 AC_CHECK_HEADERS([kadm5/kadm5-pwcheck.h kadm5/kadm5_err.h], [], [],
     [RRA_INCLUDES_KRB5])
 RRA_LIB_KRB5_RESTORE
-RRA_LIB_SQLITE_OPTIONAL
+RRA_LIB_SQLITE3_OPTIONAL
 
 dnl Probe for libdl, which is used for the test suite.
 save_LIBS="$LIBS"
@@ -70,7 +70,7 @@ AC_SUBST([DL_LIBS])
 dnl Checks for basic C functionality.
 AC_HEADER_STDBOOL
 AC_CHECK_HEADERS([strings.h sys/bittypes.h sys/select.h sys/time.h syslog.h])
-AC_CHECK_DECLS([snprintf, vsnprintf])
+AC_CHECK_DECLS([reallocarray])
 RRA_C_C99_VAMACROS
 RRA_C_GNU_VAMACROS
 AC_TYPE_LONG_LONG_INT
@@ -79,11 +79,10 @@ AC_TYPE_UINT16_T
 AC_TYPE_UINT32_T
 AC_CHECK_TYPES([ssize_t], [], [],
     [#include <sys/types.h>])
-RRA_FUNC_SNPRINTF
 AC_CHECK_FUNCS([explicit_bzero setrlimit])
 AC_REPLACE_FUNCS([asprintf mkstemp reallocarray strndup])
 
 dnl Write out the results.
 AC_CONFIG_FILES([Makefile])
-AC_CONFIG_HEADER([config.h])
+AC_CONFIG_HEADERS([config.h])
 AC_OUTPUT

@@ -1,5 +1,20 @@
                     User-Visible krb5-strength Changes
 
+krb5-strength 3.3 (unreleased)
+
+    heimdal-history now requires the Perl modules Const::Fast and
+    JSON::MaybeXS instead of Readonly and JSON.
+
+    Update to rra-c-util 10.5:
+
+    * Assume a working snprintf rather than supplying a replacement.
+    * Fix detection of reallocarray on NetBSD.
+    * Check that Kerberos header files were found during configure.
+    * Use AS_ECHO in all Autoconf macros.
+    * Always use lib32 or lib64 if it exists, even on Debian.
+    * Fix rejection of unknown Clang warning flags.
+    * Disable -Wreserved-identifier for Clang warning builds.
+
 krb5-strength 3.2 (2020-05-17)
 
     Add new -c (--check-only) option to heimdal-history to check whether a

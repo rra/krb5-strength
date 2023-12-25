@@ -1,7 +1,7 @@
 # Automake makefile for krb5-strength.
 #
 # Written by Russ Allbery <eagle@eyrie.org>
-# Copyright 2016, 2020 Russ Allbery <eagle@eyrie.org>
+# Copyright 2016, 2020, 2023 Russ Allbery <eagle@eyrie.org>
 # Copyright 2007, 2009-2010, 2012-2014
 #     The Board of Trustees of the Leland Stanford Junior University
 #
@@ -32,9 +32,9 @@ EXTRA_DIST = .clang-format .github .gitignore README.md LICENSE bootstrap   \
 # libraries, and if we're using the system CrackLib, TinyCDB, or SQLite, add
 # its location unconditionally as well.
 AM_CPPFLAGS = $(CRACKLIB_CPPFLAGS) $(KRB5_CPPFLAGS) $(CDB_CPPFLAGS) \
-	$(SQLITE_CPPFLAGS)
+	$(SQLITE3_CPPFLAGS)
 AM_LDFLAGS = $(CRACKLIB_LDFLAGS) $(KRB5_LDFLAGS) $(CDB_LDFLAGS) \
-	$(SQLITE_LDFLAGS)
+	$(SQLITE3_LDFLAGS)
 
 # Build our portability library.
 noinst_LTLIBRARIES = portable/libportable.la
@@ -76,7 +76,7 @@ else
     plugin_strength_la_LIBADD = $(CRACKLIB_LIBS)
 endif
 plugin_strength_la_LIBADD += portable/libportable.la $(KRB5_LIBS) \
-	$(CDB_LIBS) $(SQLITE_LIBS)
+	$(CDB_LIBS) $(SQLITE3_LIBS)
 
 # The Heimdal external check program.
 bin_PROGRAMS = tools/heimdal-strength
@@ -91,7 +91,7 @@ else
     tools_heimdal_strength_LDADD = $(CRACKLIB_LIBS)
 endif
 tools_heimdal_strength_LDADD += util/libutil.a portable/libportable.la \
-	$(KRB5_LIBS) $(CDB_LIBS) $(SQLITE_LIBS)
+	$(KRB5_LIBS) $(CDB_LIBS) $(SQLITE3_LIBS)
 
 # Other tools.
 dist_bin_SCRIPTS = tools/heimdal-history tools/krb5-strength-wordlist
@@ -134,11 +134,10 @@ warnings:
 	    KRB5_CPPFLAGS='$(KRB5_CPPFLAGS_GCC)' $(check_PROGRAMS)
 
 # The bits below are for the test suite, not for the main package.
-check_PROGRAMS = tests/runtests tests/plugin/heimdal-t tests/plugin/mit-t \
-	tests/portable/asprintf-t tests/portable/mkstemp-t		  \
-	tests/portable/reallocarray-t tests/portable/snprintf-t		  \
-	tests/portable/strndup-t tests/util/messages-krb5-t		  \
-	tests/util/messages-t tests/util/xmalloc
+check_PROGRAMS = tests/runtests tests/plugin/heimdal-t tests/plugin/mit-t   \
+	tests/portable/asprintf-t tests/portable/mkstemp-t		    \
+	tests/portable/reallocarray-t tests/portable/strndup-t		    \
+	tests/util/messages-krb5-t tests/util/messages-t tests/util/xmalloc
 if EMBEDDED_CRACKLIB
     check_PROGRAMS += cracklib/packer
 endif
@@ -168,9 +167,6 @@ tests_portable_reallocarray_t_SOURCES = tests/portable/reallocarray-t.c \
 	tests/portable/reallocarray.c
 tests_portable_reallocarray_t_LDADD = tests/tap/libtap.a \
 	portable/libportable.la
-tests_portable_snprintf_t_SOURCES = tests/portable/snprintf-t.c \
-	tests/portable/snprintf.c
-tests_portable_snprintf_t_LDADD = tests/tap/libtap.a portable/libportable.la
 tests_portable_strndup_t_SOURCES = tests/portable/strndup-t.c \
 	tests/portable/strndup.c
 tests_portable_strndup_t_LDADD = tests/tap/libtap.a portable/libportable.la
@@ -223,6 +219,6 @@ check-valgrind: $(check_PROGRAMS) tests/data/dictionary.pwd
 # Used by maintainers to reformat all source code using clang-format and
 # excluding some files.
 reformat:
-	find . -name '*.[ch]' \! -name snprintf.c \! -name krb5-profile.c \
-	    \! -path './cracklib/*' -print				  \
-	    | xargs clang-format-10 -style=file -i
+	find . -name '*.[ch]' \! -name krb5-profile.c	\
+	    \! -path './cracklib/*' -print		\
+	    | xargs clang-format -style=file -i

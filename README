@@ -127,11 +127,11 @@ REQUIREMENTS
   later plus the following CPAN modules:
 
   * DB_File::Lock
+  * Const::Fast
   * Crypt::PBKDF2
   * Getopt::Long::Descriptive
   * IPC::Run
-  * JSON
-  * Readonly
+  * JSON::MaybeXS
 
   and their dependencies.
 

@@ -1,9 +1,10 @@
 /*
  * Prototypes for the kadmin password strength checking plugin.
  *
- * Developed by Daria Phoebe Brashear and Ken Hornstein of Sine Nomine Associates,
- *     on behalf of Stanford University
+ * Developed by Daria Phoebe Brashear and Ken Hornstein of Sine Nomine
+ *     Associates, on behalf of Stanford University
  * Extensive modifications by Russ Allbery <eagle@eyrie.org>
+ * Copyright 2023 Russ Allbery <eagle@eyrie.org>
  * Copyright 2006-2007, 2009, 2012-2014
  *     The Board of Trustees of the Leland Stanford Junior University
  *
@@ -163,7 +164,7 @@ krb5_error_code strength_check_cracklib(krb5_context, krb5_pwqual_moddata,
  * requested and not available.
  */
 krb5_error_code strength_init_sqlite(krb5_context, krb5_pwqual_moddata);
-#ifdef HAVE_SQLITE
+#ifdef HAVE_SQLITE3
 krb5_error_code strength_check_sqlite(krb5_context, krb5_pwqual_moddata,
                                       const char *password);
 void strength_close_sqlite(krb5_context, krb5_pwqual_moddata);

@@ -10,9 +10,9 @@
  *     #include <stdarg.h>
  *     #include <stdbool.h>
  *     #include <stddef.h>
+ *     #include <stdint.h>
  *     #include <stdio.h>
  *     #include <stdlib.h>
- *     #include <stdint.h>
  *     #include <string.h>
  *     #include <strings.h>
  *     #include <sys/types.h>
@@ -25,7 +25,7 @@
  * which can be found at <https://www.eyrie.org/~eagle/software/rra-c-util/>.
  *
  * Written by Russ Allbery <eagle@eyrie.org>
- * Copyright 2014, 2016, 2018, 2020 Russ Allbery <eagle@eyrie.org>
+ * Copyright 2014, 2016, 2018, 2020-2021 Russ Allbery <eagle@eyrie.org>
  * Copyright 2006-2011, 2013-2014
  *     The Board of Trustees of the Leland Stanford Junior University
  *
@@ -74,6 +74,11 @@
 
 /* Get the bool type. */
 #include <portable/stdbool.h>
+
+/* In case uint32_t and associated limits weren't defined. */
+#ifndef UINT32_MAX
+#    define UINT32_MAX 4294967295UL
+#endif
 
 /* Windows provides snprintf under a different name. */
 #ifdef _WIN32
@@ -133,18 +138,10 @@ extern int asprintf(char **, const char *, ...)
 extern int vasprintf(char **, const char *, va_list)
     __attribute__((__format__(printf, 2, 0)));
 #endif
-#if !HAVE_DECL_SNPRINTF
-extern int snprintf(char *, size_t, const char *, ...)
-    __attribute__((__format__(printf, 3, 4)));
-#endif
-#if !HAVE_DECL_VSNPRINTF
-extern int vsnprintf(char *, size_t, const char *, va_list)
-    __attribute__((__format__(printf, 3, 0)));
-#endif
 #if !HAVE_MKSTEMP
 extern int mkstemp(char *);
 #endif
-#if !HAVE_REALLOCARRAY
+#if !HAVE_DECL_REALLOCARRAY
 extern void *reallocarray(void *, size_t, size_t);
 #endif
 #if !HAVE_STRNDUP

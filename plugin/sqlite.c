@@ -29,7 +29,7 @@
  *
  * Written by Russ Allbery <eagle@eyrie.org>
  * Based on work by David Mazières
- * Copyright 2016, 2020 Russ Allbery <eagle@eyrie.org>
+ * Copyright 2016, 2020, 2023 Russ Allbery <eagle@eyrie.org>
  * Copyright 2014
  *     The Board of Trustees of the Leland Stanford Junior University
  *
@@ -65,7 +65,7 @@
 /*
  * Stub for strength_init_sqlite if not built with SQLite support.
  */
-#ifndef HAVE_SQLITE
+#ifndef HAVE_SQLITE3
 krb5_error_code
 strength_init_sqlite(krb5_context ctx, krb5_pwqual_moddata data UNUSED)
 {
@@ -87,7 +87,7 @@ strength_init_sqlite(krb5_context ctx, krb5_pwqual_moddata data UNUSED)
 
 
 /* Skip the rest of this file if SQLite is not available. */
-#ifdef HAVE_SQLITE
+#ifdef HAVE_SQLITE3
 
 /*
  * Report a SQLite error.  Takes the module data (used to access the SQLite
@@ -402,4 +402,4 @@ strength_close_sqlite(krb5_context ctx UNUSED, krb5_pwqual_moddata data)
         sqlite3_close(data->sqlite);
 }
 
-#endif /* HAVE_SQLITE */
+#endif /* HAVE_SQLITE3 */
