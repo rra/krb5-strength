@@ -1,15 +1,15 @@
-# krb5-strength 3.2
+# krb5-strength
 
 [![Build
 status](https://github.com/rra/krb5-strength/workflows/build/badge.svg)](https://github.com/rra/krb5-strength/actions)
 [![Debian
-package](https://img.shields.io/debian/v/krb5-strength)](https://tracker.debian.org/pkg/krb5-strength)
+package](https://img.shields.io/debian/v/krb5-strength/unstable)](https://tracker.debian.org/pkg/krb5-strength)
 
-Copyright 2016, 2020 Russ Allbery <eagle@eyrie.org>.  Copyright 2006-2007,
-2009-2010, 2012-2014 The Board of Trustees of the Leland Stanford Junior
-University.  Copyright 1993 Alec Muffett.  This software is distributed
-under a BSD-style license.  Please see the section [License](#license)
-below for more information.
+Copyright 2016, 2020, 2023 Russ Allbery <eagle@eyrie.org>.  Copyright
+2006-2007, 2009-2010, 2012-2014 The Board of Trustees of the Leland
+Stanford Junior University.  Copyright 1993 Alec Muffett.  This software
+is distributed under a BSD-style license.  Please see the section
+[License](#license) below for more information.
 
 ## Blurb
 
@@ -129,12 +129,12 @@ Internet with a modicum of searching, none are included in this toolkit.
 The password history program, heimdal-history, requires Perl 5.010 or
 later plus the following CPAN modules:
 
-* DB_File::Lock
+* Const::Fast
 * Crypt::PBKDF2
+* DB_File::Lock
 * Getopt::Long::Descriptive
 * IPC::Run
-* JSON
-* Readonly
+* JSON::MaybeXS
 
 and their dependencies.
 
@@ -142,9 +142,10 @@ To bootstrap from a Git checkout, or if you change the Automake files and
 need to regenerate Makefile.in, you will need Automake 1.11 or later.  For
 bootstrap or if you change configure.ac or any of the m4 files it includes
 and need to regenerate configure or config.h.in, you will need Autoconf
-2.64 or later.  You will also need Perl 5.010 or later and the DBI,
-DBD::SQLite, JSON, Perl6::Slurp, and Readonly modules (from CPAN) to
-generate man pages and bootstrap the test suite data from a Git checkout.
+2.64 or later.  Perl is also required to generate manual pages from a
+fresh Git checkout.  You will also need Perl 5.010 or later and the
+Const::Fast, DBI, DBD::SQLite, JSON::MaybeXS, and Perl6::Slurp modules
+(from CPAN) to bootstrap the test suite data from a Git checkout.
 
 ## Building and Installation
 
@@ -209,11 +210,11 @@ you need to specify a different Kerberos installation root via
 
 You can also individually set the paths to the include directory and the
 library directory with `--with-krb5-include` and `--with-krb5-lib`.  You
-may need to do this if Autoconf can't figure out whether to use lib,
-lib32, or lib64 on your platform.
+may need to do this if Autoconf can't figure out whether to use `lib`,
+`lib32`, or `lib64` on your platform.
 
-To not use krb5-config and force library probing even if there is a
-krb5-config script on your path, set PATH_KRB5_CONFIG to a nonexistent
+To not use `krb5-config` and force library probing even if there is a
+`krb5-config` script on your path, set `PATH_KRB5_CONFIG` to a nonexistent
 path:
 
 ```
@@ -315,7 +316,7 @@ requests are gratefully reviewed and normally accepted.
 The krb5-strength package as a whole is covered by the following copyright
 statement and license:
 
-> Copyright 2016, 2020
+> Copyright 2016, 2020, 2023
 >     Russ Allbery <eagle@eyrie.org>
 >
 > Copyright 2006-2007, 2009-2010, 2012-2014
@@ -342,8 +343,8 @@ statement and license:
 > FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 > DEALINGS IN THE SOFTWARE.
 >
-> Developed by Daria Phoebe Brashear and Ken Hornstein of Sine Nomine Associates,
-> on behalf of Stanford University.
+> Developed by Daria Phoebe Brashear and Ken Hornstein of Sine Nomine
+> Associates, on behalf of Stanford University.
 >
 > The embedded version of CrackLib (all files in the `cracklib`
 > subdirectory) is covered by the Artistic license.  See the file
