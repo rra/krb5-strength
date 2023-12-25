@@ -7,6 +7,9 @@ krb5-strength 3.3 (unreleased)
 
     Explicitly erase the copy of the password made in the Heimdal plugin.
 
+    Add a spec file for building RPMs, contributed by Daria Phoebe
+    Brashear.
+
     Update to rra-c-util 10.5:
 
     * Assume a working snprintf rather than supplying a replacement.
