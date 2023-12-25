@@ -116,7 +116,7 @@ sub output_test {
     say_fh($fh, $prefix, "{\n");
     for my $attr (@ATTRIBUTES) {
         my $value = $test_ref->{$attr};
-        if ($IS_LITERAL_ATTRIBUTE{$attr}) {
+        if (exists($IS_LITERAL_ATTRIBUTE{$attr})) {
             $value //= 0;
         } else {
             $value = defined($value) ? qq{"$value"} : 'NULL';
