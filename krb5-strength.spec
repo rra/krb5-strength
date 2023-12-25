@@ -1,3 +1,11 @@
+# RPM spec file for krb5-strength.
+#
+# Written by Daria Phoebe Brashear
+# Copyright 2023 Daria Phoebe Brashear
+# Copyright 2023 Russ Allbery <eagle@eyrie.org>
+#
+# SPDX-License-Identifier: MIT
+
 %bcond_with	krb5		# build with MIT kerberos if asked
 
 # Crypt::PBKDF2 isn't in base or EPEL on rhel8 so this won't work there frex
