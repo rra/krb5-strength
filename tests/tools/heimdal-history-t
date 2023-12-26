@@ -3,7 +3,7 @@
 # Test suite for Heimdal per-principal history.
 #
 # Written by Russ Allbery <eagle@eyrie.org>
-# Copyright 2020 Russ Allbery <eagle@eyrie.org>
+# Copyright 2020, 2023 Russ Allbery <eagle@eyrie.org>
 # Copyright 2014
 #     The Board of Trustees of the Leland Stanford Junior University
 #
@@ -52,7 +52,7 @@ sub run_heimdal_history {
     $in .= "end\n";
 
     # Find the newly-built history and strengty programs.
-    my $history  = test_file_path('../tools/heimdal-history');
+    my $history = test_file_path('../tools/heimdal-history');
     my $strength = test_file_path('../tools/heimdal-strength');
 
     # Get a temporary directory for statistics and history databases.
@@ -91,8 +91,8 @@ sub run_heimdal_history {
 #  Throws: Text exception on failure to run the test program
 sub check_password {
     my ($test_ref) = @_;
-    my $principal  = $test_ref->{principal};
-    my $password   = $test_ref->{password};
+    my $principal = $test_ref->{principal};
+    my $password = $test_ref->{password};
 
     # Run the heimdal-strength command.
     my ($status, $out, $err) = run_heimdal_history($principal, $password);
@@ -105,9 +105,9 @@ sub check_password {
     is($status, $test_ref->{status} || 0, "$test_ref->{name} (status)");
     if (defined($test_ref->{error})) {
         is($err, $test_ref->{error}, '...error message');
-        is($out, q{},                '...no output');
+        is($out, q{}, '...no output');
     } else {
-        is($err, q{},        '...no errors');
+        is($err, q{}, '...no errors');
         is($out, 'APPROVED', '...approved');
     }
     return;
@@ -156,22 +156,24 @@ for my $test_ref (@{$tests}) {
 my %lengthdb;
 my $mode = O_CREAT | O_RDWR;
 my $path = test_tmpdir() . '/lengths.db';
-ok(tie(%lengthdb, 'DB_File::Lock', [$path, $mode, oct(600)], 'write'),
-    'Length database exists');
+ok(
+    tie(%lengthdb, 'DB_File::Lock', [$path, $mode, oct(600)], 'write'),
+    'Length database exists',
+);
 is_deeply(\%lengthdb, \%lengths, '...and contents are correct');
 
 # Check the same password twice in a row with the -c option.  It should be
 # accepted both times, instead of rejected the second time as a duplicate.
 my ($status, $out, $err)
   = run_heimdal_history('test@EXAMPLE.ORG', 'somepass', '-c');
-is($status, 0,            'First password check succeeds');
-is($out,    "APPROVED\n", '...with correct output');
-is($err,    q{},          '...and no error');
+is($status, 0, 'First password check succeeds');
+is($out, "APPROVED\n", '...with correct output');
+is($err, q{}, '...and no error');
 ($status, $out, $err)
   = run_heimdal_history('test@EXAMPLE.ORG', 'somepass', '-c');
-is($status, 0,            'Second password check still succeeds');
-is($out,    "APPROVED\n", '...with correct output');
-is($err,    q{},          '...and no error');
+is($status, 0, 'Second password check still succeeds');
+is($out, "APPROVED\n", '...with correct output');
+is($err, q{}, '...and no error');
 
 # Clean up the databases and lock files on any exit.
 END {

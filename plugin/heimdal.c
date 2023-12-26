@@ -12,7 +12,7 @@
  * instead.
  *
  * Written by Russ Allbery <eagle@eyrie.org>
- * Copyright 2020 Russ Allbery <eagle@eyrie.org>
+ * Copyright 2020, 2023 Russ Allbery <eagle@eyrie.org>
  * Copyright 2009, 2013
  *     The Board of Trustees of the Leland Stanford Junior University
  *
@@ -99,6 +99,7 @@ heimdal_pwcheck(krb5_context ctx, krb5_principal principal,
         convert_error(ctx, code, NULL, message, length);
 
 done:
+    explicit_bzero(pastring, password->length);
     free(pastring);
     if (name != NULL)
         krb5_free_unparsed_name(ctx, name);
