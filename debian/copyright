@@ -3,10 +3,11 @@ Upstream-Contact: Russ Allbery <eagle@eyrie.org>
 Source: https://www.eyrie.org/~eagle/software/krb5-strength/
 
 Files: *
-Copyright: 2000-2002, 2004-2020 Russ Allbery <eagle@eyrie.org>
+Copyright: 2000-2002, 2004-2023 Russ Allbery <eagle@eyrie.org>
   2001-2002, 2004-2014
     The Board of Trustees of the Leland Stanford Junior University
   2010 the Massachusetts Institute of Technology
+  2023 Daria Phoebe Brashear
 License: Expat
 
 Files: .clang-format docs/krb5-strength.5.in docs/krb5-strength.pod
@@ -18,7 +19,7 @@ Files: .clang-format docs/krb5-strength.5.in docs/krb5-strength.pod
  tests/portable/mkstemp-t.c tests/portable/reallocarray-t.c
  tests/portable/strndup-t.c tools/heimdal-strength.1
  tools/heimdal-strength.pod util/macros.h
-Copyright: 2006, 2010, 2014-2020 Russ Allbery <eagle@eyrie.org>
+Copyright: 2006, 2010, 2014-2023 Russ Allbery <eagle@eyrie.org>
   2006-2014 The Board of Trustees of the Leland Stanford Junior University
 License: all-permissive
  Copying and distribution of this file, with or without modification, are
@@ -27,25 +28,25 @@ License: all-permissive
  warranty.
 
 Files: Makefile.in
-Copyright: 1994-2020 Free Software Foundation, Inc.
+Copyright: 1994-2021 Free Software Foundation, Inc.
   2007, 2009-2010, 2012-2014
     The Board of Trustees of the Leland Stanford Junior University
-  2016, 2020 Russ Allbery <eagle@eyrie.org>
+  2016, 2020, 2023 Russ Allbery <eagle@eyrie.org>
 License: FSF-unlimited and Expat
 
 Files: aclocal.m4
-Copyright: 1996-2020 Free Software Foundation, Inc.
+Copyright: 1996-2021 Free Software Foundation, Inc.
   2004 Scott James Remnant <scott@netsplit.com>
   2012-2015 Dan Nicholson <dbn.lists@gmail.com>
 License: FSF-unlimited, and GPL-2+ with Autoconf exception or Expat
 
 Files: build-aux/ar-lib build-aux/compile build-aux/depcomp
  build-aux/missing
-Copyright: 1996-2020 Free Software Foundation, Inc.
+Copyright: 1996-2021 Free Software Foundation, Inc.
 License: GPL-2+ with Autoconf exception or Expat
 
 Files: build-aux/config.guess build-aux/config.sub
-Copyright: 1992-2018 Free Software Foundation, Inc.
+Copyright: 1992-2022 Free Software Foundation, Inc.
 License: GPL-3+ with Autoconf exception or Expat
 
 Files: build-aux/install-sh
@@ -76,11 +77,12 @@ License: X11
  Consortium.
 
 Files: build-aux/ltmain.sh
-Copyright: 1996-2015 Free Software Foundation, Inc.
-License: GPL-2+ with Libtool exception or Expat, and GPL-3+ with Libtool exception or Expat, and GPL-3+
+Copyright: 1996-2019, 2021-2022 Free Software Foundation, Inc.
+  2004-2019, 2021 Bootstrap Authors
+License: GPL-2+ with Libtool exception or Expat, and GPL-2+ or Expat
 
 Files: configure
-Copyright: 1992-1996, 1998-2012, 2014 Free Software Foundation, Inc.
+Copyright: 1992-1996, 1998-2017, 2020-2021 Free Software Foundation, Inc.
 License: FSF-configure, and GPL-2+ with Libtool exception or Expat
 
 Files: cracklib/*
@@ -202,7 +204,7 @@ Copyright: 1991, 1994-2003 The Internet Software Consortium and Rich Salz
   2004-2006, 2009, 2016 Internet Systems Consortium, Inc.
   2008-2010, 2012-2014
     The Board of Trustees of the Leland Stanford Junior University
-  2015-2020 Russ Allbery <eagle@eyrie.org>
+  2015-2023 Russ Allbery <eagle@eyrie.org>
 License: ISC
  Permission to use, copy, modify, and distribute this software for any
  purpose with or without fee is hereby granted, provided that the above
@@ -217,22 +219,23 @@ License: ISC
  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 Files: m4/clang.m4 m4/cracklib.m4 m4/krb5-config.m4 m4/krb5.m4
- m4/lib-depends.m4 m4/lib-helper.m4 m4/lib-pathname.m4 m4/snprintf.m4
- m4/sqlite.m4 m4/tinycdb.m4 m4/vamacros.m4
+ m4/lib-depends.m4 m4/lib-helper.m4 m4/lib-pathname.m4 m4/sqlite3.m4
+ m4/tinycdb.m4 m4/vamacros.m4
 Copyright: 2005-2014
     The Board of Trustees of the Leland Stanford Junior University
-  2015, 2018, 2020 Russ Allbery <eagle@eyrie.org>
+  2015, 2018, 2020-2022 Russ Allbery <eagle@eyrie.org>
 License: unlimited
  This file is free software; the authors give unlimited permission to copy
  and/or distribute it, with or without modifications, as long as this
  notice is preserved.
 
 Files: m4/libtool.m4
-Copyright: 1996-2001, 2003-2015 Free Software Foundation, Inc.
+Copyright: 1996-2001, 2003-2019, 2021-2022 Free Software Foundation, Inc.
 License: FSF-unlimited, and GPL-2+ with Libtool exception or Expat
 
 Files: m4/ltoptions.m4 m4/ltsugar.m4 m4/ltversion.m4 m4/lt~obsolete.m4
-Copyright: 2004-2005, 2007-2009, 2011-2015 Free Software Foundation, Inc.
+Copyright: 2004-2005, 2007-2009, 2011-2019, 2021-2022
+    Free Software Foundation, Inc.
 License: FSF-unlimited
 
 Files: portable/krb5-profile.c
@@ -274,16 +277,6 @@ License: MIT-Kerberos
  MIT trademarks in order to convey information (although in doing so,
  recognition of their trademark status should be given).
 
-Files: portable/snprintf.c tests/portable/snprintf-t.c
-Copyright: 1995 Patrick Powell
-  2000-2006, 2018-2020 Russ Allbery <eagle@eyrie.org>
-  2001 Hrvoje Niksic
-  2009-2010 The Board of Trustees of the Leland Stanford Junior University
-License: Powell-snprintf
- This code is based on code written by Patrick Powell (papowell@astart.com)
- It may be used for any purpose as long as this notice remains intact
- on all source code distributions
-
 License: Expat
  Permission is hereby granted, free of charge, to any person obtaining a
  copy of this software and associated documentation files (the
@@ -316,6 +309,16 @@ License: FSF-unlimited
  This program is distributed in the hope that it will be useful, but
  WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+License: GPL-2+ or Expat
+ This file is dual licensed under the terms of the MIT license
+ <https://opensource.org/license/MIT>, and GPL version 2 or later
+ <http://www.gnu.org/licenses/gpl-2.0.html>.  You must apply one of these
+ licenses when using or redistributing this software or any of the files within
+ it.  See the URLs above, or the file `LICENSE` included in the Bootstrap
+ distribution for the full license texts.
+Comment: You can find the GPL version 2 in /usr/share/common-licenses/GPL-2
+ on Debian systems.
 
 License: GPL-2+ with Autoconf exception
  This file is free software; you can redistribute it and/or modify it
@@ -362,19 +365,6 @@ Comment: The option described in the license has been accepted and these
  described at the top of this file.  You can find the GPL version 2 in
  /usr/share/common-licenses/GPL-2 on Debian systems.
 
-License: GPL-3+
- This program is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation, either version 3 of the License, or
- (at your option) any later version.
- .
- This program is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
-Comment: You can find the GPL version 3 in /usr/share/common-licenses/GPL-3
- on Debian systems.
-
 License: GPL-3+ with Autoconf exception
  This file is free software; you can redistribute it and/or modify it
  under the terms of the GNU General Public License as published by the
@@ -400,22 +390,3 @@ Comment: The option described in the license has been accepted and these
  described at the top of this file.  You can find the GPL version 3 in
  /usr/share/common-licenses/GPL-3 on Debian systems.
 
-License: GPL-3+ with Libtool exception
- GNU Libtool is free software; you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation; either version 3 of the License, or
- (at your option) any later version.
- .
- As a special exception to the GNU General Public License, if you
- distribute this file as part of a program or library that is built
- using GNU Libtool, you may include this file under the same
- distribution terms that you use for the rest of that program.
- .
- GNU Libtool is distributed in the hope that it will be useful, but
- WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
-Comment: The option described in the license has been accepted and these
- files are distributed under the same terms as the package as a whole, as
- described at the top of this file.  You can find the GPL version 3 in
- /usr/share/common-licenses/GPL-3 on Debian systems.
