@@ -79,7 +79,7 @@ License: X11
 Files: build-aux/ltmain.sh
 Copyright: 1996-2019, 2021-2022 Free Software Foundation, Inc.
   2004-2019, 2021 Bootstrap Authors
-License: GPL-2+ with Libtool exception or Expat, and GPL-2+ or Expat
+License: GPL-2+ with Libtool exception or Expat, and GPL-2+-or-Expat
 
 Files: configure
 Copyright: 1992-1996, 1998-2017, 2020-2021 Free Software Foundation, Inc.
@@ -310,15 +310,15 @@ License: FSF-unlimited
  WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
-License: GPL-2+ or Expat
+License: GPL-2+-or-Expat
  This file is dual licensed under the terms of the MIT license
  <https://opensource.org/license/MIT>, and GPL version 2 or later
  <http://www.gnu.org/licenses/gpl-2.0.html>.  You must apply one of these
- licenses when using or redistributing this software or any of the files within
- it.  See the URLs above, or the file `LICENSE` included in the Bootstrap
- distribution for the full license texts.
+ licenses when using or redistributing this software or any of the files
+ within it.  See the URLs above, or the file `LICENSE` included in the
+ Bootstrap distribution for the full license texts.
 Comment: You can find the GPL version 2 in /usr/share/common-licenses/GPL-2
- on Debian systems.
+ on Debian systems and the Expat license in this file.
 
 License: GPL-2+ with Autoconf exception
  This file is free software; you can redistribute it and/or modify it
