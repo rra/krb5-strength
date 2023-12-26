@@ -22,6 +22,7 @@ perl/minimum-version
 perl/strict
 portable/asprintf       valgrind
 portable/mkstemp        valgrind
+portable/reallocarray   valgrind
 portable/strndup        valgrind
 style/obsolete-strings
 tools/heimdal-history
