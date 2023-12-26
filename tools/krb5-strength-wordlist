@@ -73,13 +73,13 @@ sub write_cdb {
     my ($in_fh, $output, $filter) = @_;
 
     # Check that the output CDB file doesn't exist.
-    if (-f $output) {
+    if (-e $output) {
         die "$0: output file $output already exists\n";
     }
 
     # Create a temporary file to write the CDB input into.
     my $tmp = $output . '.data';
-    if (-f $tmp) {
+    if (-e $tmp) {
         die "$0: temporary output file $tmp already exists\n";
     }
     open(my $tmp_fh, '>', $tmp);
@@ -122,7 +122,7 @@ sub write_sqlite {
     my ($in_fh, $output, $filter) = @_;
 
     # Check that the output SQLite file doesn't exist.
-    if (-f $output) {
+    if (-e $output) {
         die "$0: output file $output already exists\n";
     }
 
@@ -205,8 +205,8 @@ sub build_filter {
     # Build a filter from our command-line parameters.  This is an anonymous
     # sub that returns true to keep a word and false otherwise.
     my $filter = sub {
-        my ($word)     = @_;
-        my $length     = length($word);
+        my ($word) = @_;
+        my $length = length($word);
         my $min_length = $config_ref->{'min-length'};
         my $max_length = $config_ref->{'max-length'};
 
@@ -247,8 +247,8 @@ local $0 = basename($0);
 # Parse the argument list.
 my %config;
 my @options = (
-    'ascii|a',      'cdb|c=s',    'max-length|L=i', 'min-length|l=i',
-    'manual|man|m', 'output|o=s', 'sqlite|s=s',     'exclude|x=s@',
+    'ascii|a', 'cdb|c=s', 'max-length|L=i', 'min-length|l=i',
+    'manual|man|m', 'output|o=s', 'sqlite|s=s', 'exclude|x=s@',
 );
 Getopt::Long::config('bundling', 'no_ignore_case');
 GetOptions(\%config, @options);
@@ -426,7 +426,7 @@ Russ Allbery <eagle@eyrie.org>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright 2016, 2020 Russ Allbery <eagle@eyrie.org>
+Copyright 2016, 2020, 2023 Russ Allbery <eagle@eyrie.org>
 
 Copyright 2013-2014 The Board of Trustees of the Leland Stanford Junior
 University

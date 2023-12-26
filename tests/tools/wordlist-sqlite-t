@@ -3,7 +3,7 @@
 # Test suite for krb5-strength-wordlist SQLite database generation
 #
 # Written by Russ Allbery <eagle@eyrie.org>
-# Copyright 2020 Russ Allbery <eagle@eyrie.org>
+# Copyright 2020, 2023 Russ Allbery <eagle@eyrie.org>
 # Copyright 2014
 #     The Board of Trustees of the Leland Stanford Junior University
 #
@@ -23,7 +23,7 @@ use Test::More;
 # Load prerequisite modules.
 use_prereq('DBI');
 use_prereq('DBD::SQLite');
-use_prereq('IPC::Run',     'run');
+use_prereq('IPC::Run', 'run');
 use_prereq('Perl6::Slurp', 'slurp');
 
 # Set up for testing of an Automake project.
@@ -46,7 +46,7 @@ sub run_wordlist {
     my $wordlist = test_file_path('../tools/krb5-strength-wordlist');
 
     # Ensure the output file does not exist.
-    if (-f $output) {
+    if (-e $output) {
         unlink($output) or BAIL_OUT("cannot delete $output: $!");
     }
 
@@ -56,9 +56,9 @@ sub run_wordlist {
     my $status = ($? >> 8);
 
     # Check the results.
-    is($status, 0,   'krb5-strength-wordlist -s');
-    is($out,    q{}, '...with no output');
-    is($err,    q{}, '...and no errors');
+    is($status, 0, 'krb5-strength-wordlist -s');
+    is($out, q{}, '...with no output');
+    is($err, q{}, '...and no errors');
 
     # Return the newly-created database.
     return $output;
@@ -67,7 +67,7 @@ sub run_wordlist {
 # Read the word list that we'll use for testing so that we can validate the
 # contents of the generated SQLite database.
 my $wordlist = test_file_path('data/wordlist');
-my @words    = slurp($wordlist);
+my @words = slurp($wordlist);
 chomp(@words);
 
 # Declare the plan now that we know how many tests there will be.  There is
@@ -86,7 +86,7 @@ ok(defined($dbh), 'Opening SQLite database succeeded');
 # Walk through every row in the passwords table and ensure that the drowssap
 # column is the reverse of the password column.  Accumulate the passwords so
 # that we can check against the contents of the word list.
-my $sql      = 'SELECT PASSWORD, DROWSSAP FROM PASSWORDS';
+my $sql = 'SELECT PASSWORD, DROWSSAP FROM PASSWORDS';
 my $data_ref = $dbh->selectall_arrayref($sql);
 my @got;
 for my $row (@{$data_ref}) {

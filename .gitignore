@@ -9,6 +9,7 @@
 /config.log
 /config.status
 /configure
+/configure~
 /cracklib/packer
 /docs/krb5-strength.5.in
 /libtool

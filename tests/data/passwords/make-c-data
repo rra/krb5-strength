@@ -14,18 +14,18 @@ use strict;
 use warnings;
 
 use Carp qw(croak);
+use Const::Fast qw(const);
 use Encode qw(encode);
 use File::Basename qw(basename);
-use JSON;
+use JSON::MaybeXS qw(JSON);
 use Perl6::Slurp qw(slurp);
-use Readonly;
 
 ##############################################################################
 # Global variables
 ##############################################################################
 
 # The header on the generated source file.
-Readonly my $HEADER => <<'END_HEADER';
+const my $HEADER => <<'END_HEADER';
 /*
  * Automatically generated -- do not edit!
  *
@@ -46,16 +46,16 @@ Readonly my $HEADER => <<'END_HEADER';
 END_HEADER
 
 # The list of attributes, in order, whose values go into the C struct.
-Readonly my @ATTRIBUTES => qw(
-  name principal password code error skip_for_system_cracklib
+const my @ATTRIBUTES => qw(
+    name principal password code error skip_for_system_cracklib
 );
 
 # A hash of attributes that should be put in the C struct as they literally
 # appear in the JSON, rather than as strings.  (In other words, attributes
 # that are numbers, booleans, or C constants.)  Only the keys are of interest.
-Readonly my %IS_LITERAL_ATTRIBUTE => (
-    code                     => 1,
-    skip_for_system_cracklib => 1
+const my %IS_LITERAL_ATTRIBUTE => (
+    code => 1,
+    skip_for_system_cracklib => 1,
 );
 
 ##############################################################################
@@ -116,7 +116,7 @@ sub output_test {
     say_fh($fh, $prefix, "{\n");
     for my $attr (@ATTRIBUTES) {
         my $value = $test_ref->{$attr};
-        if ($IS_LITERAL_ATTRIBUTE{$attr}) {
+        if (exists($IS_LITERAL_ATTRIBUTE{$attr})) {
             $value //= 0;
         } else {
             $value = defined($value) ? qq{"$value"} : 'NULL';
@@ -206,7 +206,7 @@ Russ Allbery <eagle@eyrie.org>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright 2020 Russ Allbery <eagle@eyrie.org>
+Copyright 2020, 2023 Russ Allbery <eagle@eyrie.org>
 
 Copyright 2013 The Board of Trustees of the Leland Stanford Junior
 University

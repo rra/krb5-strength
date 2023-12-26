@@ -1,7 +1,7 @@
 # Test list for krb5-strength.  -*- conf -*-
 #
 # Written by Russ Allbery <eagle@eyrie.org>
-# Copyright 2016, 2020 Russ Allbery <eagle@eyrie.org>
+# Copyright 2016, 2020, 2023 Russ Allbery <eagle@eyrie.org>
 # Copyright 2009-2010, 2013-2014
 #     The Board of Trustees of the Leland Stanford Junior University
 #
@@ -22,7 +22,7 @@ perl/minimum-version
 perl/strict
 portable/asprintf       valgrind
 portable/mkstemp        valgrind
-portable/snprintf       valgrind
+portable/reallocarray   valgrind
 portable/strndup        valgrind
 style/obsolete-strings
 tools/heimdal-history

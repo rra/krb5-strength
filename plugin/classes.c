@@ -4,7 +4,7 @@
  * Checks whether the password satisfies a set of character class rules.
  *
  * Written by Russ Allbery <eagle@eyrie.org>
- * Copyright 2016 Russ Allbery <eagle@eyrie.org>
+ * Copyright 2016, 2023 Russ Allbery <eagle@eyrie.org>
  * Copyright 2013-2014
  *     The Board of Trustees of the Leland Stanford Junior University
  *
@@ -66,7 +66,7 @@ analyze_password(const char *password, struct password_classes *classes)
  */
 static krb5_error_code
 check_rule(krb5_context ctx, struct class_rule *rule, size_t length,
-           struct password_classes *classes)
+           const struct password_classes *classes)
 {
     if (length < rule->min || (rule->max > 0 && length > rule->max))
         return 0;
