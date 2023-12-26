@@ -1,3 +1,11 @@
+krb5-strength (3.3-1) UNRELEASED; urgency=medium
+
+  * New upstream release.
+    - Increase hash iterations for heimdal-history.
+    - Explicitly clear another password before freeing.
+
+ -- Russ Allbery <rra@debian.org>  Mon, 25 Dec 2023 18:58:47 -0800
+
 krb5-strength (3.2-4) unstable; urgency=medium
 
   * Run make maintainer-clean during debian/rules clean, since
